@@ -12,7 +12,7 @@
        pkgs = import nixpkgs {
          inherit system overlays;
        };
-       # nativeBuildInputs = with pkgs; [];
+       nativeBuildInputs = with pkgs; [ ];
        buildInputs = with pkgs; [ 
          go
          gopls
@@ -24,7 +24,10 @@
      with pkgs;
      {
        devShells.default = mkShell {
-         inherit buildInputs; #nativeBuildInputs;
+         inherit buildInputs nativeBuildInputs;
+       };
+       devShells.mini = mkShell {
+         inherit buildInputs;
        };
      }
     );
