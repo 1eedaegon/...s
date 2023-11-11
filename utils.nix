@@ -1,4 +1,8 @@
 # Utilities
+
+# 제발 유틸함수야 불러와져라 에휴
+
+# TOOD: 그냥 Derivation 만들어서 쓰기.
 /**
 - system: For nix profile each architecture
 - pkgs: For flake devShells
@@ -23,12 +27,12 @@ Env schema
     mini = [ pkgs... ]
 }
 */
-{
-    envToPackages = {flakePkgs, envAttrs}: with flakePkgs; 
-    {
-        packages = eachAttrs (name: value: { inherit value } ) envAttrs
-    };
-}
+# {
+#     envToPackages = {flakePkgs, envAttrs}: with flakePkgs; 
+#     {
+#         packages = eachAttrs (name: value: { mkShell { inherit value; }  } ) envAttrs;
+#     };
+# }
 # map (
 # ) envList
 # envList: flakePkgs: with flakePkgs {
