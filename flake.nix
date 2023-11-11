@@ -3,36 +3,19 @@
 
   inputs.nixpkgs.url = "github:nixos/nixpkgs";
   inputs.flake-utils.url = "github:numtide/flake-utils";
+  inputs.utils.url = "./utils.nix";
+  inputs.envs.url = "./envs.nix";
 
-  outputs = { self, nixpkgs, flake-utils }:
+  outputs = { self, nixpkgs, flake-utils, utils }:
     flake-utils.lib.eachDefaultSystem (system:
      let
-       overlays = [ ];
        pkgs = import nixpkgs {
-         inherit system overlays;
+         inherit system;
        };
-       nativeBuildInputs = with pkgs; [ ];
-       goDev = with pkgs; [ 
-         go
-         gopls
-         gotools
-         go-tools
-       ];
+       envs = import ./envs.nix;
      in
-     with pkgs; 
      {
-      packages.system.goDev = buildInputs {
-        paths = goDev
-      };
-       devShells.default = mkShell {
-         inherit goDev nativeBuildInputs;
-       };
-       devShells.mini = mkShell {
-         inherit goDev;
-       };
-       devShells.mini2 = mkShell {
-         inherit goDev;
-       };
+      utils.envToPackages { flakePkgs=pkgs; envAttrs=envs; }
      }
     );
 }
