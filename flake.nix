@@ -38,11 +38,11 @@
       Provide attribute set
       */
       packages.default = mkShell {
-         inherit default goDev 
+         inherit default goDev;
        };
       packages.mini = mkShell {
         inherit default;
       };
-     }
+     };
     );
 }
