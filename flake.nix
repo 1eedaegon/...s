@@ -18,10 +18,10 @@
         git
         curl
         wget
-        bat
+        # bat
         # gitmoji
-        asciinema
-        neovim
+        # asciinema
+        # neovim
 
       ];
 

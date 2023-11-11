@@ -1,6 +1,6 @@
 # ...s(3dots)
 
->
+> Just
 
 ## Install Nix
 
@@ -36,4 +36,12 @@ minimal
 
 User globally
 
-`❯ nix profile github:1eedaegon/...s`
+`❯ nix profile install github:1eedaegon/...s`
+
+## Uninstall
+
+1. Clean devshells
+
+`❯ nix-collect-garbage`
+
+2. Clean profile
