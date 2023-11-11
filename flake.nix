@@ -19,7 +19,7 @@
         curl
         wget
         bat
-        gitmoji
+        # gitmoji
         asciinema
         neovim
 
