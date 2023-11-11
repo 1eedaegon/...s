@@ -43,6 +43,6 @@
       packages.mini = mkShell {
         inherit default;
       };
-     };
+     }
     );
 }
