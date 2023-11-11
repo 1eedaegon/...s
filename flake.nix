@@ -8,7 +8,7 @@
     flake-utils.lib.eachDefaultSystem (system:
      let
        pkgs = import nixpkgs {
-         inherit system overlays;
+         inherit system ;
        };
       # Utils function을 바로 불러오는 것은 안되고 derivation을 만드는 것이 편함.
       # TODO: 대다수 공식문서가 home-manager를 이야기하니 home-manager를 보자
