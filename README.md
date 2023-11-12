@@ -1,6 +1,6 @@
 # ...s(3dots)
 
-> Just
+> Just build own dotfiles
 
 ## Install Nix
 
