@@ -10,17 +10,17 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      # - name: Check out code
-      #   uses: actions/checkout@v2
+      - name: Check out code
+        uses: actions/checkout@v2
 
       - name: Set up Go
         uses: actions/setup-go@v2
         with:
-          go-version: "1.21" # Go 버전을 프로젝트에 맞게 설정하세요
+          go-version: "1.21"
 
       - name: Build
         run: |
-          go build -o ./cmd/main ./bin/3dots
+          go build -o ./cmd/main.go ./bin/3dots
 
       - name: Upload artifact
         uses: actions/upload-artifact@v2
