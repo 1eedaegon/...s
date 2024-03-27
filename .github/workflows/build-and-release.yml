@@ -20,13 +20,13 @@ jobs:
 
       - name: Build
         run: |
-          mkdir bin && go build -o ./cmd/main.go ./bin/3dots
+          go build -o ./cmd/main.go ./bin/3dots
 
       - name: Upload artifact
         uses: actions/upload-artifact@v2
         with:
-          name: 3dots
-          path: ./bin/3dots
+          name: ../bin/3dots
+          path: 3dots
 
   release:
     needs: build
