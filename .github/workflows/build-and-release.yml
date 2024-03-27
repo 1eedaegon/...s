@@ -1,58 +1,59 @@
 name: Build and Release
 
+# Oh my trash pipeline
 on:
   push:
     branches:
-    - main
+      - main
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    # - name: Check out code
-    #   uses: actions/checkout@v2
+      # - name: Check out code
+      #   uses: actions/checkout@v2
 
-    - name: Set up Go
-      uses: actions/setup-go@v2
-      with:
-        go-version: '1.21' # Go 버전을 프로젝트에 맞게 설정하세요
+      - name: Set up Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: "1.21" # Go 버전을 프로젝트에 맞게 설정하세요
 
-    - name: Build
-      run: |
-        go build -o ./cmd/main ./bin/3dots
+      - name: Build
+        run: |
+          go build -o ./cmd/main ./bin/3dots
 
-    - name: Upload artifact
-      uses: actions/upload-artifact@v2
-      with:
-        name: 3dots
-        path: ./bin/3dots
+      - name: Upload artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: 3dots
+          path: ./bin/3dots
 
   release:
     needs: build
     runs-on: ubuntu-latest
     steps:
-    - name: Download artifact
-      uses: actions/download-artifact@v2
-      with:
-        name: 3dots
+      - name: Download artifact
+        uses: actions/download-artifact@v2
+        with:
+          name: 3dots
 
-    - name: Create Release
-      id: create_release
-      uses: actions/create-release@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        tag_name: ${{ github.ref }}
-        release_name: Release ${{ github.ref }}
-        draft: false
-        prerelease: false
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          draft: false
+          prerelease: false
 
-    - name: Upload Release Asset
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./bin/3dots
-        asset_name: 3dots
-        asset_content_type: application/octet-stream
+      - name: Upload Release Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./bin/3dots
+          asset_name: 3dots
+          asset_content_type: application/octet-stream
