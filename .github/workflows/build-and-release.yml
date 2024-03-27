@@ -25,8 +25,8 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-artifact@v2
         with:
-          name: ../bin/3dots
-          path: 3dots
+          name: 3dots
+          path: ./bin/3dots
 
   release:
     needs: build
