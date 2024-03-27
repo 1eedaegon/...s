@@ -20,7 +20,7 @@ jobs:
 
       - name: Build
         run: |
-          go build -o ./cmd/main.go ./bin/3dots
+          make build
 
       - name: Upload artifact
         uses: actions/upload-artifact@v2
