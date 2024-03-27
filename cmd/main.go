@@ -167,5 +167,6 @@ func getProjectNameFromWd(path string) string {
 		dirName = filepath.Base(path)
 		logger.Sugar().Infof("Directory name:", dirName)
 	}
+
 	return dirName
 }
