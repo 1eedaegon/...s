@@ -8,9 +8,9 @@ let
     else if version == "20" then pkgs.nodejs_20
     else if version == "18" then pkgs.nodejs_18
     else if version == "16" then pkgs.nodejs_16
-    else pkgs.nodejs; # 기본값
+    else pkgs.nodejs; 
   
-  # 기본 Node.js 패키지
+  # Default nodejs packages
   basePackages = [
     nodePkg
   ];

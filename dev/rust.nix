@@ -11,7 +11,7 @@ let
         extensions = [ "rust-src" "rust-analyzer" ];
       }
     else
-      # 특정 버전 사용 (해당 버전이 있는 경우)
+      # Has specific version
       (if builtins.hasAttr version pkgs.rust-bin.${channel} then
         pkgs.rust-bin.${channel}.${version}.default.override {
           extensions = [ "rust-src" "rust-analyzer" ];
@@ -22,7 +22,7 @@ let
         }
       );
   
-  # 기본 Rust 패키지
+  # Default rust packages
   basePackages = [
     rustPkg
   ];
@@ -36,7 +36,7 @@ let
   ];
   
   
-  systemTools = with pkgs; [
+  versionSpecificTools = with pkgs; [
     # pkg-config
     # openssl.dev
     # gcc

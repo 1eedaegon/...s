@@ -19,22 +19,22 @@
           inherit overlays;
         };
 
-        # CLI Binary derivation 가져오기
+        # Import CLI Binary derivation 
         # myCliBinary = import ./cli-derivation.nix { inherit pkgs system; };
         # hasBinary = myCliBinary ? package && myCliBinary.package != null;
 
-        # 공통 패키지 (모든 환경에서 사용)
+        # Common pakcages
         commonPackages = with pkgs; [
           oh-my-zsh
           # emacs
         ] ++ (if stdenv.isWindows then [ pkgs.chocolatey ] else []);
 
-        # 바이너리 경고 메시지
+        # Warning hook for binary on not supported cpu platform
         binaryWarningHook = if hasBinary then "" else ''
           echo "WARNING: CLI binary not available for platform ${system}, skipping..."
         '';
 
-        # 개발 환경 구성
+        # Develop
         devEnv = import ./mode_dev {
           inherit pkgs system commonPackages;
           cliBinary = if hasBinary then myCliBinary.package else null;
@@ -42,7 +42,7 @@
           binaryWarningHook = binaryWarningHook;
         };
 
-        # 운영 환경 구성
+        # Ops
         opsEnv = import ./mode_ops {
           inherit pkgs system commonPackages;
           cliBinary = if hasBinary then myCliBinary.package else null;
@@ -51,21 +51,18 @@
         };
 
       in {
-        # 개발 셸 정의
+        # Shell for each modes
         devShells = {
-          # 기본 환경
           mode_dev = devEnv.default;
           mode_ops = opsEnv.default;
           default = devEnv.default;
 
-          # 특화 개발 환경
           mode_dev_node = devEnv.node;
           mode_dev_py = devEnv.py;
           mode_dev_ml = devEnv.ml;
           mode_dev_rust = devEnv.rust;
           mode_dev_go = devEnv.go;
 
-          # 특화 운영 환경
           mode_ops_cloud = opsEnv.cloud;
           mode_ops_k8s = opsEnv.k8s;
         };
