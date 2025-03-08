@@ -1,55 +1,53 @@
-{ pkgs, system }: args:
+# dev/rust.nix
+{ pkgs, system }:
 
 let
-  
-  channel = args.channel or "stable";
-  version = args.version or "latest";
-  
-  rustPkg = 
-    if version == "latest" then
-      pkgs.rust-bin.${channel}.latest.default.override {
-        extensions = [ "rust-src" "rust-analyzer" ];
-      }
-    else
-      # Has specific version
-      (if builtins.hasAttr version pkgs.rust-bin.${channel} then
-        pkgs.rust-bin.${channel}.${version}.default.override {
-          extensions = [ "rust-src" "rust-analyzer" ];
-        }
-      else 
-        pkgs.rust-bin.${channel}.latest.default.override {
-          extensions = [ "rust-src" "rust-analyzer" ];
-        }
-      );
-  
-  # Default rust packages
-  basePackages = [
-    rustPkg
-  ];
-  
-  commonTools = with pkgs; [
+  langModuleTemplate = import ../lib/language-template.nix { inherit pkgs system; };
+in
+langModuleTemplate {
+  name = "rust";
+  commonPkgs = with pkgs; [
+    pkg-config
+    openssl.dev
+    libiconv
     cargo-edit
     cargo-watch
     cargo-expand
-    cargo-audit
-    cargo-flamegraph
+    gdb
+    lldb
   ];
-  
-  
-  versionSpecificTools = with pkgs; [
-    # pkg-config
-    # openssl.dev
-    # gcc
-    # gdb
-  ];
-  
-in {
-  packages = basePackages ++ commonTools ++ systemTools;
-  
-  shellHook = ''
-    echo "Rust Enabled!"
-    echo "Rust $(rustc --version)"
-    echo "Cargo $(cargo --version)"
-    export RUST_BACKTRACE=1
-  '';
+  commonConfig = {
+    shellHook = ''
+      # Rust develop log
+      export RUST_BACKTRACE=1
+      export RUST_LOG=debug
+      
+      # Cargo cache
+      export CARGO_HOME="$HOME/.cargo"
+      mkdir -p $CARGO_HOME
+      
+      # Cargo alias
+      alias cb='cargo build'
+      alias ct='cargo test'
+      alias cr='cargo run'
+    '';
+  };
+  versions = {
+    "latest" = {
+      pkg = pkgs.rust-bin.stable.latest.default.override {
+        extensions = [ "rust-src" "rust-analyzer" "clippy" "rustfmt" ];
+      };
+      includePkgs = with pkgs; [];
+      excludePkgs = [];
+      shellHook = '''';
+    };
+    "1.84.0" = {
+      pkg = pkgs.rust-bin.stable."1.70.0".default.override {
+        extensions = [ "rust-src" "rust-analyzer" "clippy" "rustfmt" ];
+      };
+      includePkgs = with pkgs; [];
+      excludePkgs = [];
+      shellHook = '''';
+    };
+  };
 }
