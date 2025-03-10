@@ -8,7 +8,7 @@
     rust-overlay.url = "github:oxalica/rust-overlay";
     rust-overlay.inputs.nixpkgs.follows = "nixpkgs";
   };
-  
+  # TODO: Define packages and apps for default environment
   outputs = { self, nixpkgs, flake-utils, rust-overlay }:
      flake-utils.lib.eachDefaultSystem (system:
       let
@@ -18,16 +18,23 @@
           config.allowUnfree = true; 
         };
         commonPkgs = with pkgs; [
+          nerd-fonts.symbols-only
+          nerd-fonts.fira-code
           starship
-          # emacs
+          bat
+          git
+          curl
+          asciinema
         ];
-        starshipHook = ''eval "$(starship init bash)"'';
+        
         # lib = import (self + "/lib") {inherit pkgs; };
-
+        
         # Call generating
         # commonShellHooks = pkgs.callPackage ./lib/common-shell-hook.nix { inherit pkgs; };
         commonShellHooks = ''
-          ${starshipHook}
+          eval "$(starship init bash)"
+          alias l="ls -lah"
+          alias cat="bat"
         '';
          
         # ++ (if stdenv.isWindows then [ chocolatey ] else []);
@@ -54,7 +61,7 @@
             lldb
           ] ++ commonPkgs;
           
-          shellHook = ''
+          shellHook = commonShellHooks+''
             # Log level
             declare -x name="rust"
             export RUST_BACKTRACE=1
@@ -68,7 +75,7 @@
             alias cb='cargo build'
             alias ct='cargo test'
             alias cr='cargo run'
-          '' + commonShellHooks;
+          '';
         } ;
         
         # Rust 1.70.0
@@ -87,7 +94,7 @@
             lldb
           ] ++ commonPkgs;
           
-          shellHook = ''
+          shellHook = commonShellHooks + ''
             # Rust 로그
             export RUST_BACKTRACE=1
             export RUST_LOG=debug
@@ -116,7 +123,7 @@
             golint
           ] ++ commonPkgs;
         
-          shellHook = ''
+          shellHook = commonShellHooks + ''
             # Go 환경 설정
             export GOPATH="$HOME/go"
             export PATH="$GOPATH/bin:$PATH"
@@ -132,7 +139,7 @@
             rustLatest.buildInputs ++ 
             goLatest.buildInputs;
           
-          shellHook = ''
+          shellHook = commonShellHooks+ ''
             echo "Develop in cycle"
             ${rustLatest.shellHook}
             ${goLatest.shellHook}
