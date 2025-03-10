@@ -18,12 +18,21 @@
           config.allowUnfree = true; 
         };
         commonPkgs = with pkgs; [
-          # oh-my-zsh
+          starship
           # emacs
         ];
-        # Not yet: https://github.com/NixOS/nix/pull/8901
+        starshipHook = ''eval "$(starship init bash)"'';
+        # lib = import (self + "/lib") {inherit pkgs; };
+
+        # Call generating
+        # commonShellHooks = pkgs.callPackage ./lib/common-shell-hook.nix { inherit pkgs; };
+        commonShellHooks = ''
+          ${starshipHook}
+        '';
+         
         # ++ (if stdenv.isWindows then [ chocolatey ] else []);
-        
+        # commonHooks = import "./lib/common-shell-hook.nix";
+        # Not yet: https://github.com/NixOS/nix/pull/8901
         # CLI 바이너리 처리
         # myCliBinary = import ./cli-derivation.nix { inherit pkgs system; };
         # hasBinary = myCliBinary ? package && myCliBinary.package != null;
@@ -31,7 +40,7 @@
         
         # Rust dev latest
         rustLatest = pkgs.mkShell {
-          name = "rust-latest";
+          name = "rust";
           buildInputs = with pkgs; [
             (rust-bin.stable.latest.default.override {
               extensions = [ "rust-src" "rust-analyzer" "clippy" "rustfmt" ];
@@ -47,6 +56,7 @@
           
           shellHook = ''
             # Log level
+            declare -x name="rust"
             export RUST_BACKTRACE=1
             export RUST_LOG=debug
             
@@ -58,8 +68,8 @@
             alias cb='cargo build'
             alias ct='cargo test'
             alias cr='cargo run'
-          '';
-        };
+          '' + commonShellHooks;
+        } ;
         
         # Rust 1.70.0
         rust_1_70_0 = pkgs.mkShell {
@@ -95,7 +105,7 @@
         
         # Go Dev
         goLatest = pkgs.mkShell {
-          name = "go-latest";
+          name = "go";
           buildInputs = with pkgs; [
             go
             gopls
@@ -105,7 +115,7 @@
             godef
             golint
           ] ++ commonPkgs;
-          
+        
           shellHook = ''
             # Go 환경 설정
             export GOPATH="$HOME/go"
@@ -114,8 +124,9 @@
           '';
         };
         
+
         # Default, 
-        defaultEnv = pkgs.mkShell {
+        devShell = pkgs.mkShell {
           name = "dev";
           buildInputs = 
             rustLatest.buildInputs ++ 
@@ -125,13 +136,13 @@
             echo "Develop in cycle"
             ${rustLatest.shellHook}
             ${goLatest.shellHook}
-            
           '';
         };
-        
+      
       in {
         devShells = {
-          default = defaultEnv;
+          default = devShell;
+          dev = devShell;
           rust = rustLatest;
           rust170 = rust_1_70_0;
           go = goLatest;
