@@ -30,9 +30,9 @@ default
 
 `❯ nix develop github:1eedaegon/...s`
 
-minimal
+language specific(e.g rust)
 
-`❯ nix develop github:1eedaegon/...s#mini`
+`❯ nix develop github:1eedaegon/...s#rust`
 
 User globally
 
