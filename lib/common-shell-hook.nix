@@ -2,4 +2,5 @@
 { pkgs ? import  {} }:
 ''
   eval "$(starship init bash)"
+  alias l="ls -lah"
 ''
