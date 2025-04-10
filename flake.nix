@@ -33,6 +33,7 @@
           starship
           bat
           git
+          htop
           curl
           asciinema
           fontconfig
