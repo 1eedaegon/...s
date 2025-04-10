@@ -37,7 +37,6 @@
           asciinema
           fontconfig
           direnv
-          make
           uv
         ];
         commonShellHooks = import ./lib/common-shell-hook.nix { inherit pkgs; };
