@@ -38,6 +38,8 @@
           fontconfig
           direnv
           uv
+          gcc
+          gnumake
         ];
         commonShellHooks = import ./lib/common-shell-hook.nix { inherit pkgs; };
         
@@ -173,6 +175,10 @@
             paths = pyPkgs;
         };
 
+        defaultBuildEnv = pkgs.buildEnv {
+            name = "dev";
+            paths = defaultPkgs ++ commonPkgs;
+        };
         # Default, 
         devBuildEnv = pkgs.buildEnv {
             name = "dev";
@@ -203,7 +209,7 @@
         # };
         # TODO: Make generate func for buildEnv, mkShell using pkgs and shellHook
         packages = {
-          default = devBuildEnv;
+          default = defaultBuildEnv;
           dev = devBuildEnv;
           py = pyBuildEnv;
           go = goBuildEnv;
