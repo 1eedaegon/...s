@@ -1,6 +1,6 @@
 # flake.nix
 {
-  description = "gg";
+  description = "3dots with nix flake";
   
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
@@ -14,208 +14,192 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
   };
-  # TODO: Define packages and apps for default environment
+
   outputs = { self, nixpkgs, flake-utils, home-manager, rust-overlay, ... }:
-     flake-utils.lib.eachDefaultSystem (system:
+    flake-utils.lib.eachDefaultSystem (system:
       let
         overlays = [ (import rust-overlay) ];
         pkgs = import nixpkgs { 
           inherit system overlays; 
           config.allowUnfree = true; 
         };
-        commonPkgs = with pkgs; [
-          nerd-fonts.fira-code
-          starship
-        ];
-        defaultPkgs = with pkgs; [
-          nerd-fonts.symbols-only
-          nerd-fonts.fira-code
-          starship
-          bat
-          git
-          htop
-          curl
-          asciinema
-          fontconfig
-          direnv
-          uv
-          gcc
-          gnumake
-        ];
+        
         commonShellHooks = import ./lib/common-shell-hook.nix { inherit pkgs; };
         
+        # 기본 환경 정의
+        defaultEnv = {
+          name = "default";
+          pkgList = with pkgs; [
+            nerd-fonts.symbols-only
+            nerd-fonts.fira-code
+            starship
+            bat
+            git
+            htop
+            curl
+            asciinema
+            fontconfig
+            direnv
+            uv
+            gcc
+            gnumake
+          ];
+          shell = commonShellHooks;
+        };
+        
+        mkEnv = 
+          { name, pkgList ? [], shell ? "", combine ? [] }: 
+          let 
+            # Combine Pkgs
+            combinedPkgList = if combine != [] 
+              then pkgList ++ builtins.concatMap (env: env.pkgList) combine
+              else pkgList;
 
-        # Not yet: https://github.com/NixOS/nix/pull/8901 
-        # ++ (if stdenv.isWindows then [ chocolatey ] else []);
+            # Combine Shell
+            combinedShell = if combine != []
+              then shell + builtins.concatStringsSep "\n" (builtins.map (env: env.shell) combine)
+              else shell;
+          in {
+            inherit name;
+            pkgList = combinedPkgList;
+            shell = combinedShell;
+            
+            # Generate buildEnv and mkShell
+            toOutputs = baseEnv: {
+              packages = {
+                "${name}" = pkgs.buildEnv {
+                  name = "${name}";
+                  paths = combinedPkgList;
+                };
+              };
+              devShells = {
+                "${name}" = pkgs.mkShell {
+                  name = "${name}";
+                  buildInputs = combinedPkgList ++ baseEnv.pkgList;
+                  shellHook = baseEnv.shell + combinedShell;
+                };
+              };
+            };
+          };
         
-        # CLI 바이너리 처리
-        # myCliBinary = import ./cli-derivation.nix { inherit pkgs system; };
-        # hasBinary = myCliBinary ? package && myCliBinary.package != null;
-        # cliBinary = if hasBinary then [ myCliBinary.package ] else [];
-        
-        # Rust dev latest
-        rustPkgs = with pkgs; [
-            (rust-bin.stable.latest.default.override {
-              extensions = [ "rust-src" "rust-analyzer" "clippy" "rustfmt" ];
-            })
-            pkg-config
-            openssl.dev
-            libiconv
-            cargo-edit
-            cargo-watch
-            cargo-expand
-            lldb
-          ]++ commonPkgs;
-        rustShellHook = commonShellHooks + ''
-            # Log level
-            declare -x name="rust"
-            export RUST_BACKTRACE=1
-            export RUST_LOG=debug
-            
-            # Cargo cache
-            export CARGO_HOME="$HOME/.cargo"
-            mkdir -p $CARGO_HOME
-            
-            # Cargo alias
-            alias cb='cargo build'
-            alias ct='cargo test'
-            alias cr='cargo run'
-            
-            rustc --version
-          '';
-        rustShell = pkgs.mkShell {
-          name = "rust";
-          buildInputs = rustPkgs;
-          shellHook = rustShellHook;
-        };
-        rustBuildEnv = pkgs.buildEnv {
-          name = "rust";
-          paths = rustPkgs;
-        };
-        # Rust 1.70.0
-        rust170Pkgs = with pkgs; [
-          (rust-bin.stable."1.70.0".default.override {
-            extensions = [ "rust-src" "rust-analyzer" "clippy" "rustfmt" ];
-          })
-          pkg-config
-          openssl.dev
-          libiconv
-          cargo-edit
-          cargo-watch
-          cargo-expand
-          lldb
-        ]++ commonPkgs;
-        rust170ShellHook = commonShellHooks + ''
-            # Rust 로그
-            export RUST_BACKTRACE=1
-            export RUST_LOG=debug
-            
-            # Cargo 캐시
-            export CARGO_HOME="$HOME/.cargo"
-            mkdir -p $CARGO_HOME
-            
-            # Cargo alias
-            alias cb='cargo build'
-            alias ct='cargo test'
-            alias cr='cargo run'
-            
-            # Version
-            rustc --version
-          '';
-        
-        rust170 = pkgs.mkShell {
-          name = "rust-1.70.0";
-          buildInputs = rust170Pkgs;
-          shellHook = rust170ShellHook;
-        };
-        
-        # Go Dev
-        goPkgs = with pkgs; [
-          go
-          gopls
-          gotools
-          go-outline
-          gopkgs
-          godef
-          golint
-        ]++ commonPkgs; 
-        goShellHook = ''
-          # Go 환경 설정
-          export GOPATH="$HOME/go"
-          export PATH="$GOPATH/bin:$PATH"
-          mkdir -p $GOPATH
+        environments = {
+          default = defaultEnv // {
+            toOutputs = _: {
+              packages = {
+                "default" = pkgs.buildEnv {
+                  name = "default";
+                  paths = defaultEnv.pkgList;
+                };
+              };
+              devShells = {
+                "default" = pkgs.mkShell {
+                  name = "default";
+                  buildInputs = defaultEnv.pkgList;
+                  shellHook = defaultEnv.shell;
+                };
+              };
+            };
+          };
+          
+          # Rust 
+          rust = mkEnv {
+            name = "rust";
+            pkgList = with pkgs; [
+              (rust-bin.stable.latest.default.override {
+                extensions = [ "rust-src" "rust-analyzer" "clippy" "rustfmt" ];
+              })
+              pkg-config
+              openssl.dev
+              libiconv
+              cargo-edit
+              cargo-watch
+              cargo-expand
+              lldb
+            ];
+            shell = ''
+              echo "Rust Develop Environment"
+              export RUST_BACKTRACE=1
+              export RUST_LOG=debug
+              export CARGO_HOME="$HOME/.cargo"
+              mkdir -p $CARGO_HOME
+              alias cb='cargo build'
+              alias ct='cargo test'
+              alias cr='cargo run'
+              rustc --version
+            '';
+          };
+          
+          # Go 
+          go = mkEnv {
+            name = "go";
+            pkgList = with pkgs; [
+              go
+              gopls
+              gotools
+              go-outline
+              gopkgs
+              godef
+              golint
+            ];
+            shell = ''
+              echo "Go Develop Environment"
+              export GOPATH="$HOME/go"
+              export PATH="$GOPATH/bin:$PATH"
+              mkdir -p $GOPATH
+              go version
 
-          # Version
-          go version
-        ''+ commonShellHooks;
-        goShell = pkgs.mkShell {
-          name = "go";
-          buildInputs = goPkgs;
-          shellHook = goShellHook;
-        };
-        goBuildEnv = pkgs.buildEnv {
-          name = "go";
-          paths = goPkgs;
-        };
-        
-        # Python Dev
-        pyPkgs = with pkgs; [
-          uv
-        ] ++ commonPkgs;
-        pyShellHook =  ''
-          # Version
-          uv version
-        '' + commonShellHooks;
-        pyShell = pkgs.mkShell {
-          name = "py";
-          buildInputs = pyPkgs;
-          shellHook = pyShellHook;
-        };
-        pyBuildEnv = pkgs.buildEnv {
+            '';
+          };
+          
+          # Python 
+          # TODO: UV가 대신해줄 수 있을것같다.
+          py = mkEnv {
             name = "py";
-            paths = pyPkgs;
-        };
+            pkgList = with pkgs; [
+              python3
+              python3Packages.pip
+              python3Packages.ipython
+              python3Packages.black
+              python3Packages.pylint
+            ];
+            shell = ''
+              echo "Python Develop Environment"
+              export PYTHONPATH="$PWD:$PYTHONPATH"
+              python --version
+              uv version
 
-        defaultBuildEnv = pkgs.buildEnv {
+            '';
+          };
+          
+          
+          dev = mkEnv {
             name = "dev";
-            paths = defaultPkgs ++ commonPkgs;
+            shell = ''
+              echo "Base Develop Envs"
+            '';
+            combine = [
+              environments.py
+              environments.go
+              environments.rust
+            ];
+          };
         };
-        # Default, 
-        devBuildEnv = pkgs.buildEnv {
-            name = "dev";
-            paths = defaultPkgs ++ pyPkgs ++ rustPkgs ++ goPkgs;
-        };
-      
+        
+        # 모든 환경의 outputs 생성
+        allOutputs = builtins.mapAttrs 
+          (name: env: env.toOutputs defaultEnv) 
+          environments;
+        
+        # packages와 devShells 병합
+        mergeOutputsBy = attr:
+          builtins.foldl' 
+            (acc: outputs: acc // outputs.${attr}) 
+            {} 
+            (builtins.attrValues allOutputs);
+            
       in {
-        # homeConfigurations."1eedaegon-${system}" =   home-manager.lib.homeManagerConfiguration {
-        #     modules = [
-        #       {
-        #         home.username = "1eedaegon";
-        #         home.homeDirectory = "/home/1eedaegon";
-        #         home.stateVersion = "22.11";
-        #         programs.home-manager.enable = true;
-        #       }
-        #     ];
-        #   };
-        # packages = {
-        #   dev = mkShell {
-        #     # name = "dev";
-        #     buildInputs = commonPkgs ++ py.buildInputs;
-        #     shellHook = ''''+commonShellHooks + rustShellHook + goShellHook + pyShellHook;
-        #   };
-        #   inherit py rust rust170 go;
-        # };
-        # devShells = {
-        #   inherit pyShell;
-        # };
-        # TODO: Make generate func for buildEnv, mkShell using pkgs and shellHook
-        packages = {
-          default = defaultBuildEnv;
-          dev = devBuildEnv;
-          py = pyBuildEnv;
-          go = goBuildEnv;
-          rust = rustBuildEnv;
-        };
+        packages = mergeOutputsBy "packages";
+        devShells = mergeOutputsBy "devShells";
       }
     );
 }

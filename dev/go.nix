@@ -1,22 +1,21 @@
-# dev/go.nix
-{ pkgs, system }:
-let
-  langModuleTemplate = import ../lib/language-template.nix { inherit pkgs system; };
-in
-langModuleTemplate {
+{ pkgs, mkEnv }:
+
+mkEnv {
   name = "go";
-  commonPkgs = with pkgs; [];
-  commonConfig = {
-    shellHook = '''';
-  };
-  versions = {
-    "latest" = {
-      pkg = pkgs.go;  # Go 패키지만 지정
-      includePkgs = with pkgs; [ golangci-lint delve ];  # 추가 패키지
-      excludePkgs = [];
-      shellHook = ''
-        echo "Go latest development environment"
-      '';
-    };
-  };
+  pkgList = with pkgs; [
+    go
+    gopls
+    gotools
+    go-outline
+    gopkgs
+    godef
+    golint
+  ];
+  shell = ''
+    echo "Go Development Environment"
+    export GOPATH="$HOME/go"
+    export PATH="$GOPATH/bin:$PATH"
+    mkdir -p $GOPATH
+    go version
+  '';
 }
