@@ -1,5 +1,5 @@
-# 기본 shll 설정을 위한 shellHook
-{ pkgs }:
+# 기본 shell 설정을 위한 shellHook
+{ pkgs, system }:
 ''
   eval "$(starship init bash)"
   if [ ! -f ~/.config/starship.toml ]; then

@@ -1,6 +1,6 @@
 # flake.nix
 {
-  description = "3dots with nix flake";
+  description = "...s(3dots) with nix flake";
   
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
@@ -24,9 +24,9 @@
           config.allowUnfree = true; 
         };
         
-        commonShellHooks = import ./lib/common-shell-hook.nix { inherit pkgs; };
+        commonShellHooks = import ./lib/common-shell-hook.nix { inherit pkgs system; };
         
-        # 기본 환경 정의
+        # Default environment definition
         defaultEnv = {
           name = "default";
           pkgList = with pkgs; [
@@ -43,7 +43,14 @@
             uv
             gcc
             gnumake
-          ];
+          ] ++ (if system == "x86_64-darwin" || system == "aarch64-darwin" then [
+            # macOS-only packages
+            coreutils
+            # (import ./lib/iterm2-settings.nix { inherit pkgs system; })
+          ] else if system == "x86_64-linux" then [
+            # Linux-only packages
+            systemd
+          ] else []);
           shell = commonShellHooks;
         };
         
@@ -185,12 +192,12 @@
           };
         };
         
-        # 모든 환경의 outputs 생성
+        # Generate outputs for all environments
         allOutputs = builtins.mapAttrs 
           (name: env: env.toOutputs defaultEnv) 
           environments;
         
-        # packages와 devShells 병합
+        # packages and devShells merge
         mergeOutputsBy = attr:
           builtins.foldl' 
             (acc: outputs: acc // outputs.${attr}) 
