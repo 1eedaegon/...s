@@ -54,24 +54,21 @@ User globally
 
 ```bash
 ❯ nix profile list
-Index:              0
-Flake attribute:    packages.x86_64-linux.mini
-Original flake URL: github:1eedaegon/...s
-Locked flake URL:   github:1eedaegon/...s/08d4e10ad40ad6de1ae0a3688b1cb7464be78933
-Store paths:        /nix/store/ijc616y513f3zz4dv42mfa8kba3h9ad1-nix-shell
+Name:               git+file:///Users/leedaegon/workspace/...s#packages.aarch64-darwin.default
+Flake attribute:    packages.aarch64-darwin.default
+Original flake URL: git+file:///Users/leedaegon/workspace/...s
+Locked flake URL:   git+file:///Users/leedaegon/workspace/...s
+Store paths:        /nix/store/ggcd2k0fxjnyfc0qvc3s9bnqdyshz7rx-default
 ...
 # And other profiles...
 ```
 
 Remove specific profile
 
-`❯ nix profile remove [INDEX]`
+`❯ nix profile remove [NAME]`
 
 ```bash
 
-❯ nix profile remove 4
-warning: '4' is not a valid index
-warning: Use 'nix profile list' to see the current profile.
-warning: not including '/nix/store/4kiyp2azbmdalklpa4w2wi7mzwxbc251-nix-shell' in the user environment because it's not a directory
-warning: not including '/nix/store/ijc616y513f3zz4dv42mfa8kba3h9ad1-nix-shell' in the user environment because it's not a directory
+❯ nix profile remove git+file:///Users/leedaegon/workspace/...s#packages.aarch64-darwin.default
+
 ```
