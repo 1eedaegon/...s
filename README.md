@@ -46,7 +46,9 @@ User globally
 
 2. Clean profile
 
-Search profile
+`> nix profie remove --all`
+
+3. Search profile
 
 `❯ nix profile list`
 
