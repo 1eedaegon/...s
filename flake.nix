@@ -40,7 +40,6 @@
             asciinema
             fontconfig
             direnv
-            uv
             gcc
             gnumake
           ] ++ (if system == "x86_64-darwin" || system == "aarch64-darwin" then [
@@ -124,7 +123,7 @@
               lldb
             ];
             shell = ''
-              echo "Rust Develop Environment"
+              echo "Enable[Rust]: $(rustc --version)"
               export RUST_BACKTRACE=1
               export RUST_LOG=debug
               export CARGO_HOME="$HOME/.cargo"
@@ -132,11 +131,11 @@
               alias cb='cargo build'
               alias ct='cargo test'
               alias cr='cargo run'
-              rustc --version
             '';
           };
           
           # Go 
+
           go = mkEnv {
             name = "go";
             pkgList = with pkgs; [
@@ -147,14 +146,18 @@
               gopkgs
               godef
               golint
+              golangci-lint
+              gotestsum
+              protobuf
+              protoc-gen-go
+              protoc-gen-go-grpc
+              kind
             ];
             shell = ''
-              echo "Go Develop Environment"
+              echo "Enable[Golang]: $(go version)"
               export GOPATH="$HOME/go"
               export PATH="$GOPATH/bin:$PATH"
               mkdir -p $GOPATH
-              go version
-
             '';
           };
           
@@ -163,6 +166,7 @@
           py = mkEnv {
             name = "py";
             pkgList = with pkgs; [
+              uv
               python3
               python3Packages.pip
               python3Packages.ipython
@@ -170,11 +174,8 @@
               python3Packages.pylint
             ];
             shell = ''
-              echo "Python Develop Environment"
+              echo "Enable[Python(uv)]: $(uv --version)"
               export PYTHONPATH="$PWD:$PYTHONPATH"
-              python --version
-              uv version
-
             '';
           };
           
