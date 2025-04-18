@@ -6,6 +6,8 @@
     starship preset nerd-font-symbols -o ~/.config/starship.toml
   fi
   alias l="ls -lah"
+  alias nd="nix devleop"
+  alias k="kubectl"
   echo -e "font check(branch): \uf126 \ue0a0 \uf121"
 
 ''
