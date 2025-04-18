@@ -123,7 +123,7 @@
               lldb
             ];
             shell = ''
-              echo "Enable[Rust]: $(rustc --version)"
+              echo "Enabled[Rust]: $(rustc --version)"
               export RUST_BACKTRACE=1
               export RUST_LOG=debug
               export CARGO_HOME="$HOME/.cargo"
@@ -154,7 +154,7 @@
               kind
             ];
             shell = ''
-              echo "Enable[Golang]: $(go version)"
+              echo "Enabled[Golang]: $(go version)"
               export GOPATH="$HOME/go"
               export PATH="$GOPATH/bin:$PATH"
               mkdir -p $GOPATH
@@ -174,7 +174,7 @@
               python3Packages.pylint
             ];
             shell = ''
-              echo "Enable[Python(uv)]: $(uv --version)"
+              echo "Enabled[Python(uv)]: $(uv --version)"
               export PYTHONPATH="$PWD:$PYTHONPATH"
             '';
           };
@@ -183,7 +183,10 @@
           dev = mkEnv {
             name = "dev";
             shell = ''
-              echo "Base Develop Envs"
+              echo "###############"
+              echo "# DEV Enabled #"
+              echo "###############"
+              echo "               "
             '';
             combine = [
               environments.py
