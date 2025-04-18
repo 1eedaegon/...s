@@ -8,7 +8,7 @@
   alias l="ls -lah"
   
   # Nix alias
-  alias nd="nix devleop"
+  alias nd="nix develop"
   alias np="nix profile"
   alias ncg="nix-collect-garbage"
 
