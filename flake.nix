@@ -42,9 +42,11 @@
             direnv
             gcc
             gnumake
+            htop
           ] ++ (if system == "x86_64-darwin" || system == "aarch64-darwin" then [
             # macOS-only packages
             coreutils
+            asitop
             # (import ./lib/iterm2-settings.nix { inherit pkgs system; })
           ] else if system == "x86_64-linux" then [
             # Linux-only packages
