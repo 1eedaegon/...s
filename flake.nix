@@ -1,7 +1,7 @@
 # flake.nix
 {
   description = "...s(3dots) with nix flake";
-  
+
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     flake-utils.url = "github:numtide/flake-utils";
@@ -19,13 +19,13 @@
     flake-utils.lib.eachDefaultSystem (system:
       let
         overlays = [ (import rust-overlay) ];
-        pkgs = import nixpkgs { 
-          inherit system overlays; 
-          config.allowUnfree = true; 
+        pkgs = import nixpkgs {
+          inherit system overlays;
+          config.allowUnfree = true;
         };
-        
+
         commonShellHooks = import ./lib/common-shell-hook.nix { inherit pkgs system; };
-        
+
         # Default environment definition
         defaultEnv = {
           name = "default";
@@ -54,12 +54,12 @@
           ] else []);
           shell = commonShellHooks;
         };
-        
-        mkEnv = 
-          { name, pkgList ? [], shell ? "", combine ? [] }: 
-          let 
+
+        mkEnv =
+          { name, pkgList ? [], shell ? "", combine ? [] }:
+          let
             # Combine Pkgs
-            combinedPkgList = if combine != [] 
+            combinedPkgList = if combine != []
               then pkgList ++ builtins.concatMap (env: env.pkgList) combine
               else pkgList;
 
@@ -71,7 +71,7 @@
             inherit name;
             pkgList = combinedPkgList;
             shell = combinedShell;
-            
+
             # Generate buildEnv and mkShell
             toOutputs = baseEnv: {
               packages = {
@@ -89,7 +89,7 @@
               };
             };
           };
-        
+
         environments = {
           default = defaultEnv // {
             toOutputs = _: {
@@ -108,8 +108,8 @@
               };
             };
           };
-          
-          # Rust 
+
+          # Rust
           rust = mkEnv {
             name = "rust";
             pkgList = with pkgs; [
@@ -135,8 +135,8 @@
               alias cr='cargo run'
             '';
           };
-          
-          # Go 
+
+          # Go
 
           go = mkEnv {
             name = "go";
@@ -162,8 +162,8 @@
               mkdir -p $GOPATH
             '';
           };
-          
-          # Python 
+
+          # Python
           # TODO: UV가 대신해줄 수 있을것같다.
           py = mkEnv {
             name = "py";
@@ -171,6 +171,7 @@
               uv
               python3
               python3Packages.pip
+              python3Packages.pytest
               python3Packages.ipython
               python3Packages.black
               python3Packages.pylint
@@ -180,8 +181,8 @@
               export PYTHONPATH="$PWD:$PYTHONPATH"
             '';
           };
-          
-          
+
+
           dev = mkEnv {
             name = "dev";
             shell = ''
@@ -197,19 +198,19 @@
             ];
           };
         };
-        
+
         # Generate outputs for all environments
-        allOutputs = builtins.mapAttrs 
-          (name: env: env.toOutputs defaultEnv) 
+        allOutputs = builtins.mapAttrs
+          (name: env: env.toOutputs defaultEnv)
           environments;
-        
+
         # packages and devShells merge
         mergeOutputsBy = attr:
-          builtins.foldl' 
-            (acc: outputs: acc // outputs.${attr}) 
-            {} 
+          builtins.foldl'
+            (acc: outputs: acc // outputs.${attr})
+            {}
             (builtins.attrValues allOutputs);
-            
+
       in {
         packages = mergeOutputsBy "packages";
         devShells = mergeOutputsBy "devShells";
