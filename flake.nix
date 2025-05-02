@@ -169,12 +169,6 @@
             name = "py";
             pkgList = with pkgs; [
               uv
-              python3
-              python3Packages.pip
-              python3Packages.pytest
-              python3Packages.ipython
-              python3Packages.black
-              python3Packages.pylint
             ];
             shell = ''
               echo "Enabled[Python(uv)]: $(uv --version)"
