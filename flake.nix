@@ -24,6 +24,11 @@
           config.allowUnfree = true;
         };
 
+        crossTarget = "x86_64-unknown-linux-gnu";
+        pkgs_x86_64 = import nixpkgs {
+          system = "x86_64-linux";
+          config.allowUnfree = true;
+        };
         commonShellHooks = import ./lib/common-shell-hook.nix { inherit pkgs system; };
 
         # Default environment definition
@@ -138,8 +143,42 @@
             '';
           };
 
-          # Go
+          rust-cross-x86 = mkEnv {
+            name = "rust-cross-x86";
+            pkgList = with pkgs; [
+              (rust-bin.stable.latest.default.override {
+                targets = [ crossTarget ];
+                extensions = [ "rust-src" "clippy" "rustfmt" ];
+              })
+              pkgsCross.gnu64.binutils-unwrapped
+              pkgsCross.gnu64.gcc
+              pkgsCross.gnu64.stdenv.cc.libc.dev
+              pkgsCross.gnu64.openssl.dev
+              pkgs_x86_64.stdenv.cc.libc.dev
+              #pkgs_x86_64.openssl.dev
+              pkg-config
 
+            ];
+            shell = ''
+              echo "Enabled[Rust x86-64 Compile]: ${crossTarget}"
+
+              # Compiler
+              export CC_x86_64_unknown_linux_gnu="${crossTarget}-gcc"
+              export AR_x86_64_unknown_linux_gnu="${crossTarget}-ar"
+
+              # Linker
+              export CARGO_TARGET_X86_64_UNKNOWN_LINUX_GNU_LINKER="${crossTarget}-gcc"
+
+              # Header
+              export NIX_CFLAGS_COMPILE="-isystem ${pkgs_x86_64.stdenv.cc.libc.dev}/include"
+
+              # pkg-config
+              export PKG_CONFIG_PATH="${pkgs_x86_64.openssl.dev}/lib/pkgconfig"
+              export OPENSSL_DIR="${pkgs_x86_64.openssl.dev}"
+            '';
+          };
+
+          # Go
           go = mkEnv {
             name = "go";
             pkgList = with pkgs; [
