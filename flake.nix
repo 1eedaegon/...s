@@ -131,6 +131,7 @@
               cargo-watch
               cargo-expand
               lldb
+              protobuf
             ];
             shell = ''
               echo "Enabled[Rust]: $(rustc --version)"
