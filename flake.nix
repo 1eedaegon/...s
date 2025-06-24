@@ -48,8 +48,8 @@
             gcc
             gnumake
             htop
-            podman
             just
+            act
           #  knope: not yet
           ] ++ (if system == "x86_64-darwin" || system == "aarch64-darwin" then [
             # macOS-only packages
