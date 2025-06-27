@@ -40,6 +40,7 @@
             starship
             bat
             git
+            gh
             htop
             curl
             asciinema
