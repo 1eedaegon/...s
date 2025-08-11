@@ -16,7 +16,80 @@
   };
 
   outputs = { self, nixpkgs, flake-utils, home-manager, rust-overlay, ... }:
-    flake-utils.lib.eachDefaultSystem (system:
+    let
+       # For PC Global profile
+       userConfigurations = {
+         "1eedaegon" = {
+           name = "1eedaegon";
+           email = "d8726243@gmail.com";
+           module = ./home/home.nix;
+         };
+         "default" = {
+           name = "1eedaegon";
+           email = "d8726243@gmail.com";
+           module = ./home/home.nix;
+          };
+       };
+       # For NixOS Global profile
+       nixosSystemConfigs =
+         let
+           currentSystem = builtins.currentSystem or "x86_64-linux";
+           # NixOS support only Linux
+           nixosSystem = if builtins.match ".*darwin.*" currentSystem != null then
+             "x86_64-linux"  # darwin, use x86_64-linux
+           else
+             currentSystem;   # linux
+         in
+         {
+           "desktop" = {
+             system = nixosSystem;
+             hostname = "1eedaegon";
+             users = [ "1eedaegon" ];
+             modules = [
+               ./nixos/desktop.nix
+             ];
+           };
+         };
+
+      # 시스템별 homeDirectory 자동 설정
+      getHomeDirectory = system: username:
+        if builtins.match ".*darwin.*" system != null then
+          "/Users/${username}"
+        else
+          "/home/${username}";
+
+      allHomeConfigurations =
+        let
+          currentSystem = builtins.currentSystem or "x86_64-linux";
+          overlays = [ (import rust-overlay) ];
+          pkgs = import nixpkgs {
+            system = currentSystem;
+            inherit overlays;
+            config.allowUnfree = true;
+          };
+        in
+        builtins.mapAttrs
+          (configKey: value:
+            home-manager.lib.homeManagerConfiguration {
+              inherit pkgs;
+              extraSpecialArgs = {
+                username = value.name;  # value.name 사용
+                email = value.email;
+                system = currentSystem;
+              };
+              modules = [
+                value.module
+                {
+                  home.username = value.name;  # value.name 사용
+                  home.homeDirectory = getHomeDirectory currentSystem value.name;  # value.name 사용
+                  home.stateVersion = "24.05";
+                  programs.home-manager.enable = true;
+                }
+              ];
+            })
+          userConfigurations;
+     in
+    (flake-utils.lib.eachDefaultSystem (system:
       let
         overlays = [ (import rust-overlay) ];
         pkgs = import nixpkgs {
@@ -24,14 +97,6 @@
           config.allowUnfree = true;
         };
 
-        # User configuration
-        userConfiguration = {
-          "1eedaegon" = {
-            homeDirectory = "/home/1eedaegon";
-            email = "d8726243@gmail.com";
-            module = ./home/home.nix;
-          };
-        };
 
         # Default environment definition
         commonPackages = import ./packages/packages.nix { inherit pkgs system; };
@@ -45,8 +110,6 @@
           };
 
       in {
-        # --- 💻 devShells 출력 ---
-        # 프로젝트별 개발 환경은 그대로 유지됩니다.
         devShells = {
           default = mkEnv { name = "default"; };
           # Rust
@@ -54,7 +117,12 @@
             name = "rust";
             pkgList = with pkgs; [
               (rust-bin.stable.latest.default.override {
-                extensions = [ "rust-src" "rust-analyzer" "clippy" "rustfmt" ];
+                extensions = [
+                  "rust-src"
+                  "rust-analyzer"
+                  "clippy"
+                  "rustfmt"
+                ];
               })
               pkg-config
               openssl.dev
@@ -122,97 +190,95 @@
               nodejs
             ];
             shellHook = ''
-              echo "Enabled[Node.js(nvm)]: $(nvm --version)"
+              echo "Enabled[Node.js]: $(nvm --version)"
             '';
           };
         };
-
-        # --- 🏠 Home Manager 출력 ---
-        # 1. 일반 Linux / macOS 용
-        homeConfigurations = builtins.mapAttrs
-          (name: value:
-            home-manager.lib.homeManagerConfiguration {
-              inherit pkgs;
-              extraSpecialArgs = { # 모듈에 전달할 특별 인자
-                username = name;
-                email = value.email;
-              };
-              modules = [ value.module ];
-            })
-          userConfiguration;
-
-        # 2. NixOS 용
-        homeManagerModules = builtins.mapAttrs'
-          (name: value: {
-            # `imports = [ my-flake.homeManagerModules.1eedaegon ];` 형태로 사용
-            inherit name;
-            value = {
-              imports = [ value.module ];
-              _module.args = {
-                username = name;
-                email = value.email;
-              };
+      }
+    )) //
+    {
+      homeConfigurations = allHomeConfigurations;
+      # homeManagerModules (시스템별)
+      homeManagerModules = flake-utils.lib.eachDefaultSystem (system:
+        let
+          overlays = [ (import rust-overlay) ];
+          pkgs = import nixpkgs {
+            inherit system overlays;
+            config.allowUnfree = true;
+          };
+        in
+        builtins.mapAttrs
+          (configKey: value: {
+            imports = [
+              value.module
+              {
+                home.username = value.name;  # value.name 사용
+                home.homeDirectory = getHomeDirectory system value.name;  # value.name 사용
+                home.stateVersion = "24.05";
+                programs.home-manager.enable = true;
+              }
+            ];
+            _module.args = {
+              username = value.name;  # value.name 사용
+              email = value.email;
+              inherit system pkgs;
             };
           })
-          userConfiguration;
+          userConfigurations
+      );
 
-       #  devShells = (mergeOutputsBy "devShells") // {
-       #     default = pkgs.mkShell {
-       #       name = "default-shell";
-       #       buildInputs = commonPackages; # 공통 패키지 목록 사용
-       #       shellHook = commonShellHooks;
-       #     };
-       #   };
+      # nixosConfigurations
+      nixosConfigurations = builtins.mapAttrs
+        (hostName: config:
+          nixpkgs.lib.nixosSystem {
+            system = config.system;
+            specialArgs = {
+              inherit home-manager;
+              hostname = config.hostname;
+            };
+            modules = [
+              {
+                system.stateVersion = "24.05";
+                networking.hostName = config.hostname;
+                nix.settings.experimental-features = [ "nix-command" "flakes" ];
+                nixpkgs.overlays = [ (import rust-overlay) ];
+                nixpkgs.config.allowUnfree = true;
 
-       #   # --- ✨ Home Manager 설정 (더욱 독립적으로 변경) ---
-       #   # extraSpecialArgs에서 defaultEnv 전달 부분을 제거합니다.
-       #   homeConfigurations = builtins.mapAttrs
-       #     (name: value:
-       #       home-manager.lib.homeManagerConfiguration {
-       #         inherit pkgs;
-       #         extraSpecialArgs = { username = name; }; # username만 전달
-       #         modules = [ value.module ];
-       #       })
-       #     userConfigurations;
+                users.users = builtins.listToAttrs (
+                  map (username:
+                    {
+                      name = username;
+                      value = {
+                        isNormalUser = true;
+                        description = username;
+                        home = getHomeDirectory config.system username;
+                        extraGroups = [ "networkmanager" "wheel" "docker" ];
+                      };
+                    }
+                  ) config.users
+                );
 
-       #   # NixOS 모듈도 동일하게 수정
-       #   homeManagerModules = builtins.mapAttrs'
-       #     (name: value: {
-       #       name = name;
-       #       value = {
-       #         imports = [ value.module ];
-       #         _module.args = { username = name; };
-       #       };
-       #     })
-       #     userConfigurations;
-       # });
-        # packages = mergeOutputsBy "packages";
-        # devShells = mergeOutputsBy "devShells";
-        # # For Other OS
-        # homeConfigurations = builtins.mapAttrs
-        #   (name: value: home-manager.lib.homeManagerConfiguration {
-        #     pkgs = pkgs;
-        #     extraSpecialArgs = {
-        #       inherit defaultEnv;
-        #       username = name;
-        #     };
-        #     modules = [ value.module ];
-        #   })
-        #   userConfiguration;
+                programs.zsh.enable = true;
+                programs.git.enable = true;
+                services.openssh.enable = true;
+                virtualisation.docker.enable = true;
+              }
 
-        # # For NixOS
-        # homeManagerModules = builtins.mapAttrs
-        #   (name: value: {
-        #     name = name
-        #     value = {
-        #     import [ value.module ];
-        #     _module.args = {
-        #       inherit defaultEnv;
-        #       username = name;
-        #     }
-        #     }
-        #   });
-        # userConfiguration;
-      }
-    );
+              home-manager.nixosModules.home-manager
+              {
+                home-manager.useGlobalPkgs = true;
+                home-manager.useUserPackages = true;
+                home-manager.backupFileExtension = "backup";
+
+                home-manager.users = builtins.listToAttrs (
+                  map (username: {
+                    name = username;
+                    value = self.homeManagerModules.${config.system}.${username};
+                  }) config.users
+                );
+              }
+            ] ++ config.modules;
+          })
+        nixosSystemConfigs;
+    };
 }

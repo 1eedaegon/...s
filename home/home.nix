@@ -15,6 +15,6 @@
     userEmail = email;
   };
 
-  home.sessionVariables.WELCOME_MSG = "Welcome, ${username}. You are in ⌬ nix together";
+  home.sessionVariables.WELCOME_MSG = "Welcome, ${username}. You are in nix ⌬ together";
   programs.zsh.initExtra = "echo $WELCOME_MSG";
 }
