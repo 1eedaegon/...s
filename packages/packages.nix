@@ -4,7 +4,6 @@
 with pkgs; [
   nerd-fonts.symbols-only
   nerd-fonts.fira-code
-  starship
   lsd # https://github.com/lsd-rs/lsd
   bat
   git

@@ -38,11 +38,11 @@ language specific(e.g rust)
 
 Normally
 
-`> nix run home-manager -- switch --flake .#[user].[platform]`
+`> nix run home-manager -- switch --flake github:1eedaegon/...s#[user].[platform]`
 
 With Backup
 
-`> nix run home-manager -- switch --flake .#[user].[platform] -b [backup name]`
+`> nix run home-manager -- switch --flake github:1eedaegon/...s#[user].[platform] -b [backup name]`
 
 e.g) `nix run home-manager -- switch --flake .#default.aarch64-darwin -b backup`
 ```bash
