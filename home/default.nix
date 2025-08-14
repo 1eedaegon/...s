@@ -6,17 +6,7 @@ in
 {
   home.packages = commonPackages;
 
-  programs.zsh = {
-    enable = true;
-    shellAliases = {
-      ls = "lsd";
-      l  = "lsd -l";
-      la = "lsd -a";
-      ll = "lsd -la";
-      lt = "lsd --tree";
-    };
-  };
-
+  programs.zsh.enable = true;
   programs.starship.enable = true;
   programs.direnv = {
     enable = true;
@@ -29,4 +19,5 @@ in
     LANG = "en_US.UTF-8";
   };
   programs.home-manager.enable = true;
+  programs.fastfetch.enable = true;
 }
