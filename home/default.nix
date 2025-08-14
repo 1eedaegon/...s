@@ -1,7 +1,7 @@
 # home/default.nix
-{ pkgs, ... }:
+{ pkgs, system ? builtins.currentSystem, ... }:
 let
-  commonPackages = import ../packages.nix { inherit pkgs; };
+  commonPackages = import ../packages/packages.nix { inherit pkgs system; };
 in
 {
   home.packages = commonPackages;

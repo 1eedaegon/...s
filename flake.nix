@@ -20,16 +20,22 @@
        # For PC Global profile
        userConfigurations = {
          "1eedaegon" = {
-           name = "1eedaegon";
+           name = "leedaegon";
            email = "d8726243@gmail.com";
            module = ./home/home.nix;
          };
          "default" = {
-           name = "1eedaegon";
+           name = "leedaegon";
            email = "d8726243@gmail.com";
            module = ./home/home.nix;
           };
        };
+       getHomeDirectory = system: username:
+         if builtins.match ".*darwin.*" system != null then
+           "/Users/${username}"
+         else
+           "/home/${username}";
+
        # For NixOS Global profile
        nixosSystemConfigs =
          let
@@ -40,6 +46,7 @@
            else
              currentSystem;   # linux
          in
+
          {
            "desktop" = {
              system = nixosSystem;
@@ -51,43 +58,63 @@
            };
          };
 
-      # 시스템별 homeDirectory 자동 설정
-      getHomeDirectory = system: username:
-        if builtins.match ".*darwin.*" system != null then
-          "/Users/${username}"
-        else
-          "/home/${username}";
+       mkAllHomeConfigurations =
+         let
+         # Platform suffix mapping
+         platformSuffixes = {
+           "x86_64-linux" = "linux";
+           "aarch64-linux" = "aarch64-linux";
+           "x86_64-darwin" = "darwin";
+           "aarch64-darwin" = "aarch64-darwin";
+         };
 
-      allHomeConfigurations =
-        let
-          currentSystem = builtins.currentSystem or "x86_64-linux";
-          overlays = [ (import rust-overlay) ];
-          pkgs = import nixpkgs {
-            system = currentSystem;
-            inherit overlays;
-            config.allowUnfree = true;
-          };
+         # Generate configurations for a specific system
+         mkSystemConfigs = system:
+         let
+         overlays = [ (import rust-overlay) ];
+         pkgs = import nixpkgs {
+           inherit system overlays;
+           config.allowUnfree = true;
+         };
+         in
+         builtins.mapAttrs (name: config:
+           home-manager.lib.homeManagerConfiguration {
+             inherit pkgs;
+             extraSpecialArgs = {
+               username = config.name;
+               email = config.email;
+               inherit system;
+             };
+             modules = [
+               config.module
+               {
+                 home.username = config.name;
+                 home.homeDirectory = getHomeDirectory system config.name;
+                 home.stateVersion = "24.05";
+                 programs.home-manager.enable = true;
+               }
+             ];
+           }
+         ) userConfigurations;
+
+         # Generate all user.platform combinations
+         allConfigs = builtins.foldl' (acc: system:
+           let
+           suffix = platformSuffixes.${system};
+           systemConfigs = mkSystemConfigs system;
+
+           # Create user.platform entries
+           namedConfigs = builtins.listToAttrs (
+             map (userName: {
+               name = "${userName}.${suffix}";
+               value = systemConfigs.${userName};
+             }) (builtins.attrNames systemConfigs)
+           );
+           in
+           acc // namedConfigs
+         ) {} (builtins.attrNames platformSuffixes);
         in
-        builtins.mapAttrs
-          (configKey: value:
-            home-manager.lib.homeManagerConfiguration {
-              inherit pkgs;
-              extraSpecialArgs = {
-                username = value.name;  # value.name 사용
-                email = value.email;
-                system = currentSystem;
-              };
-              modules = [
-                value.module
-                {
-                  home.username = value.name;  # value.name 사용
-                  home.homeDirectory = getHomeDirectory currentSystem value.name;  # value.name 사용
-                  home.stateVersion = "24.05";
-                  programs.home-manager.enable = true;
-                }
-              ];
-            })
-          userConfigurations;
+        allConfigs;
      in
     (flake-utils.lib.eachDefaultSystem (system:
       let
@@ -96,7 +123,6 @@
           inherit system overlays;
           config.allowUnfree = true;
         };
-
 
         # Default environment definition
         commonPackages = import ./packages/packages.nix { inherit pkgs system; };
@@ -197,36 +223,7 @@
       }
     )) //
     {
-      homeConfigurations = allHomeConfigurations;
-      # homeManagerModules (시스템별)
-      homeManagerModules = flake-utils.lib.eachDefaultSystem (system:
-        let
-          overlays = [ (import rust-overlay) ];
-          pkgs = import nixpkgs {
-            inherit system overlays;
-            config.allowUnfree = true;
-          };
-        in
-        builtins.mapAttrs
-          (configKey: value: {
-            imports = [
-              value.module
-              {
-                home.username = value.name;  # value.name 사용
-                home.homeDirectory = getHomeDirectory system value.name;  # value.name 사용
-                home.stateVersion = "24.05";
-                programs.home-manager.enable = true;
-              }
-            ];
-            _module.args = {
-              username = value.name;  # value.name 사용
-              email = value.email;
-              inherit system pkgs;
-            };
-          })
-          userConfigurations
-      );
-
+      homeConfigurations = mkAllHomeConfigurations;
       # nixosConfigurations
       nixosConfigurations = builtins.mapAttrs
         (hostName: config:
@@ -245,17 +242,15 @@
                 nixpkgs.config.allowUnfree = true;
 
                 users.users = builtins.listToAttrs (
-                  map (username:
-                    {
-                      name = username;
-                      value = {
-                        isNormalUser = true;
-                        description = username;
-                        home = getHomeDirectory config.system username;
-                        extraGroups = [ "networkmanager" "wheel" "docker" ];
-                      };
-                    }
-                  ) config.users
+                  map (username: {
+                    name = username;
+                    value = {
+                      isNormalUser = true;
+                      description = username;
+                      home = getHomeDirectory config.system username;
+                      extraGroups = [ "networkmanager" "wheel" "docker" ];
+                    };
+                  }) config.users
                 );
 
                 programs.zsh.enable = true;

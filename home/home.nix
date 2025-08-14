@@ -2,7 +2,6 @@
 # home/home.nix
 { config, lib, pkgs, username,  email, ... }: {
   home.username = username;
-  home.homeDirectory = config.users.users.${username}.home or "/home/${username}";
   home.stateVersion = "24.05";
 
   imports = [
@@ -16,5 +15,5 @@
   };
 
   home.sessionVariables.WELCOME_MSG = "Welcome, ${username}. You are in nix ⌬ together";
-  programs.zsh.initExtra = "echo $WELCOME_MSG";
+  programs.zsh.initContent = "echo $WELCOME_MSG";
 }

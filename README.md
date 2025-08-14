@@ -34,9 +34,23 @@ language specific(e.g rust)
 
 `❯ nix develop github:1eedaegon/...s#rust`
 
-User globally
+## Global Settings using home-manager
 
-`❯ nix profile install github:1eedaegon/...s`
+Normally
+
+`> nix run home-manager -- switch --flake .#[user].[platform]`
+
+With Backup
+
+`> nix run home-manager -- switch --flake .#[user].[platform] -b [backup name]`
+
+e.g) `nix run home-manager -- switch --flake .#default.aarch64-darwin -b backup`
+```bash
+lrwxr-xr-x leedaegon staff  70 B  Thu Aug 14 23:04:33 2025 .zshenv ⇒ /nix/store/zpmjydbkq6p6hrz35380nlirs19kn0fl-home-manager-files/.zshenv
+.rw-r--r-- leedaegon staff  21 B  Thu May 30 10:54:40 2024 .zshenv.backup
+lrwxr-xr-x leedaegon staff  69 B  Thu Aug 14 23:04:33 2025 .zshrc ⇒ /nix/store/zpmjydbkq6p6hrz35380nlirs19kn0fl-home-manager-files/.zshrc
+```
+
 
 ## Uninstall
 
@@ -44,11 +58,15 @@ User globally
 
 `❯ nix-collect-garbage`
 
-2. Clean profile
+2. Clean home-manager
+
+`❯ nix run home-manager -- uninstall`
+
+3. Clean profile
 
 `> nix profie remove --all`
 
-3. Search profile
+4. Search profile
 
 `❯ nix profile list`
 
@@ -63,7 +81,7 @@ Store paths:        /nix/store/ggcd2k0fxjnyfc0qvc3s9bnqdyshz7rx-default
 # And other profiles...
 ```
 
-Remove specific profile
+5. Remove specific profile
 
 `❯ nix profile remove [NAME]`
 
