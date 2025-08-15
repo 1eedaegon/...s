@@ -7,6 +7,16 @@ in
   home.packages = commonPackages;
 
   programs.zsh.enable = true;
+  # Drain direnv integration from fish for others
+  programs.fish = {
+    enable = true;
+    shellInit = ''
+      # direnv hook
+      # if status --is-interactive
+      #   eval (direnv hook fish)
+      # end
+  '';
+  };
   programs.starship.enable = true;
   programs.direnv = {
     enable = true;

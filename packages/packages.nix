@@ -12,7 +12,6 @@ with pkgs; [
   curl
   asciinema
   fontconfig
-  direnv
   gcc
   gnumake
   just

@@ -1,6 +1,5 @@
-# TODO: migrate to home-manager
 # home/home.nix
-{ config, lib, pkgs, username,  email, system, ... }:
+{ config, lib, pkgs, username, hostname, email, system, ... }:
 let
   isDarwin = pkgs.stdenv.isDarwin;
 in
