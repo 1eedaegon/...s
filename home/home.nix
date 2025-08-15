@@ -111,7 +111,6 @@ in
       cd = "z";
       iterm-restart = "osascript -e 'quit app \"iTerm\"' && sleep 2 && open -a iTerm";
 
-      z = "zed";
       zhere = "zed .";
     };
 
