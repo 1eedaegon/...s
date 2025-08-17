@@ -1,44 +1,73 @@
-# lib/mk-env.nix
-{ pkgs }:
+# lib/mkenv.nix
+# Pure function that receives all dependencies as arguments
+{ pkgs, system, modules }:
 
-# mkEnv: Generate packages and devShells
-# Args:
-# - name: Environment name
-# - pkgList: Package list (default: [])
-# - shell: Shell script (default: "")
-# - combine: Combine environment list (default: [])
-{ name, pkgList ? [], shell ? "", combine ? [] }: 
-let 
-  # Combine Pkgs
-  combinedPkgList = if combine != [] 
-    then pkgList ++ builtins.concatMap (env: env.pkgList) combine
-    else pkgList;
+let
+  # Extract modules from arguments: 구조 분해를 좀 더 명확하게 한거긴 한데...
+  inherit (modules) commonInstalls commonExec devInstalls devExec devConfig;
 
-  # Combine Shell
-  combinedShell = if combine != []
-    then shell + "\n" + builtins.concatStringsSep "\n" (builtins.map (env: env.shell) combine)
-    else shell;
-  
-in {
-  inherit name;
-  pkgList = combinedPkgList;
-  shell = combinedShell;
-  
-  # Generate packages and devShells
-  # baseEnv: Default environment (packages and shell script are added)
-  toOutputs = baseEnv: {
-    packages = {
-      "${name}" = pkgs.buildEnv {
-        name = "${name}";
-        paths = combinedPkgList;
-      };
+  # Base environment builder
+  buildEnv = { name, packages ? [], aliases ? {}, environment ? {}, shellHook ? "" }:
+    let
+      # Convert aliases to shell commands
+      aliasesStr = builtins.concatStringsSep "\n" (
+        builtins.attrValues (
+          builtins.mapAttrs (name: value: "alias ${name}='${value}'") aliases
+        )
+      );
+
+      # Set environment variables
+      envVarsStr = builtins.concatStringsSep "\n" (
+        builtins.attrValues (
+          builtins.mapAttrs (name: value: "export ${name}='${toString value}'") environment
+        )
+      );
+    in
+    pkgs.mkShell {
+      inherit name;
+      buildInputs = packages;
+
+      shellHook = ''
+        ${envVarsStr}
+        ${aliasesStr}
+        ${shellHook}
+      '';
     };
-    devShells = {
-      "${name}" = pkgs.mkShell {
-        name = "${name}";
-        buildInputs = combinedPkgList ++ baseEnv.pkgList;
-        shellHook = baseEnv.shell + "\n" + combinedShell;
-      };
+in
+{
+  # Main environment creation function
+  mkEnv = { name, extraPackages ? [], extraShellHook ? "", overrides ? {} }:
+    let
+      # Get environment-specific settings
+      envPackages = if name != "default" && devInstalls.environments ? ${name}
+                    then devInstalls.environments.${name}.packages
+                    else [];
+
+      envConfig = devConfig.getEnvironmentConfig name;
+
+      envExec = if name != "default" && devExec.environments ? ${name}
+                then devExec.environments.${name}
+                else { aliases = {}; shellHook = ""; };
+
+      # Apply overrides
+      finalPackages = commonInstalls.packages ++ envPackages ++ extraPackages ++ (overrides.packages or []);
+      finalAliases = commonExec.aliases // envExec.aliases // (overrides.aliases or {});
+      finalEnvironment = (envConfig.environment or {}) // (overrides.environment or {});
+      finalShellHook = ''
+        ${commonExec.initScript}
+        ${commonExec.functions}
+        ${commonExec.preserveEnvHook}
+        ${envExec.shellHook or ""}
+        ${extraShellHook}
+        ${overrides.shellHook or ""}
+      '';
+    in
+    buildEnv {
+      inherit name;
+      packages = finalPackages;
+      aliases = finalAliases;
+      environment = finalEnvironment;
+      shellHook = finalShellHook;
     };
-  };
+
 }
