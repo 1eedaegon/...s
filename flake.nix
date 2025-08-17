@@ -20,12 +20,14 @@
          # For PC Global profile
          userConfigurations = {
            "1eedaegon" = {
-             name = "1eedaegon";
+             name = "leedaegon"; # For system user
+             username = "1eedaegon"; # For service user
              email = "d8726243@gmail.com";
              module = ./home/home.nix;
            };
            "default" = {
-             name = "1eedaegon";
+             name = "leedaegon"; # For system user
+             username = "1eedaegon"; # For service user
              email = "d8726243@gmail.com";
              module = ./home/home.nix;
             };
@@ -81,7 +83,8 @@
              home-manager.lib.homeManagerConfiguration {
                inherit pkgs;
                extraSpecialArgs = {
-                 username = config.name;
+                 systemUsername = config.name;
+                 username = config.username;
                  email = config.email;
                  inherit system;
                };

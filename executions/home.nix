@@ -91,6 +91,15 @@ in
       setopt HIST_VERIFY
       setopt SHARE_HISTORY
 
+      # Zsh completion style
+      zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}' # Case insensitive
+      zstyle ':completion:*' menu select
+      zstyle ':completion:*' list-colors ''${(s.:.)LS_COLORS}
+      zstyle ':completion:*' verbose true
+      zstyle ':completion:*:*:kill:*:processes' list-colors '=(#b) #([0-9]#)*=0=01;31'
+      zstyle ':completion:*:descriptions' format '%B%d%b'
+      zstyle ':completion:*:warnings' format 'No matches for: %d'
+
       # Better completion
       setopt COMPLETE_IN_WORD
       setopt ALWAYS_TO_END

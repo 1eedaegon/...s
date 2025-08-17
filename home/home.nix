@@ -1,66 +1,45 @@
 # home/home.nix
-{ config, lib, pkgs, username, email, system, ... }:
+{ config, lib, pkgs, username, systemUsername, email, system, ... }:
 let
   isDarwin = pkgs.stdenv.isDarwin;
 
   # Import new module structures
   homeInstalls = import ../installations/home.nix {
-    inherit config lib pkgs username email system;
+    inherit config lib pkgs email system;
+    inherit systemUsername username;
   };
   homeExec = import ../executions/home.nix {
-    inherit config lib pkgs username system;
+    inherit config lib pkgs system;
+    inherit systemUsername username;
   };
   homeConfig = import ../configurations/home.nix {
-    inherit config lib pkgs username email system;
+    inherit config lib pkgs email system;
+    inherit systemUsername username;
   };
   commonExec = import ../executions/default.nix { inherit pkgs system; };
 in
 {
-  home.username = username;
+  home.username = systemUsername;
   home.stateVersion = "24.05";
 
-
-  # Use packages from new module structure
   home.packages = homeInstalls.packages;
 
-  # Apply programs configuration from modules
   programs = lib.recursiveUpdate homeInstalls.programs {
-    # Git configuration with user info
-    git = {
-      enable = true;
-      userName = username;
-      userEmail = email;
-      extraConfig = {
-        init.defaultBranch = "main";
-        pull.rebase = true;
-        push.autoSetupRemote = true;
-        core.editor = "nvim";
-      };
-    };
+    # Git
+    git = homeInstalls.programs.git // homeConfig.git;
 
-    # Starship configuration
-    starship = {
-      enable = true;
-      enableZshIntegration = true;
-      settings = homeConfig.starship;
-    };
+    # Starship
+    starship = homeInstalls.programs.starship // homeConfig.starship;
 
-    # Zsh configuration
-    zsh = {
-      enable = true;
-      enableCompletion = true;
-      autosuggestion.enable = true;
-      syntaxHighlighting.enable = true;
+    # Zsh
+    zsh = homeInstalls.programs.zsh // homeConfig.zsh // {
       shellAliases = homeExec.aliases;
-      initExtra = homeExec.zshConfig.initExtra;
-      sessionVariables = homeConfig.environment;
+      initContent = homeExec.zshConfig.initExtra;
     };
 
     # Bat configuration
-    bat = {
-      enable = true;
-      config = homeConfig.bat;
-    };
+    bat = homeInstalls.programs.bat // homeConfig.bat;
+
   };
 
   # Set session variables from configuration module

@@ -21,144 +21,167 @@ in
     HOMEBREW_NO_ANALYTICS = if isDarwin then "1" else null;
     HOMEBREW_NO_AUTO_UPDATE = if isDarwin then "1" else null;
   };
-
+  git = {
+     userName = username;
+     userEmail = email;
+     extraConfig = {
+       init.defaultBranch = "main";
+       pull.rebase = true;
+       push.autoSetupRemote = true;
+       core.editor = "vim";
+     };
+   };
   # Starship prompt configuration
   starship = {
-    format = ''
-      [╭─](bold green)$username$hostname$directory$git_branch$git_status$cmd_duration
-      [╰─](bold green)$character
-    '';
+    enableZshIntegration = true;
+    enableBashIntegration = true;
+    settings = {
+      format = ''
+        (bold green)\$ $username$hostname$directory$git_branch$git_status$env_var$cmd_duration(bold green)$character
+      '';
 
-    username = {
-      show_always = true;
-      format = "[$user]($style) in ";
-      style_user = "bold bright-cyan";
-      style_root = "bold bright-red";
-    };
+      # For identify nix dev env
+      env_var = {
+        NIX_DEV_ENV = {
+          symbol = "";
+          format = "(bold cyan)\#$env_value ";
+        };
+      };
 
-    hostname = {
-      ssh_only = false;
-      format = "[@$hostname]($style) ";
-      style = "bold bright-blue";
-      disabled = false;
-    };
+      username = {
+        show_always = true;
+        format = "[$user]($style) in ";
+        style_user = "bold bright-cyan";
+        style_root = "bold bright-red";
+      };
 
-    directory = {
-      format = "[$path]($style)[$read_only]($read_only_style) ";
-      style = "bold bright-green";
-      truncation_length = 3;
-      truncate_to_repo = false;
-      truncation_symbol = "…/";
-      home_symbol = "~";
-      read_only = " 🔒";
-      read_only_style = "red";
-    };
+      hostname = {
+        ssh_only = false;
+        format = "[@$hostname]($style) ";
+        style = "bold bright-blue";
+        disabled = false;
+      };
 
-    character = {
-      success_symbol = "[➜](bold bright-purple)";
-      error_symbol = "[✗](bold bright-red)";
-      vicmd_symbol = "[V](bold bright-yellow)";
-    };
+      directory = {
+        format = "[$path]($style)[$read_only]($read_only_style) ";
+        style = "bold bright-green";
+        truncation_length = 3;
+        truncate_to_repo = false;
+        truncation_symbol = "…/";
+        home_symbol = "~";
+        read_only = " 🔒";
+        read_only_style = "red";
+      };
 
-    git_branch = {
-      format = "on [$symbol$branch]($style) ";
-      symbol = " ";
-      style = "bold bright-magenta";
-    };
+      character = {
+        success_symbol = "[➜](bold bright-purple)";
+        error_symbol = "[✗](bold bright-red)";
+        vicmd_symbol = "[V](bold bright-yellow)";
+      };
 
-    git_status = {
-      format = "([$all_status$ahead_behind]($style)) ";
-      style = "bold bright-yellow";
-      conflicted = "🏳";
-      ahead = "⇡\${count}";
-      behind = "⇣\${count}";
-      diverged = "⇕⇡\${ahead_count}⇣\${behind_count}";
-      untracked = "🤷";
-      stashed = "📦";
-      modified = "📝";
-      staged = '[++\($count\)](green)';
-      renamed = "👅";
-      deleted = "🗑";
-    };
+      git_branch = {
+        format = "on [$symbol$branch]($style) ";
+        symbol = " ";
+        style = "bold bright-magenta";
+      };
 
-    cmd_duration = {
-      min_time = 500;
-      format = "took [$duration]($style) ";
-      style = "bold bright-yellow";
-      show_milliseconds = false;
-      disabled = false;
-    };
+      git_status = {
+        format = "([$all_status$ahead_behind]($style)) ";
+        style = "bold bright-yellow";
+        conflicted = "🏳";
+        ahead = "⇡\${count}";
+        behind = "⇣\${count}";
+        diverged = "⇕⇡\${ahead_count}⇣\${behind_count}";
+        untracked = "🤷";
+        stashed = "📦";
+        modified = "📝";
+        staged = "[++\($count\)](green)";
+        renamed = "👅";
+        deleted = "🗑";
+      };
 
-    # Language modules
-    rust = {
-      format = "via [$symbol($version )]($style)";
-      symbol = "🦀 ";
-      style = "bold red";
-    };
+      cmd_duration = {
+        min_time = 500;
+        format = "took [$duration]($style) ";
+        style = "bold bright-yellow";
+        show_milliseconds = false;
+        disabled = false;
+      };
 
-    golang = {
-      format = "via [$symbol($version )]($style)";
-      symbol = "🐹 ";
-      style = "bold cyan";
-    };
+      # Language modules
+      rust = {
+        format = "via [$symbol($version )]($style)";
+        symbol = "🦀 ";
+        style = "bold red";
+      };
 
-    python = {
-      format = "via [\${symbol}\${pyenv_prefix}(\${version} )(\($virtualenv\) )]($style)";
-      symbol = "🐍 ";
-      style = "yellow bold";
-      pyenv_version_name = false;
-      python_binary = ["python3" "python"];
-    };
+      golang = {
+        format = "via [$symbol($version )]($style)";
+        symbol = "🐹 ";
+        style = "bold cyan";
+      };
 
-    nodejs = {
-      format = "via [$symbol($version )]($style)";
-      symbol = "⬢ ";
-      style = "bold green";
-    };
+      python = {
+        format = "via [\${symbol}\${pyenv_prefix}(\${version} )(\($virtualenv\) )]($style)";
+        symbol = "🐍 ";
+        style = "yellow bold";
+        pyenv_version_name = false;
+        python_binary = ["python3" "python"];
+      };
 
-    package = {
-      format = "via [$symbol$version]($style) ";
-      symbol = "📦 ";
-      style = "208 bold";
-    };
+      nodejs = {
+        format = "via [$symbol($version )]($style)";
+        symbol = "⬢ ";
+        style = "bold green";
+      };
 
-    # Other useful modules
-    battery = {
-      full_symbol = "🔋 ";
-      charging_symbol = "⚡️ ";
-      discharging_symbol = "💀 ";
-      display = [
-        { threshold = 10; style = "bold red"; }
-        { threshold = 30; style = "bold yellow"; }
-      ];
-    };
+      package = {
+        format = "via [$symbol$version]($style) ";
+        symbol = "📦 ";
+        style = "208 bold";
+      };
 
-    time = {
-      disabled = false;
-      format = "🕙[$time]($style) ";
-      style = "bold bright-white";
-      use_12hr = false;
-    };
+      # Other useful modules
+      battery = {
+        full_symbol = "🔋 ";
+        charging_symbol = "⚡️ ";
+        discharging_symbol = "💀 ";
+        display = [
+          { threshold = 10; style = "bold red"; }
+          { threshold = 30; style = "bold yellow"; }
+        ];
+      };
 
-    status = {
-      style = "bg:blue";
-      symbol = "🔴";
-      format = "[$symbol $common_meaning$signal_name$maybe_int]($style) ";
-      map_symbol = true;
-      disabled = false;
-    };
+      time = {
+        disabled = false;
+        format = "🕙[$time]($style) ";
+        style = "bold bright-white";
+        use_12hr = false;
+      };
 
-    memory_usage = {
-      disabled = true;
-      threshold = 75;
-      format = "via $symbol [$ram_pct]($style) ";
-      symbol = "🐏";
-      style = "bold dimmed white";
+      status = {
+        style = "bg:blue";
+        symbol = "🔴";
+        format = "[$symbol $common_meaning$signal_name$maybe_int]($style) ";
+        map_symbol = true;
+        disabled = false;
+      };
+
+      memory_usage = {
+        disabled = true;
+        threshold = 75;
+        format = "via $symbol [$ram_pct]($style) ";
+        symbol = "🐏";
+        style = "bold dimmed white";
+      };
     };
   };
 
   # Zsh specific configuration
   zsh = {
+    enableCompletion = true;
+    autosuggestion.enable = true;
+    syntaxHighlighting.enable = true;
     # Oh-My-Zsh configuration
     oh-my-zsh = {
       enable = false; # We're using our own configuration
@@ -186,14 +209,6 @@ in
       share = true;
     };
 
-    # Completion settings
-    completion = {
-      enable = true;
-      autoMenu = true;
-      menuSelect = true;
-      completeInWord = true;
-      matcher = "m:{a-zA-Z}={A-Za-z}"; # Case insensitive completion
-    };
 
     # Directory navigation
     dirHashes = {
@@ -202,42 +217,6 @@ in
       proj = "$HOME/Projects";
       cfg = "$HOME/.config";
       nix = "$HOME/.config/nixpkgs";
-    };
-
-    # Zsh options
-    options = {
-      # History
-      EXTENDED_HISTORY = true;
-      HIST_EXPIRE_DUPS_FIRST = true;
-      HIST_IGNORE_DUPS = true;
-      HIST_IGNORE_SPACE = true;
-      HIST_VERIFY = true;
-      SHARE_HISTORY = true;
-
-      # Completion
-      COMPLETE_IN_WORD = true;
-      ALWAYS_TO_END = true;
-      PATH_DIRS = true;
-      AUTO_MENU = true;
-      AUTO_LIST = true;
-      AUTO_PARAM_SLASH = true;
-      EXTENDED_GLOB = true;
-
-      # Directory
-      AUTO_CD = true;
-      AUTO_PUSHD = true;
-      PUSHD_IGNORE_DUPS = true;
-      PUSHDMINUS = true;
-
-      # Jobs
-      NOTIFY = true;
-      LONG_LIST_JOBS = true;
-      INTERACTIVE_COMMENTS = true;
-
-      # Other
-      CORRECT = true;
-      CORRECT_ALL = false;
-      IGNORE_EOF = true;
     };
   };
 
@@ -295,23 +274,12 @@ in
 
   # Bat (better cat) configuration
   bat = {
-    theme = "TwoDark";
-    style = "numbers,changes,header";
-    italic-text = "always";
-    tabs = "2";
-    wrap = "never";
-    pager = "less -FR";
-
-    # Custom themes can be added
-    themes = {
-      snazzy = {
-        src = pkgs.fetchFromGitHub {
-          owner = "connorholyday";
-          repo = "nord-bat";
-          rev = "master";
-          sha256 = ""; # Would need actual hash
-        };
-      };
+    config = {
+      theme = "TwoDark";
+      style = "numbers,changes,header";
+      tabs = "2";
+      wrap = "never";
+      pager = "less -FR";
     };
   };
 

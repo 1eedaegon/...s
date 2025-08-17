@@ -50,10 +50,10 @@ in
                 else { aliases = {}; shellHook = ""; };
 
       # Apply overrides
-      finalPackages = commonInstalls.packages ++ envPackages ++ extraPackages ++ (overrides.packages or []);
-      finalAliases = commonExec.aliases // envExec.aliases // (overrides.aliases or {});
-      finalEnvironment = (envConfig.environment or {}) // (overrides.environment or {});
-      finalShellHook = ''
+      appliedPackages = commonInstalls.packages ++ envPackages ++ extraPackages ++ (overrides.packages or []);
+      appliedAliases = commonExec.aliases // envExec.aliases // (overrides.aliases or {});
+      appliedEnvironment = (envConfig.environment or {}) // (overrides.environment or {}) // { NIX_DEV_ENV = name; };
+      appliedShellHook = ''
         ${commonExec.initScript}
         ${commonExec.functions}
         ${commonExec.preserveEnvHook}
@@ -64,10 +64,10 @@ in
     in
     buildEnv {
       inherit name;
-      packages = finalPackages;
-      aliases = finalAliases;
-      environment = finalEnvironment;
-      shellHook = finalShellHook;
+      packages = appliedPackages;
+      aliases = appliedAliases;
+      environment = appliedEnvironment;
+      shellHook = appliedShellHook;
     };
 
 }
