@@ -76,7 +76,7 @@ in
     };
 
     # Python development environment
-    python = {
+    py = {
       packages = with pkgs; [
         # Python package manager
         uv

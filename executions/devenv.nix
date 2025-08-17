@@ -145,7 +145,7 @@ in
     };
 
     # Python development environment
-    python = {
+    py = {
       aliases = {
         # Python shortcuts
         py = "python";

@@ -25,6 +25,12 @@
              email = "d8726243@gmail.com";
              module = ./home/home.nix;
            };
+           "root" = {
+             name = "root";
+             username = "root";
+             email = "root@localhost";
+             module = ./home/home.nix;  # 같은 설정 파일 사용
+           };
            "default" = {
              name = "leedaegon"; # For system user
              username = "1eedaegon"; # For service user
@@ -147,7 +153,7 @@
             default = mkEnv { name = "default"; };
             rust = mkEnv { name = "rust"; };
             go = mkEnv { name = "go"; };
-            py = mkEnv { name = "python"; };
+            py = mkEnv { name = "py"; };
             node = mkEnv { name = "node"; };
 
             # Custom environments

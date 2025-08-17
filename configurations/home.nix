@@ -37,14 +37,16 @@ in
     enableBashIntegration = true;
     settings = {
       format = ''
-        (bold green)\$ $username$hostname$directory$git_branch$git_status$env_var$cmd_duration(bold green)$character
+        $username$hostname$directory$env_var$git_branch$git_status$cmd_duration(bold green)$character
       '';
 
       # For identify nix dev env
       env_var = {
         NIX_DEV_ENV = {
           symbol = "";
-          format = "(bold cyan)\#$env_value ";
+          # format = "[\\(#$env_value\\)]($style) ";
+          format = "[(#$env_value)]($style) ";
+          style = "bold bright-purple";
         };
       };
 

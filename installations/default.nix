@@ -47,6 +47,9 @@
 
     # System utilities
     fontconfig
+
+    # Dynamic dev toolset based on rust
+    mise
   ] ++ (if system == "x86_64-darwin" || system == "aarch64-darwin" then [
     # macOS-specific packages
     coreutils

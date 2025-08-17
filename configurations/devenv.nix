@@ -224,7 +224,7 @@ rec {
     };
 
     # Python development environment configuration
-    python = {
+    py = {
       environment = common.environment // {
         # Python specific environment variables
         PYTHONPATH = "$PWD:$PYTHONPATH";
@@ -328,7 +328,7 @@ rec {
         colors = "Linux";
         confirm_exit = false;
         deep_reload = true;
-        editor = "nvim";
+        editor = "vim";
         xmode = "Context";
       };
     };
@@ -475,7 +475,7 @@ rec {
       environment = common.environment // {
         KUBECONFIG = "$HOME/.kube/config";
         KUBECTL_EXTERNAL_DIFF = "diff -u";
-        KUBE_EDITOR = "nvim";
+        KUBE_EDITOR = "vim";
       };
 
       # kubectl configuration
