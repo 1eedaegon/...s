@@ -44,7 +44,7 @@ With Backup
 
 `> nix run home-manager -- switch --flake github:1eedaegon/...s#[user].[platform] -b [backup name]`
 
-e.g) `nix run home-manager -- switch --flake .#default.aarch64-darwin -b backup`
+e.g) `nix run home-manager -- switch --flake github:1eedaegon/...s#default.aarch64-darwin -b backup`
 ```bash
 lrwxr-xr-x leedaegon staff  70 B  Thu Aug 14 23:04:33 2025 .zshenv ⇒ /nix/store/zpmjydbkq6p6hrz35380nlirs19kn0fl-home-manager-files/.zshenv
 .rw-r--r-- leedaegon staff  21 B  Thu May 30 10:54:40 2024 .zshenv.backup
