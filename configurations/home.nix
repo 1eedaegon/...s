@@ -437,16 +437,16 @@ in
     mimeApps = {
       enable = true;
       defaultApplications = {
-        "text/plain" = ["nvim.desktop"];
-        "text/markdown" = ["nvim.desktop"];
-        "text/x-python" = ["nvim.desktop"];
-        "text/x-rust" = ["nvim.desktop"];
-        "text/x-go" = ["nvim.desktop"];
-        "text/javascript" = ["nvim.desktop"];
-        "text/typescript" = ["nvim.desktop"];
-        "application/json" = ["nvim.desktop"];
-        "application/xml" = ["nvim.desktop"];
-        "application/x-yaml" = ["nvim.desktop"];
+        "text/plain" = ["vim.desktop"];
+        "text/markdown" = ["vim.desktop"];
+        "text/x-python" = ["vim.desktop"];
+        "text/x-rust" = ["vim.desktop"];
+        "text/x-go" = ["vim.desktop"];
+        "text/javascript" = ["vim.desktop"];
+        "text/typescript" = ["vim.desktop"];
+        "application/json" = ["vim.desktop"];
+        "application/xml" = ["vim.desktop"];
+        "application/x-yaml" = ["vim.desktop"];
       };
     };
   };
