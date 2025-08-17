@@ -2,6 +2,32 @@
 
 > Just build own dotfiles
 
+## Module preview
+```
+┌──────────────────────────────┐
+│                  User Commands                   │
+└──────────────────────────────┘
+                          │
+                          ▼
+                 ┌──────────┐
+                 │   flake.nix     │
+                 └──────────┘
+                          │
+      ┌────────────────────────┐
+      ▼                   ▼                   ▼
+    ╔════════════════════════════╗
+    ║           Module Loading & Composition        ║
+    ╠═══════════════╦════════════╣
+    ║ installations ║  executions   ║configurations║
+    ╠═════════╬═════════╬════════╣
+    ║   Packages    ║   Shell Cmds  ║   Settings   ║
+    ║   Programs    ║   Aliases     ║   Env Vars   ║
+    ║   (What)      ║   Functions   ║   Configs    ║
+    ║               ║   (How to Run)║   (How)      ║
+    ╚═════════╩═════════╩═════════╝
+```
+
+
 ## Install Nix
 
 Install determinate systems nix
