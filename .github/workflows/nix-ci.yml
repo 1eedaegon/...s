@@ -1,0 +1,71 @@
+name: Nix CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  check:
+    name: Flake Check
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: cachix/install-nix-action@v24
+        with:
+          github_access_token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Check flake
+        run: nix flake check
+
+  test-shells:
+    name: Test Shells
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+        shell: [default, rust, go, py, node]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: cachix/install-nix-action@v24
+        with:
+          github_access_token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Test ${{ matrix.shell }} shell
+        run: nix develop .#${{ matrix.shell }} --command echo "✓ ${{ matrix.shell }} shell works"
+
+  test-home:
+    name: Test Home Configs
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            config: default.linux
+          - os: ubuntu-latest
+            config: 1eedaegon.linux
+          - os: macos-latest
+            config: default.darwin
+          - os: macos-latest
+            config: 1eedaegon.darwin
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: cachix/install-nix-action@v24
+        with:
+          github_access_token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Check ${{ matrix.config }}
+        run: nix eval .#homeConfigurations."${{ matrix.config }}" > /dev/null && echo "✓ ${{ matrix.config }} is valid"
+
+  format:
+    name: Format Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: cachix/install-nix-action@v24
+        with:
+          github_access_token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Check formatting
+        run: nix run nixpkgs#nixpkgs-fmt -- --check .

@@ -1,0 +1,117 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Tag to create release for"
+        required: true
+        type: string
+
+jobs:
+  create-release:
+    name: Create Release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install Nix
+        uses: cachix/install-nix-action@v24
+        with:
+          github_access_token: ${{ secrets.GITHUB_TOKEN }}
+          extra_nix_config: |
+            experimental-features = nix-command flakes
+            accept-flake-config = true
+
+      - name: Generate changelog
+        id: changelog
+        run: |
+          # Get the tag name
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            TAG="${{ github.event.inputs.tag }}"
+          else
+            TAG="${GITHUB_REF#refs/tags/}"
+          fi
+
+          # Get previous tag
+          PREV_TAG=$(git describe --tags --abbrev=0 $TAG^ 2>/dev/null || echo "")
+
+          # Generate changelog
+          if [ -n "$PREV_TAG" ]; then
+            echo "CHANGELOG<<EOF" >> $GITHUB_OUTPUT
+            echo "## What's Changed" >> $GITHUB_OUTPUT
+            echo "" >> $GITHUB_OUTPUT
+            git log --pretty=format:"* %s (%h)" $PREV_TAG..$TAG >> $GITHUB_OUTPUT
+            echo "" >> $GITHUB_OUTPUT
+            echo "EOF" >> $GITHUB_OUTPUT
+          else
+            echo "CHANGELOG<<EOF" >> $GITHUB_OUTPUT
+            echo "Initial release" >> $GITHUB_OUTPUT
+            echo "EOF" >> $GITHUB_OUTPUT
+          fi
+
+          echo "TAG=$TAG" >> $GITHUB_OUTPUT
+
+      - name: Create flake archive
+        run: |
+          # Create a clean archive of the flake
+          git archive --format=tar.gz --prefix=...s-${{ steps.changelog.outputs.TAG }}/ \
+            -o ...s-${{ steps.changelog.outputs.TAG }}.tar.gz HEAD
+
+      - name: Generate flake metadata
+        run: |
+          cat > flake-metadata.json << EOF
+          {
+            "version": "${{ steps.changelog.outputs.TAG }}",
+            "commit": "$(git rev-parse HEAD)",
+            "date": "$(date -u +"%Y-%m-%dT%H:%M:%SZ")",
+            "inputs": $(nix flake metadata --json | jq '.locks.nodes | del(.root)')
+          }
+          EOF
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ steps.changelog.outputs.TAG }}
+          name: Release ${{ steps.changelog.outputs.TAG }}
+          body: |
+            ${{ steps.changelog.outputs.CHANGELOG }}
+
+            ## Installation
+
+            ### Using Nix Flakes
+
+            ```bash
+            # Enter development shell
+            nix develop github:1eedaegon/...s/${{ steps.changelog.outputs.TAG }}
+
+            # Or use specific shell
+            nix develop github:1eedaegon/...s/${{ steps.changelog.outputs.TAG }}#rust
+            ```
+
+            ### Home Manager
+
+            ```bash
+            # Apply home configuration
+            nix run home-manager -- switch --flake github:1eedaegon/...s/${{ steps.changelog.outputs.TAG }}#[user].[platform]
+            ```
+
+            ## Verification
+
+            The flake can be verified with:
+            ```bash
+            nix flake check github:1eedaegon/...s/${{ steps.changelog.outputs.TAG }}
+            ```
+          files: |
+            ...s-${{ steps.changelog.outputs.TAG }}.tar.gz
+            flake-metadata.json
+          draft: false
+          prerelease: ${{ contains(steps.changelog.outputs.TAG, '-rc') || contains(steps.changelog.outputs.TAG, '-beta') || contains(steps.changelog.outputs.TAG, '-alpha') }}
