@@ -28,7 +28,12 @@ in
       init.defaultBranch = "main";
       pull.rebase = true;
       push.autoSetupRemote = true;
-      core.editor = "vim";
+      core = {
+        editor = "vim";
+        whitespace = "fix,-indent-with-non-tab,trailing-space,cr-at-eol";
+        pager = "less -FRX --RAW-CONTROL-CHARS";
+        autocrlf = "input";
+      };
     };
   };
   # Starship prompt configuration
@@ -37,8 +42,8 @@ in
     enableBashIntegration = true;
     settings = {
       format = ''
-        $username$hostname$directory$env_var$git_branch$git_status$cmd_duration(bold green)$character
-
+        $username$hostname$directory$env_var$git_branch$git_status$cmd_duration(bold green)
+        $character
       '';
 
       # For identify nix dev env
