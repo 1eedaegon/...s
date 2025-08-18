@@ -20,8 +20,9 @@
 
     # Pager settings
     PAGER = "less";
-    LESS = "-R";
-    LESSHISTFILE = "-"; # Don't save less history
+    LESS = "-R -F";
+    LESSANSIENDCHARS = "mK";
+    # LESSHISTFILE = "-"; # Don't save less history
 
     # Man page colors
     LESS_TERMCAP_mb = "$(printf '%b' '[1;31m')";     # begin blinking

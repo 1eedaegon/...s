@@ -37,8 +37,8 @@ in
     enableBashIntegration = true;
     settings = {
       format = ''
-        $username$hostname$directory$env_var$git_branch$git_status$cmd_duration(bold green)
-        $character
+        $username$hostname$directory$env_var$git_branch$git_status$cmd_duration(bold green)$character
+
       '';
 
       # For identify nix dev env
