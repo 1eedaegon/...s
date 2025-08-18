@@ -79,8 +79,6 @@ in
       ${common.initScript}
       ${common.functions}
 
-      # Home-manager specific initialization
-
       # Set up history
       HISTFILE=~/.zsh_history
       HISTSIZE=10000
