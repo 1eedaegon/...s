@@ -19,24 +19,24 @@
       let
          # For PC Global profile
          userConfigurations = {
-           "1eedaegon" = {
-             name = "leedaegon"; # For system user
-             username = "1eedaegon"; # For service user
-             email = "d8726243@gmail.com";
-             module = ./home/home.nix;
-           };
-           "root" = {
-             name = "root";
-             username = "root";
-             email = "root@localhost";
-             module = ./home/home.nix;  # 같은 설정 파일 사용
-           };
            "default" = {
              name = "leedaegon"; # For system user
              username = "1eedaegon"; # For service user
              email = "d8726243@gmail.com";
              module = ./home/home.nix;
             };
+           "1eedaegon" = {
+             name = "leedaegon"; # For system user
+             username = "1eedaegon"; # For service user
+             email = "d8726243@gmail.com";
+             module = ./home/home.nix;
+           };
+           "root" = { # Hmm..... is useful?
+             name = "root";
+             username = "root";
+             email = "root@localhost";
+             module = ./home/home.nix;
+           };
          };
          getHomeDirectory = system: username:
            if builtins.match ".*darwin.*" system != null then

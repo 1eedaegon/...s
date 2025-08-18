@@ -6,8 +6,8 @@
   # Common environment variables
   environment = {
     # Editor settings
-    EDITOR = "nvim";
-    VISUAL = "nvim";
+    EDITOR = "vim";
+    VISUAL = "vim";
 
     # Locale settings
     LANG = "en_US.UTF-8";
@@ -70,7 +70,7 @@
   # Git global configuration
   git = {
     core = {
-      editor = "nvim";
+      editor = "vim";
       whitespace = "fix,-indent-with-non-tab,trailing-space,cr-at-eol";
       pager = "less -R";
       autocrlf = "input";
