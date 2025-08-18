@@ -22,5 +22,5 @@
   # x86_64 virtualisation
   virtualisation.libvirtd.enable = true;
   programs.virt-manager.enable = true;
-  programs.steam.enable = true;  # 게임은 주로 x86_64에서
+  programs.steam.enable = true; # 게임은 주로 x86_64에서
 }

@@ -14,14 +14,15 @@ in
       packages = with pkgs; [
         # Rust toolchain
         (if rust-bin != null then
-          rust-bin.stable.latest.default.override {
-            extensions = [
-              "rust-src"
-              "rust-analyzer"
-              "clippy"
-              "rustfmt"
-            ];
-          }
+          rust-bin.stable.latest.default.override
+            {
+              extensions = [
+                "rust-src"
+                "rust-analyzer"
+                "clippy"
+                "rustfmt"
+              ];
+            }
         else
           rustc
         )
@@ -196,8 +197,8 @@ in
 
     # Default development environment (empty, uses only common packages)
     default = {
-      packages = [];
-      programs = {};
+      packages = [ ];
+      programs = { };
     };
   };
 }

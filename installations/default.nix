@@ -10,20 +10,20 @@
     gh
 
     # Terminal improvements
-    lsd         # better ls
-    bat         # better cat
-    ripgrep     # better grep
-    fzf         # fuzzy finder
-    zoxide      # better cd
-    starship    # prompt
-    fastfetch   # system info
+    lsd # better ls
+    bat # better cat
+    ripgrep # better grep
+    fzf # fuzzy finder
+    zoxide # better cd
+    starship # prompt
+    fastfetch # system info
 
     # Essential tools
     curl
     wget
     htop
-    jq          # JSON processor
-    yq          # YAML processor
+    jq # JSON processor
+    yq # YAML processor
 
     # Build tools
     gcc
@@ -57,7 +57,7 @@
   ] else if system == "x86_64-linux" || system == "aarch64-linux" then [
     # Linux-specific packages
     systemd
-  ] else []);
+  ] else [ ]);
 
   # 공통 프로그램 설정 (programs.*.enable)
   programs = {

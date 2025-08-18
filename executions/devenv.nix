@@ -340,7 +340,7 @@ in
 
     # Default/base development environment
     default = {
-      aliases = {};
+      aliases = { };
 
       shellHook = ''
         ${common.preserveEnvHook}
@@ -367,7 +367,7 @@ in
 
   # Helper function to get merged aliases for an environment
   getMergedAliases = env:
-    common.aliases // (env.aliases or {});
+    common.aliases // (env.aliases or { });
 
   # Helper function to get complete shell hook for an environment
   getCompleteShellHook = env:

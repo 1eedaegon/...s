@@ -7,7 +7,7 @@ let
   inherit (modules) commonInstalls commonExec devInstalls devExec devConfig;
 
   # Base environment builder
-  buildEnv = { name, packages ? [], aliases ? {}, environment ? {}, shellHook ? "" }:
+  buildEnv = { name, packages ? [ ], aliases ? { }, environment ? { }, shellHook ? "" }:
     let
       # Convert aliases to shell commands
       aliasesStr = builtins.concatStringsSep "\n" (
@@ -36,23 +36,25 @@ let
 in
 {
   # Main environment creation function
-  mkEnv = { name, extraPackages ? [], extraShellHook ? "", overrides ? {} }:
+  mkEnv = { name, extraPackages ? [ ], extraShellHook ? "", overrides ? { } }:
     let
       # Get environment-specific settings
-      envPackages = if name != "default" && devInstalls.environments ? ${name}
-                    then devInstalls.environments.${name}.packages
-                    else [];
+      envPackages =
+        if name != "default" && devInstalls.environments ? ${name}
+        then devInstalls.environments.${name}.packages
+        else [ ];
 
       envConfig = devConfig.getEnvironmentConfig name;
 
-      envExec = if name != "default" && devExec.environments ? ${name}
-                then devExec.environments.${name}
-                else { aliases = {}; shellHook = ""; };
+      envExec =
+        if name != "default" && devExec.environments ? ${name}
+        then devExec.environments.${name}
+        else { aliases = { }; shellHook = ""; };
 
       # Apply overrides
-      appliedPackages = commonInstalls.packages ++ envPackages ++ extraPackages ++ (overrides.packages or []);
-      appliedAliases = commonExec.aliases // envExec.aliases // (overrides.aliases or {});
-      appliedEnvironment = (envConfig.environment or {}) // (overrides.environment or {}) // { NIX_DEV_ENV = name; };
+      appliedPackages = commonInstalls.packages ++ envPackages ++ extraPackages ++ (overrides.packages or [ ]);
+      appliedAliases = commonExec.aliases // envExec.aliases // (overrides.aliases or { });
+      appliedEnvironment = (envConfig.environment or { }) // (overrides.environment or { }) // { NIX_DEV_ENV = name; };
       appliedShellHook = ''
         ${commonExec.initScript}
         ${commonExec.functions}

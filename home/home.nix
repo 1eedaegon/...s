@@ -95,82 +95,98 @@ in
         };
 
         # Snazzy ANSI Colors (기존 유지)
-        "Ansi 0 Color" = {  # Black
+        "Ansi 0 Color" = {
+          # Black
           "Red Component" = 0.157;
           "Green Component" = 0.165;
           "Blue Component" = 0.212;
         };
-        "Ansi 1 Color" = {  # Red
+        "Ansi 1 Color" = {
+          # Red
           "Red Component" = 1.0;
           "Green Component" = 0.333;
           "Blue Component" = 0.333;
         };
-        "Ansi 2 Color" = {  # Green
+        "Ansi 2 Color" = {
+          # Green
           "Red Component" = 0.314;
           "Green Component" = 0.98;
           "Blue Component" = 0.439;
         };
-        "Ansi 3 Color" = {  # Yellow
+        "Ansi 3 Color" = {
+          # Yellow
           "Red Component" = 0.957;
           "Green Component" = 0.965;
           "Blue Component" = 0.482;
         };
-        "Ansi 4 Color" = {  # Blue
+        "Ansi 4 Color" = {
+          # Blue
           "Red Component" = 0.341;
           "Green Component" = 0.714;
           "Blue Component" = 1.0;
         };
-        "Ansi 5 Color" = {  # Magenta
+        "Ansi 5 Color" = {
+          # Magenta
           "Red Component" = 1.0;
           "Green Component" = 0.475;
           "Blue Component" = 0.776;
         };
-        "Ansi 6 Color" = {  # Cyan
+        "Ansi 6 Color" = {
+          # Cyan
           "Red Component" = 0.541;
           "Green Component" = 0.914;
           "Blue Component" = 0.992;
         };
-        "Ansi 7 Color" = {  # White
+        "Ansi 7 Color" = {
+          # White
           "Red Component" = 0.937;
           "Green Component" = 0.941;
           "Blue Component" = 0.921;
         };
-        "Ansi 8 Color" = {  # Bright Black
+        "Ansi 8 Color" = {
+          # Bright Black
           "Red Component" = 0.424;
           "Green Component" = 0.447;
           "Blue Component" = 0.537;
         };
-        "Ansi 9 Color" = {  # Bright Red
+        "Ansi 9 Color" = {
+          # Bright Red
           "Red Component" = 1.0;
           "Green Component" = 0.333;
           "Blue Component" = 0.333;
         };
-        "Ansi 10 Color" = {  # Bright Green
+        "Ansi 10 Color" = {
+          # Bright Green
           "Red Component" = 0.314;
           "Green Component" = 0.98;
           "Blue Component" = 0.439;
         };
-        "Ansi 11 Color" = {  # Bright Yellow
+        "Ansi 11 Color" = {
+          # Bright Yellow
           "Red Component" = 0.957;
           "Green Component" = 0.965;
           "Blue Component" = 0.482;
         };
-        "Ansi 12 Color" = {  # Bright Blue
+        "Ansi 12 Color" = {
+          # Bright Blue
           "Red Component" = 0.341;
           "Green Component" = 0.714;
           "Blue Component" = 1.0;
         };
-        "Ansi 13 Color" = {  # Bright Magenta
+        "Ansi 13 Color" = {
+          # Bright Magenta
           "Red Component" = 1.0;
           "Green Component" = 0.475;
           "Blue Component" = 0.776;
         };
-        "Ansi 14 Color" = {  # Bright Cyan
+        "Ansi 14 Color" = {
+          # Bright Cyan
           "Red Component" = 0.541;
           "Green Component" = 0.914;
           "Blue Component" = 0.992;
         };
-        "Ansi 15 Color" = {  # Bright White
+        "Ansi 15 Color" = {
+          # Bright White
           "Red Component" = 1.0;
           "Green Component" = 1.0;
           "Blue Component" = 1.0;
@@ -189,7 +205,7 @@ in
         "Initial Text" = "";
         "Use Italic Font" = true;
         "Blinking Cursor" = true;
-        "Cursor Type" = 1;  # Box cursor
+        "Cursor Type" = 1; # Box cursor
         "Minimum Contrast" = 0;
       }];
     };
@@ -197,7 +213,7 @@ in
 
   # Keep existing activation scripts for macOS
   home.activation = lib.mkIf isDarwin {
-    setupIterm = lib.hm.dag.entryAfter ["writeBoundary"] ''
+    setupIterm = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
       echo "Setting up iTerm2 with Snazzy theme..."
 
       DEFAULTS="/usr/bin/defaults"

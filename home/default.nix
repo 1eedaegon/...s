@@ -15,7 +15,7 @@ in
       # if status --is-interactive
       #   eval (direnv hook fish)
       # end
-  '';
+    '';
   };
   programs.starship.enable = true;
   programs.direnv = {

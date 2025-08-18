@@ -27,16 +27,18 @@ in
     zhere = if isDarwin then "zed ." else "code .";
 
     # iTerm restart (macOS only)
-    iterm-restart = if isDarwin then
-      "osascript -e 'quit app \"iTerm\"' && sleep 2 && open -a iTerm"
-    else "";
+    iterm-restart =
+      if isDarwin then
+        "osascript -e 'quit app \"iTerm\"' && sleep 2 && open -a iTerm"
+      else "";
 
     # System specific
     # Note: darwin-rebuild and nixos-rebuild get noglob wrapper from common.initScript
-    update = if isDarwin then
-      "darwin-rebuild switch --flake '.#'$(hostname)"
-    else
-      "nixos-rebuild switch --flake '.#'$(hostname)";
+    update =
+      if isDarwin then
+        "darwin-rebuild switch --flake '.#'$(hostname)"
+      else
+        "nixos-rebuild switch --flake '.#'$(hostname)";
 
     # Quick edits
     ezsh = "nvim ~/.zshrc";
@@ -57,10 +59,11 @@ in
 
     # Network
     myip = "curl -s https://ipinfo.io/ip";
-    localip = if isDarwin then
-      "ipconfig getifaddr en0"
-    else
-      "ip -4 addr show | grep -oP '(?<=inet\\s)\\d+(\\.\\d+){3}'";
+    localip =
+      if isDarwin then
+        "ipconfig getifaddr en0"
+      else
+        "ip -4 addr show | grep -oP '(?<=inet\\s)\\d+(\\.\\d+){3}'";
 
     # Process management
     top = "htop";

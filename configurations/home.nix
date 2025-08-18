@@ -22,15 +22,15 @@ in
     HOMEBREW_NO_AUTO_UPDATE = if isDarwin then "1" else null;
   };
   git = {
-     userName = username;
-     userEmail = email;
-     extraConfig = {
-       init.defaultBranch = "main";
-       pull.rebase = true;
-       push.autoSetupRemote = true;
-       core.editor = "vim";
-     };
-   };
+    userName = username;
+    userEmail = email;
+    extraConfig = {
+      init.defaultBranch = "main";
+      pull.rebase = true;
+      push.autoSetupRemote = true;
+      core.editor = "vim";
+    };
+  };
   # Starship prompt configuration
   starship = {
     enableZshIntegration = true;
@@ -129,7 +129,7 @@ in
         symbol = "🐍 ";
         style = "yellow bold";
         pyenv_version_name = false;
-        python_binary = ["python3" "python"];
+        python_binary = [ "python3" "python" ];
       };
 
       nodejs = {
@@ -386,7 +386,7 @@ in
     # Activation scripts
     activation = {
       # Create common directories
-      createDirs = lib.hm.dag.entryAfter ["writeBoundary"] ''
+      createDirs = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
         $DRY_RUN_CMD mkdir -p $HOME/{Projects,Downloads,Documents,Pictures,Videos,Music}
         $DRY_RUN_CMD mkdir -p $HOME/.local/{bin,share,state}
         $DRY_RUN_CMD mkdir -p $HOME/.config
@@ -394,7 +394,7 @@ in
       '';
 
       # Setup development directories
-      setupDev = lib.hm.dag.entryAfter ["writeBoundary"] ''
+      setupDev = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
         $DRY_RUN_CMD mkdir -p $HOME/Projects/{personal,work,learning,experiments}
         $DRY_RUN_CMD mkdir -p $HOME/.config/git
       '';
@@ -408,16 +408,16 @@ in
     mimeApps = {
       enable = true;
       defaultApplications = {
-        "text/plain" = ["vim.desktop"];
-        "text/markdown" = ["vim.desktop"];
-        "text/x-python" = ["vim.desktop"];
-        "text/x-rust" = ["vim.desktop"];
-        "text/x-go" = ["vim.desktop"];
-        "text/javascript" = ["vim.desktop"];
-        "text/typescript" = ["vim.desktop"];
-        "application/json" = ["vim.desktop"];
-        "application/xml" = ["vim.desktop"];
-        "application/x-yaml" = ["vim.desktop"];
+        "text/plain" = [ "vim.desktop" ];
+        "text/markdown" = [ "vim.desktop" ];
+        "text/x-python" = [ "vim.desktop" ];
+        "text/x-rust" = [ "vim.desktop" ];
+        "text/x-go" = [ "vim.desktop" ];
+        "text/javascript" = [ "vim.desktop" ];
+        "text/typescript" = [ "vim.desktop" ];
+        "application/json" = [ "vim.desktop" ];
+        "application/xml" = [ "vim.desktop" ];
+        "application/x-yaml" = [ "vim.desktop" ];
       };
     };
   };

@@ -25,13 +25,13 @@
     # LESSHISTFILE = "-"; # Don't save less history
 
     # Man page colors
-    LESS_TERMCAP_mb = "$(printf '%b' '[1;31m')";     # begin blinking
-    LESS_TERMCAP_md = "$(printf '%b' '[1;36m')";     # begin bold
-    LESS_TERMCAP_me = "$(printf '%b' '[0m')";        # end mode
+    LESS_TERMCAP_mb = "$(printf '%b' '[1;31m')"; # begin blinking
+    LESS_TERMCAP_md = "$(printf '%b' '[1;36m')"; # begin bold
+    LESS_TERMCAP_me = "$(printf '%b' '[0m')"; # end mode
     LESS_TERMCAP_so = "$(printf '%b' '[01;44;33m')"; # begin standout-mode
-    LESS_TERMCAP_se = "$(printf '%b' '[0m')";        # end standout-mode
-    LESS_TERMCAP_us = "$(printf '%b' '[1;32m')";     # begin underline
-    LESS_TERMCAP_ue = "$(printf '%b' '[0m')";        # end underline
+    LESS_TERMCAP_se = "$(printf '%b' '[0m')"; # end standout-mode
+    LESS_TERMCAP_us = "$(printf '%b' '[1;32m')"; # begin underline
+    LESS_TERMCAP_ue = "$(printf '%b' '[0m')"; # end underline
 
     # FZF configuration
     FZF_DEFAULT_OPTS = ''

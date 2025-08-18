@@ -90,7 +90,7 @@ rec {
           allFeatures = true;
           allTargets = true;
           command = "clippy";
-          extraArgs = ["--" "-W" "clippy::all"];
+          extraArgs = [ "--" "-W" "clippy::all" ];
         };
 
         inlayHints = {
@@ -120,23 +120,25 @@ rec {
 
         # Go build settings
         CGO_ENABLED = "1";
-        GOOS = if system == "x86_64-darwin" || system == "aarch64-darwin" then "darwin"
-               else if system == "x86_64-linux" || system == "aarch64-linux" then "linux"
-               else "linux";
-        GOARCH = if system == "x86_64-darwin" || system == "x86_64-linux" then "amd64"
-                 else if system == "aarch64-darwin" || system == "aarch64-linux" then "arm64"
-                 else "amd64";
+        GOOS =
+          if system == "x86_64-darwin" || system == "aarch64-darwin" then "darwin"
+          else if system == "x86_64-linux" || system == "aarch64-linux" then "linux"
+          else "linux";
+        GOARCH =
+          if system == "x86_64-darwin" || system == "x86_64-linux" then "amd64"
+          else if system == "aarch64-darwin" || system == "aarch64-linux" then "arm64"
+          else "amd64";
       };
 
       # Go tools configuration
       gopls = {
         # Build settings
         build = {
-          buildFlags = ["-tags="];
+          buildFlags = [ "-tags=" ];
           env = {
             GOFLAGS = "-mod=readonly";
           };
-          directoryFilters = ["-node_modules" "-vendor"];
+          directoryFilters = [ "-node_modules" "-vendor" ];
           expandWorkspaceToModule = true;
         };
 
@@ -191,7 +193,7 @@ rec {
         run = {
           timeout = "5m";
           tests = false;
-          skip-dirs = ["vendor" "third_party"];
+          skip-dirs = [ "vendor" "third_party" ];
         };
 
         linters = {
@@ -247,20 +249,20 @@ rec {
       ruff = {
         # Linting rules
         select = [
-          "E"   # pycodestyle errors
-          "W"   # pycodestyle warnings
-          "F"   # pyflakes
-          "I"   # isort
-          "B"   # flake8-bugbear
-          "C4"  # flake8-comprehensions
-          "UP"  # pyupgrade
+          "E" # pycodestyle errors
+          "W" # pycodestyle warnings
+          "F" # pyflakes
+          "I" # isort
+          "B" # flake8-bugbear
+          "C4" # flake8-comprehensions
+          "UP" # pyupgrade
           "ARG" # flake8-unused-arguments
           "SIM" # flake8-simplify
         ];
 
         ignore = [
-          "E501"  # line too long
-          "B008"  # do not perform function calls in argument defaults
+          "E501" # line too long
+          "B008" # do not perform function calls in argument defaults
         ];
 
         # Formatting
@@ -269,19 +271,19 @@ rec {
 
         # Per-file ignores
         per-file-ignores = {
-          "__init__.py" = ["F401"];
-          "tests/*" = ["S101"];
+          "__init__.py" = [ "F401" ];
+          "tests/*" = [ "S101" ];
         };
 
         # Auto-fix
-        fixable = ["ALL"];
-        unfixable = [];
+        fixable = [ "ALL" ];
+        unfixable = [ ];
       };
 
       # Black formatter configuration
       black = {
         line-length = 88;
-        target-version = ["py311" "py312"];
+        target-version = [ "py311" "py312" ];
         include = "\\.pyi?$";
         extend-exclude = ''
           /(
@@ -317,10 +319,10 @@ rec {
       pytest = {
         minversion = "6.0";
         addopts = "-ra -q --strict-markers";
-        testpaths = ["tests"];
-        python_files = ["test_*.py" "*_test.py"];
-        python_classes = ["Test*"];
-        python_functions = ["test_*"];
+        testpaths = [ "tests" ];
+        python_files = [ "test_*.py" "*_test.py" ];
+        python_classes = [ "Test*" ];
+        python_functions = [ "test_*" ];
       };
 
       # IPython configuration
@@ -385,10 +387,10 @@ rec {
         };
 
         rules = {
-          "indent" = ["error" 2];
-          "linebreak-style" = ["error" "unix"];
-          "quotes" = ["error" "single"];
-          "semi" = ["error" "always"];
+          "indent" = [ "error" 2 ];
+          "linebreak-style" = [ "error" "unix" ];
+          "quotes" = [ "error" "single" ];
+          "semi" = [ "error" "always" ];
           "no-unused-vars" = "warn";
           "no-console" = "off";
         };
@@ -417,7 +419,7 @@ rec {
         compilerOptions = {
           target = "ES2021";
           module = "commonjs";
-          lib = ["ES2021"];
+          lib = [ "ES2021" ];
           jsx = "react";
           strict = true;
           esModuleInterop = true;
