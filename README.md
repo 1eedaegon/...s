@@ -15,15 +15,15 @@
                               │
           ┌───────────────────┼───────────────────┐
           ▼                   ▼                   ▼
-    ╔═══════════════════════════════════════════════╗
+    ╔══════════════════════════════════════════════╗
     ║           Module Loading & Composition        ║
     ╠═══════════════╦═══════════════╦══════════════╣
     ║ installations ║  executions   ║configurations║
     ╠═══════════════╬═══════════════╬══════════════╣
     ║   Packages    ║   Shell Cmds  ║   Settings   ║
-    ║   Programs    ║   Aliases     ║   Env Vars   ║
-    ║   (What)      ║   Functions   ║   Configs    ║
-    ║               ║   (How to Run)║   (How)      ║
+    ║               ║   Aliases     ║   Env Vars   ║
+    ║   Programs    ║   Functions   ║   Configs    ║
+    ║               ║               ║              ║
     ╚═══════════════╩═══════════════╩══════════════╝
 ```
 
