@@ -1,5 +1,10 @@
 # ...s(3dots)
 
+[![Nix CI](https://github.com/1eedaegon/...s/actions/workflows/nix-ci.yml/badge.svg)](https://github.com/1eedaegon/...s/actions/workflows/nix-ci.yml)
+[![NixOS](https://img.shields.io/badge/NixOS-24.05-blue.svg?logo=nixos)](https://nixos.org)
+[![Flakes](https://img.shields.io/badge/Nix-Flakes-informational.svg?logo=nixos)](https://nixos.wiki/wiki/Flakes)
+[![License](https://img.shields.io/github/license/1eedaegon/...s)](LICENSE)
+
 > Just build own dotfiles
 
 ## Module preview
