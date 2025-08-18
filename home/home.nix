@@ -33,7 +33,10 @@ in
 
     # Zsh
     zsh = homeInstalls.programs.zsh // homeConfig.zsh // {
-      shellAliases = homeExec.aliases;
+      shellAliases = homeExec.aliases // {
+        # Noglob settings for nix commands (prevents "no matches found" errors with .#flake syntax)
+        nix = "noglob nix";
+      };
       initContent = homeExec.zshConfig.initExtra;
     };
 

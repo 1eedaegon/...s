@@ -32,10 +32,11 @@ in
     else "";
 
     # System specific
+    # Note: darwin-rebuild and nixos-rebuild get noglob wrapper from common.initScript
     update = if isDarwin then
-      "darwin-rebuild switch --flake .#$(hostname)"
+      "darwin-rebuild switch --flake '.#'$(hostname)"
     else
-      "nixos-rebuild switch --flake .#$(hostname)";
+      "nixos-rebuild switch --flake '.#'$(hostname)";
 
     # Quick edits
     ezsh = "nvim ~/.zshrc";
@@ -197,22 +198,6 @@ in
         echo "use flake .#$type" > .envrc
         direnv allow
 
-        # Initialize based on type
-        case "$type" in
-          rust)
-            cargo init
-            ;;
-          go)
-            go mod init "github.com/$username/$name"
-            ;;
-          python)
-            uv init
-            ;;
-          node)
-            npm init -y
-            ;;
-        esac
-
         echo "Project $name created with $type environment!"
       }
 
@@ -268,6 +253,10 @@ in
       bind "set completion-ignore-case on"
       bind "set show-all-if-ambiguous on"
       bind "set mark-symlinked-directories on"
+
+      # Bash doesn't need noglob settings as it doesn't interpret # as glob
+      # But we can ensure history expansion is disabled for safety
+      set +H
     '';
   };
 
