@@ -226,7 +226,7 @@ rec {
     py = {
       environment = common.environment // {
         # Python specific environment variables
-        PYTHONPATH = "${PWD}:${PYTHONPATH}";
+        PYTHONPATH = "$PWD:$PYTHONPATH";
         PYTHONDONTWRITEBYTECODE = "1";
         PYTHONUNBUFFERED = "1";
         PYTHONIOENCODING = "utf-8";
