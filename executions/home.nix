@@ -50,7 +50,7 @@ in
     sysinfo = "fastfetch";
 
     # Trash management (if trash-cli is installed)
-    rm = "trash";
+    # rm = "trash";
 
     # Better defaults
     cp = "cp -iv";
