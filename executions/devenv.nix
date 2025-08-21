@@ -351,7 +351,7 @@ in
 
         # Show current directory info
         echo ""
-        echo "📁 Current directory: ${PWD}"
+        echo "📁 Current directory: $PWD"
         if [ -d ".git" ]; then
           echo "   Git branch: $(git branch --show-current)"
         fi
