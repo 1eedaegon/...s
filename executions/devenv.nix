@@ -59,8 +59,8 @@ in
         # Set Rust environment variables
         export RUST_BACKTRACE=1
         export RUST_LOG=debug
-        export CARGO_HOME="${HOME}/.cargo"
-        export PATH="${CARGO_HOME}/bin:${PATH}"
+        export CARGO_HOME="$HOME/.cargo"
+        export PATH="$CARGO_HOME/bin:$PATH"
 
         # Rust-specific functions
         cargo-new() {
@@ -118,12 +118,12 @@ in
         echo "   Go version: $(go version)"
 
         # Set Go environment variables
-        export GOPATH="${HOME}/go"
-        export GOBIN="${GOPATH}/bin"
+        export GOPATH="$HOME/go"
+        export GOBIN="$GOPATH/bin"
         export GO111MODULE=on
         export GOPROXY=https://proxy.golang.org,direct
-        export PATH="${GOBIN}:${PATH}"
-        mkdir -p "${GOPATH}" "${GOBIN}"
+        export PATH="$GOBIN:$PATH"
+        mkdir -p "$GOPATH" "$GOBIN"
 
         # Go-specific functions
         go-new() {
@@ -190,7 +190,7 @@ in
         echo "   uv version: $(uv --version)"
 
         # Set Python environment variables
-        export PYTHONPATH="${PWD}:${PYTHONPATH}"
+        export PYTHONPATH="$PWD:$PYTHONPATH"
         export PYTHONDONTWRITEBYTECODE=1
         export PYTHONUNBUFFERED=1
 
@@ -286,7 +286,7 @@ in
 
         # Set Node environment variables
         export NODE_ENV="development"
-        export PATH="./node_modules/.bin:${PATH}"
+        export PATH="./node_modules/.bin:$PATH"
 
         # Node-specific functions
         node-new() {

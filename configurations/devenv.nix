@@ -15,8 +15,6 @@ rec {
         # Rust specific environment variables
         RUST_BACKTRACE = "1";
         RUST_LOG = "debug";
-        CARGO_HOME = "$HOME/.cargo";
-        RUSTUP_HOME = "$HOME/.rustup";
         RUST_SRC_PATH = "${pkgs.rust.packages.stable.rustPlatform.rustLibSrc}";
 
         # Cargo configuration
@@ -110,7 +108,6 @@ rec {
     go = {
       environment = common.environment // {
         # Go specific environment variables
-        GOPATH = "$HOME/go";
         GOBIN = "$GOPATH/bin";
         GO111MODULE = "on";
         GOMODCACHE = "$GOPATH/pkg/mod";
@@ -229,7 +226,7 @@ rec {
     py = {
       environment = common.environment // {
         # Python specific environment variables
-        PYTHONPATH = "$PWD:$PYTHONPATH";
+        PYTHONPATH = "${PWD}:${PYTHONPATH}";
         PYTHONDONTWRITEBYTECODE = "1";
         PYTHONUNBUFFERED = "1";
         PYTHONIOENCODING = "utf-8";
@@ -238,11 +235,6 @@ rec {
 
         # Virtual environment
         VIRTUAL_ENV_DISABLE_PROMPT = "1";
-        WORKON_HOME = "$HOME/.virtualenvs";
-
-        # Jupyter
-        JUPYTER_CONFIG_DIR = "$HOME/.jupyter";
-        JUPYTER_DATA_DIR = "$HOME/.local/share/jupyter";
       };
 
       # Python tools configuration
@@ -341,18 +333,11 @@ rec {
         # Node.js specific environment variables
         NODE_ENV = "development";
         NODE_OPTIONS = "--max-old-space-size=4096";
-        NPM_CONFIG_PREFIX = "$HOME/.npm-global";
-
-        # Package managers
-        PNPM_HOME = "$HOME/.local/share/pnpm";
-        YARN_CACHE_FOLDER = "$HOME/.cache/yarn";
 
         # Build tools
         VITE_HOST = "localhost";
         NEXT_TELEMETRY_DISABLED = "1";
 
-        # PATH additions
-        PATH = "$HOME/.npm-global/bin:$HOME/.local/share/pnpm:$PATH";
       };
 
       # NPM configuration

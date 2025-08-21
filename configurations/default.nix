@@ -51,18 +51,9 @@
     FZF_CTRL_T_COMMAND = "$FZF_DEFAULT_COMMAND";
     FZF_ALT_C_COMMAND = "fd --type d --hidden --follow --exclude .git";
 
-    # Ripgrep configuration
-    RIPGREP_CONFIG_PATH = "$HOME/.config/ripgrep/config";
-
-    # History settings
     HISTCONTROL = "ignoreboth:erasedups";
     HISTIGNORE = "ls:cd:cd -:pwd:exit:date:* --help";
 
-    # XDG Base Directory
-    XDG_CONFIG_HOME = "$HOME/.config";
-    XDG_CACHE_HOME = "$HOME/.cache";
-    XDG_DATA_HOME = "$HOME/.local/share";
-    XDG_STATE_HOME = "$HOME/.local/state";
 
     # Nix settings
     NIX_SHELL_PRESERVE_PROMPT = "1";
