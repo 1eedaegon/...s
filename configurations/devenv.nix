@@ -335,14 +335,13 @@ rec {
         NODE_OPTIONS = "--max-old-space-size=4096";
 
         # Build tools
-        VITE_HOST = "localhost";
+        VITE_HOST = "0.0.0.0";
         NEXT_TELEMETRY_DISABLED = "1";
 
       };
 
       # NPM configuration
       npm = {
-        prefix = "$HOME/.npm-global";
         loglevel = "warn";
         progress = true;
         save-exact = false;

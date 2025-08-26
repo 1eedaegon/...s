@@ -104,22 +104,22 @@ in
     node = {
       packages = with pkgs; [
         # Node.js runtime
-        nodejs_20
+        nodejs_22
 
         # Package managers
-        nodePackages.pnpm
-        nodePackages.yarn
+        pnpm
+        yarn
 
         # Development tools
-        nodePackages.typescript
-        nodePackages.typescript-language-server
-        nodePackages.eslint
-        nodePackages.prettier
+        typescript
+        typescript-language-server
+        eslint
+        prettier
 
         # Build tools
-        nodePackages.vite
-        nodePackages.webpack
-        nodePackages.webpack-cli
+        vite
+        webpack
+        webpack-cli
       ];
 
       programs = {
