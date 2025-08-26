@@ -30,6 +30,7 @@
     gnumake
 
     # Development tools
+    nodejs # full stack web
     just
     act
     asciinema
@@ -50,6 +51,8 @@
 
     # Dynamic dev toolset based on rust
     mise
+    devenv
+
   ] ++ (if system == "x86_64-darwin" || system == "aarch64-darwin" then [
     # macOS-specific packages
     coreutils

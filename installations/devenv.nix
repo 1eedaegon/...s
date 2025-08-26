@@ -117,8 +117,6 @@ in
         prettier
 
         # Build tools
-        vite
-        webpack
         webpack-cli
       ];
 

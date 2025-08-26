@@ -344,8 +344,6 @@ rec {
       npm = {
         loglevel = "warn";
         progress = true;
-        save-exact = false;
-        save-prefix = "^";
         # init-author-name = "${username}";
         init-license = "MIT";
       };

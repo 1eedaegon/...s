@@ -38,7 +38,7 @@ in
   };
   # Starship prompt configuration
   starship = {
-    enableZshIntegration = true;
+    enableZshIntegration = true;  # Disable auto-integration, we'll do it manually
     enableBashIntegration = true;
     settings = {
       format = ''
@@ -190,6 +190,7 @@ in
     enableCompletion = true;
     autosuggestion.enable = true;
     syntaxHighlighting.enable = true;
+
     # Oh-My-Zsh configuration
     oh-my-zsh = {
       enable = false; # We're using our own configuration

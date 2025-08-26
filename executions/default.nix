@@ -78,7 +78,6 @@
   # Common shell initialization script
   initScript = ''
     # Set up shell prompt and tools
-
     # Initialize starship prompt if available
     if command -v starship >/dev/null 2>&1; then
       eval "$(starship init $(basename $SHELL))"

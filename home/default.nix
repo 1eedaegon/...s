@@ -21,6 +21,9 @@ in
   programs.direnv = {
     enable = true;
     nix-direnv.enable = true;
+    enableZshIntegration = true;
+    enableFishIntegration = true;
+    enableBashIntegration = true;
   };
   programs.git.enable = true;
   programs.bat.enable = true;
