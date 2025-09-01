@@ -42,6 +42,8 @@
       getHomeDirectory = system: username:
         if builtins.match ".*darwin.*" system != null then
           "/Users/${username}"
+        else if username == "root" then
+          "/root"
         else
           "/home/${username}";
 
