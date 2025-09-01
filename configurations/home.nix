@@ -18,8 +18,8 @@ in
     PATH = "$HOME/.local/bin:$HOME/.nix-profile/bin:/etc/profiles/per-user/$USER/bin:$PATH";
 
     # macOS specific
-    HOMEBREW_NO_ANALYTICS = if isDarwin then "1" else null;
-    HOMEBREW_NO_AUTO_UPDATE = if isDarwin then "1" else null;
+    HOMEBREW_NO_ANALYTICS = if isDarwin then "1" else "0";
+    HOMEBREW_NO_AUTO_UPDATE = if isDarwin then "1" else "0";
   };
   git = {
     userName = username;
@@ -38,7 +38,7 @@ in
   };
   # Starship prompt configuration
   starship = {
-    enableZshIntegration = true;  # Disable auto-integration, we'll do it manually
+    enableZshIntegration = true; # Disable auto-integration, we'll do it manually
     enableBashIntegration = true;
     settings = {
       format = ''

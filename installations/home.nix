@@ -9,7 +9,7 @@ let
 in
 {
   # Merge common packages with home-manager specific packages
-  packages = common.packages  ++ (with pkgs; [
+  packages = common.packages ++ (with pkgs; [
     eza
   ]);
 
