@@ -61,6 +61,8 @@
   ] else if system == "x86_64-linux" || system == "aarch64-linux" then [
     # Linux-specific packages
     systemd
+    net-tools
+    nmap
   ] else [ ]);
 
   # 공통 프로그램 설정 (programs.*.enable)
