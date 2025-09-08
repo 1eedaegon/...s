@@ -30,7 +30,7 @@
     gnumake
 
     # Development tools
-    nodejs_23 # full stack web
+    nodejs_24 # full stack web
     just
     act
     asciinema
