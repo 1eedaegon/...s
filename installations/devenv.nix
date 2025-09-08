@@ -104,7 +104,7 @@ in
     node = {
       packages = with pkgs; [
         # Node.js runtime
-        nodejs_22
+        nodejs_24
 
         # Package managers
         pnpm

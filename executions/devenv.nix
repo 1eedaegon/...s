@@ -286,7 +286,7 @@ in
 
         # Set Node environment variables
         export NODE_ENV="development"
-        export PATH="./node_modules/.bin:$PATH"
+        export PATH="./node_modules/.bin:\$PATH"
 
         # Node-specific functions
         node-new() {
