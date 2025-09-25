@@ -71,6 +71,7 @@
   # 공통 프로그램 설정 (programs.*.enable)
   programs = {
     # Enable these programs with default settings
+    # tailscale.enable = true; # is not exist :[
     git.enable = true;
     starship.enable = true;
     zsh.enable = true;
