@@ -121,4 +121,3 @@ Store paths:        /nix/store/ggcd2k0fxjnyfc0qvc3s9bnqdyshz7rx-default
 ❯ nix profile remove git+file:///Users/leedaegon/workspace/...s#packages.aarch64-darwin.default
 
 ```
-
