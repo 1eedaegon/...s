@@ -43,6 +43,8 @@ in
       syntaxHighlighting.enable = true;
     };
 
+
+
     # Bat configuration
     bat = {
       enable = true;
@@ -68,6 +70,11 @@ in
 
     # FastFetch configuration
     fastfetch = {
+      enable = true;
+    };
+
+    # GnuPG
+    gpg = {
       enable = true;
     };
 
