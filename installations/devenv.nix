@@ -26,9 +26,9 @@ in
         else
           rustc
         )
-	
-	# Rust installer
-	rustup
+
+       	# Rust installer
+       	rustup
 
         # Rust development tools
         pkg-config
