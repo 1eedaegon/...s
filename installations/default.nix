@@ -57,6 +57,9 @@
     # VPN
     tailscale
 
+    # Zip
+    p7zip
+
   ] ++ (if system == "x86_64-darwin" || system == "aarch64-darwin" then [
     # macOS-specific packages
     coreutils
