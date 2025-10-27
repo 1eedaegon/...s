@@ -106,10 +106,14 @@ in
         # The issue is that something (possibly direnv or Zed itself) strips content
         # between \[ and \], leaving only empty markers
         # This must be set AFTER the bash version check/exec above
+        echo "DEBUG: Checking for Zed... TERM_PROGRAM='$TERM_PROGRAM'"
         if [[ "$TERM_PROGRAM" == "zed" ]]; then
+          echo "DEBUG: Zed detected! Setting ZED_PROMPT_FIX=1"
           # For Zed, we'll use a simpler prompt without readline escapes
           # This will be set after starship init
           export ZED_PROMPT_FIX=1
+        else
+          echo "DEBUG: Not Zed terminal"
         fi
       '';
       profileExtra = ''
