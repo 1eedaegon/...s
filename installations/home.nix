@@ -65,6 +65,15 @@ in
         echo "====== BASHRC LOADING ======"
         echo "Current bash: $BASH_VERSION"
 
+        # Zed terminal workaround: Disable readline escapes for better compatibility
+        # The issue is that something (possibly direnv or Zed itself) strips content
+        # between \[ and \], leaving only empty markers
+        if [ -n "$ZED_TERM" ]; then
+          # For Zed, we'll use a simpler prompt without readline escapes
+          # This will be set after starship init
+          export ZED_PROMPT_FIX=1
+        fi
+
         # FIRST THING: Switch to bash 5.3 if we're on old bash
         if [ -n "$BASH_VERSION" ]; then
           case "$BASH_VERSION" in
@@ -142,6 +151,22 @@ in
 
         # Load common shell functions
         ${executions.functions}
+
+        # Zed terminal prompt fix
+        if [ -n "$ZED_PROMPT_FIX" ]; then
+          # Override starship_precmd to strip readline escapes for Zed
+          if type starship_precmd &>/dev/null; then
+            _original_starship_precmd="$(declare -f starship_precmd)"
+            eval "''${_original_starship_precmd/starship_precmd/_starship_precmd_original}"
+
+            starship_precmd() {
+              _starship_precmd_original
+              # Strip readline escape markers \[ and \] from PS1
+              PS1="''${PS1//\\[/}"
+              PS1="''${PS1//\\]/}"
+            }
+          fi
+        fi
       '';
     };
 
