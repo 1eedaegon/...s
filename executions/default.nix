@@ -78,42 +78,9 @@
   # Common shell initialization script
   initScript = ''
     # Set up shell prompt and tools
-    # Initialize starship prompt if available
-    if command -v starship >/dev/null 2>&1; then
-      # Detect actual running shell, not $SHELL variable
-      if [ -n "$ZSH_VERSION" ]; then
-        eval "$(starship init zsh)"
-      elif [ -n "$BASH_VERSION" ]; then
-        eval "$(starship init bash)"
-      fi
-    fi
-
-    # Initialize zoxide if available
-    if command -v zoxide >/dev/null 2>&1; then
-      # Detect actual running shell, not $SHELL variable
-      if [ -n "$ZSH_VERSION" ]; then
-        eval "$(zoxide init zsh)"
-      elif [ -n "$BASH_VERSION" ]; then
-        eval "$(zoxide init bash)"
-      fi
-    fi
-
-    # Initialize fzf if available
-    if [ -n "$ZSH_VERSION" ]; then
-      if [ -f "${pkgs.fzf}/share/fzf/key-bindings.zsh" ]; then
-        source "${pkgs.fzf}/share/fzf/key-bindings.zsh"
-      fi
-      if [ -f "${pkgs.fzf}/share/fzf/completion.zsh" ]; then
-        source "${pkgs.fzf}/share/fzf/completion.zsh"
-      fi
-    elif [ -n "$BASH_VERSION" ]; then
-      if [ -f "${pkgs.fzf}/share/fzf/key-bindings.bash" ]; then
-        source "${pkgs.fzf}/share/fzf/key-bindings.bash"
-      fi
-      if [ -f "${pkgs.fzf}/share/fzf/completion.bash" ]; then
-        source "${pkgs.fzf}/share/fzf/completion.bash"
-      fi
-    fi
+    # Note: starship, zoxide, and fzf initialization are handled by home-manager's automatic integration
+    # for bash and zsh (via enableBashIntegration/enableZshIntegration/enableFzfIntegration)
+    # This script is mainly for additional display and custom settings
 
     # Display system info
     if command -v fastfetch >/dev/null 2>&1; then
