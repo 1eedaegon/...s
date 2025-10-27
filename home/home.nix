@@ -40,6 +40,11 @@ in
       initContent = homeExec.zshConfig.initExtra;
     };
 
+    # Bash
+    bash = homeInstalls.programs.bash // {
+      shellAliases = homeExec.aliases;
+    };
+
     # Bat configuration
     bat = homeInstalls.programs.bat // homeConfig.bat;
 
