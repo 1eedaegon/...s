@@ -14,6 +14,9 @@ in
     HOME_MANAGER_CONFIG = "$HOME/.config/home-manager/home.nix";
     HOME_MANAGER_BACKUP_EXT = "backup";
 
+    # Use Nix-provided bash-interactive as default shell (includes programmable completion)
+    SHELL = "${pkgs.bashInteractive}/bin/bash";
+
     # User-specific paths
     PATH = "$HOME/.local/bin:$HOME/.nix-profile/bin:/etc/profiles/per-user/$USER/bin:$PATH";
 

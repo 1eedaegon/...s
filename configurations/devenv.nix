@@ -108,9 +108,9 @@ rec {
     go = {
       environment = common.environment // {
         # Go specific environment variables
-        GOBIN = "$GOPATH/bin";
+        # Note: GOBIN and GOMODCACHE are set in executions/devenv.nix shellHook
+        # to properly reference $GOPATH at runtime
         GO111MODULE = "on";
-        GOMODCACHE = "$GOPATH/pkg/mod";
         GOPROXY = "https://proxy.golang.org,direct";
         GOSUMDB = "sum.golang.org";
         # GOPRIVATE = "github.com/${username}/*";

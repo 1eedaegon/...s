@@ -80,12 +80,22 @@
     # Set up shell prompt and tools
     # Initialize starship prompt if available
     if command -v starship >/dev/null 2>&1; then
-      eval "$(starship init $(basename $SHELL))"
+      # Detect actual running shell, not $SHELL variable
+      if [ -n "$ZSH_VERSION" ]; then
+        eval "$(starship init zsh)"
+      elif [ -n "$BASH_VERSION" ]; then
+        eval "$(starship init bash)"
+      fi
     fi
 
     # Initialize zoxide if available
     if command -v zoxide >/dev/null 2>&1; then
-      eval "$(zoxide init $(basename $SHELL))"
+      # Detect actual running shell, not $SHELL variable
+      if [ -n "$ZSH_VERSION" ]; then
+        eval "$(zoxide init zsh)"
+      elif [ -n "$BASH_VERSION" ]; then
+        eval "$(zoxide init bash)"
+      fi
     fi
 
     # Initialize fzf if available

@@ -120,10 +120,11 @@ in
         # Set Go environment variables
         export GOPATH="$HOME/go"
         export GOBIN="$GOPATH/bin"
+        export GOMODCACHE="$GOPATH/pkg/mod"
         export GO111MODULE=on
         export GOPROXY=https://proxy.golang.org,direct
         export PATH="$GOBIN:$PATH"
-        mkdir -p "$GOPATH" "$GOBIN"
+        mkdir -p "$GOPATH" "$GOBIN" "$GOMODCACHE"
 
         # Go-specific functions
         go-new() {
