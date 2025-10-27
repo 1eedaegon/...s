@@ -86,8 +86,9 @@ in
               # Switch immediately - this prevents all the errors below
               if [ -x "$NEW_BASH" ]; then
                 export BASH_SILENCE_DEPRECATION_WARNING=1
-                # Preserve ZED_TERM through exec
-                export ZED_TERM
+                # Preserve TERM_PROGRAM through exec (for Zed detection)
+                export TERM_PROGRAM
+                export TERM_PROGRAM_VERSION
                 echo "DEBUG: About to exec... if bashrc loads again, exec worked!"
                 exec "$NEW_BASH"
                 # This line should NEVER be reached if exec succeeds
@@ -105,7 +106,7 @@ in
         # The issue is that something (possibly direnv or Zed itself) strips content
         # between \[ and \], leaving only empty markers
         # This must be set AFTER the bash version check/exec above
-        if [ -n "$ZED_TERM" ]; then
+        if [[ "$TERM_PROGRAM" == "zed" ]]; then
           # For Zed, we'll use a simpler prompt without readline escapes
           # This will be set after starship init
           export ZED_PROMPT_FIX=1
