@@ -161,19 +161,24 @@ in
         # Load common shell functions
         ${executions.functions}
 
-        # Zed terminal prompt fix
+        # Zed terminal prompt fix - must run AFTER starship init
+        # This will be called at the end of bashrc loading
         if [ -n "$ZED_PROMPT_FIX" ]; then
-          # Override starship_precmd to strip readline escapes for Zed
-          if type starship_precmd &>/dev/null; then
-            _original_starship_precmd="$(declare -f starship_precmd)"
-            eval "''${_original_starship_precmd/starship_precmd/_starship_precmd_original}"
-
-            starship_precmd() {
-              _starship_precmd_original
-              # Strip readline escape markers \[ and \] from PS1
+          # Create a function that strips readline escapes from PS1
+          _zed_fix_prompt() {
+            # This runs after starship_precmd (if it exists)
+            if [ -n "$PS1" ]; then
               PS1="''${PS1//\\[/}"
               PS1="''${PS1//\\]/}"
-            }
+            fi
+          }
+
+          # Add our fix to PROMPT_COMMAND (runs before displaying prompt)
+          # Use array format if already an array, otherwise append with semicolon
+          if [[ "$(declare -p PROMPT_COMMAND 2>&1)" == "declare -a"* ]]; then
+            PROMPT_COMMAND+=(_zed_fix_prompt)
+          else
+            PROMPT_COMMAND="_zed_fix_prompt''${PROMPT_COMMAND:+;$PROMPT_COMMAND}"
           fi
         fi
       '';
