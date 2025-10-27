@@ -61,12 +61,7 @@ in
       ];
       # bashrcExtra runs BEFORE everything else (even before interactive check)
       bashrcExtra = ''
-        # ABSOLUTE FIRST: Mark that bashrc is being loaded
-        echo "====== BASHRC LOADING ======"
-        echo "Current bash: $BASH_VERSION"
-
-        # FIRST THING: Switch to bash 5.3 if we're on old bash
-        # Note: Must do this BEFORE setting other variables since exec replaces the process
+        # Switch to bash 5.3 if we're on old bash
         if [ -n "$BASH_VERSION" ]; then
           case "$BASH_VERSION" in
             3.*|4.0.*|4.1.*)
@@ -75,45 +70,16 @@ in
                 source ~/.nix-profile/etc/profile.d/hm-session-vars.sh
               fi
 
-              # Determine which bash to use - always use hardcoded path to be sure
+              # Determine which bash to use
               NEW_BASH="/nix/store/w6y2cw4j0x2vwfg5pbcdvs5777f9g6af-bash-interactive-5.3p0/bin/bash"
 
-              # Debug: Show what we're about to do
-              echo "DEBUG: Old bash detected ($BASH_VERSION)"
-              echo "DEBUG: Switching to: $NEW_BASH"
-              echo "DEBUG: Checking if executable..."
-
-              # Switch immediately - this prevents all the errors below
+              # Switch to bash 5.3
               if [ -x "$NEW_BASH" ]; then
                 export BASH_SILENCE_DEPRECATION_WARNING=1
-                # Preserve TERM_PROGRAM through exec (for Zed detection)
-                export TERM_PROGRAM
-                export TERM_PROGRAM_VERSION
-                echo "DEBUG: About to exec... if bashrc loads again, exec worked!"
                 exec "$NEW_BASH"
-                # This line should NEVER be reached if exec succeeds
-                echo "DEBUG: FATAL - exec failed! Still here after exec"
-                exit 1
-              else
-                echo "DEBUG: ERROR - $NEW_BASH is not executable!"
-                ls -la "$NEW_BASH" 2>&1
               fi
               ;;
           esac
-        fi
-
-        # Zed terminal workaround: Disable readline escapes for better compatibility
-        # The issue is that something (possibly direnv or Zed itself) strips content
-        # between \[ and \], leaving only empty markers
-        # This must be set AFTER the bash version check/exec above
-        echo "DEBUG: Checking for Zed... TERM_PROGRAM='$TERM_PROGRAM'"
-        if [[ "$TERM_PROGRAM" == "zed" ]]; then
-          echo "DEBUG: Zed detected! Setting ZED_PROMPT_FIX=1"
-          # For Zed, we'll use a simpler prompt without readline escapes
-          # This will be set after starship init
-          export ZED_PROMPT_FIX=1
-        else
-          echo "DEBUG: Not Zed terminal"
         fi
       '';
       profileExtra = ''
@@ -160,27 +126,6 @@ in
 
         # Load common shell functions
         ${executions.functions}
-
-        # Zed terminal prompt fix - must run AFTER starship init
-        # This will be called at the end of bashrc loading
-        if [ -n "$ZED_PROMPT_FIX" ]; then
-          # Create a function that strips readline escapes from PS1
-          _zed_fix_prompt() {
-            # This runs after starship_precmd (if it exists)
-            if [ -n "$PS1" ]; then
-              PS1="''${PS1//\\[/}"
-              PS1="''${PS1//\\]/}"
-            fi
-          }
-
-          # Add our fix to PROMPT_COMMAND (runs before displaying prompt)
-          # Use array format if already an array, otherwise append with semicolon
-          if [[ "$(declare -p PROMPT_COMMAND 2>&1)" == "declare -a"* ]]; then
-            PROMPT_COMMAND+=(_zed_fix_prompt)
-          else
-            PROMPT_COMMAND="_zed_fix_prompt''${PROMPT_COMMAND:+;$PROMPT_COMMAND}"
-          fi
-        fi
       '';
     };
 
