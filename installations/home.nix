@@ -65,16 +65,8 @@ in
         echo "====== BASHRC LOADING ======"
         echo "Current bash: $BASH_VERSION"
 
-        # Zed terminal workaround: Disable readline escapes for better compatibility
-        # The issue is that something (possibly direnv or Zed itself) strips content
-        # between \[ and \], leaving only empty markers
-        if [ -n "$ZED_TERM" ]; then
-          # For Zed, we'll use a simpler prompt without readline escapes
-          # This will be set after starship init
-          export ZED_PROMPT_FIX=1
-        fi
-
         # FIRST THING: Switch to bash 5.3 if we're on old bash
+        # Note: Must do this BEFORE setting other variables since exec replaces the process
         if [ -n "$BASH_VERSION" ]; then
           case "$BASH_VERSION" in
             3.*|4.0.*|4.1.*)
@@ -94,6 +86,8 @@ in
               # Switch immediately - this prevents all the errors below
               if [ -x "$NEW_BASH" ]; then
                 export BASH_SILENCE_DEPRECATION_WARNING=1
+                # Preserve ZED_TERM through exec
+                export ZED_TERM
                 echo "DEBUG: About to exec... if bashrc loads again, exec worked!"
                 exec "$NEW_BASH"
                 # This line should NEVER be reached if exec succeeds
@@ -105,6 +99,16 @@ in
               fi
               ;;
           esac
+        fi
+
+        # Zed terminal workaround: Disable readline escapes for better compatibility
+        # The issue is that something (possibly direnv or Zed itself) strips content
+        # between \[ and \], leaving only empty markers
+        # This must be set AFTER the bash version check/exec above
+        if [ -n "$ZED_TERM" ]; then
+          # For Zed, we'll use a simpler prompt without readline escapes
+          # This will be set after starship init
+          export ZED_PROMPT_FIX=1
         fi
       '';
       profileExtra = ''
