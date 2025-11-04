@@ -56,6 +56,13 @@
 
     # VPN
     tailscale
+    
+    # Common C Modules
+    gcc
+    libgcc
+    gnumake
+    cmake
+    extra-cmake-modules
 
     # Zip
     p7zip

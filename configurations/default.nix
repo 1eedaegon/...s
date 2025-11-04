@@ -57,6 +57,7 @@
 
     # Nix settings
     NIX_SHELL_PRESERVE_PROMPT = "1";
+
   };
 
   # Git global configuration

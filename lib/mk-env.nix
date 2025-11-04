@@ -26,6 +26,9 @@ let
     pkgs.mkShell {
       inherit name;
       buildInputs = packages;
+      # With native cpp and c modules 
+      nativeBuildInputs = with pkgs; [ stdenv.cc.cc.lib ];
+      LD_LIBRARY_PATH = "$LD_LIBRARY_PATH:${pkgs.stdenv.cc.cc.lib}/lib";
 
       shellHook = ''
         ${envVarsStr}
