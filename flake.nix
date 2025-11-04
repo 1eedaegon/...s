@@ -13,9 +13,13 @@
       url = "github:oxalica/rust-overlay";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    jetpack = {
+      url = "github:anduril/jetpack-nixos";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
-  outputs = { self, nixpkgs, flake-utils, home-manager, rust-overlay, ... }:
+  outputs = { self, nixpkgs, flake-utils, home-manager, rust-overlay, jetpack, ... }:
     let
       # For PC Global profile
       userConfigurations = {
@@ -83,10 +87,14 @@
           # Generate configurations for a specific system
           mkSystemConfigs = system:
             let
-              overlays = [ (import rust-overlay) ];
+              overlays = [
+                (import rust-overlay)
+                jetpack.overlays.default
+              ];
               pkgs = import nixpkgs {
                 inherit system overlays;
                 config.allowUnfree = true;
+                config.cudaSupport = true;
               };
             in
             builtins.mapAttrs
@@ -138,10 +146,14 @@
     in
     (flake-utils.lib.eachDefaultSystem (system:
       let
-        overlays = [ (import rust-overlay) ];
+        overlays = [
+          (import rust-overlay)
+          jetpack.overlays.default
+        ];
         pkgs = import nixpkgs {
           inherit system overlays;
           config.allowUnfree = true;
+          config.cudaSupport = true;
         };
 
         moduleLoader = import ./lib/module-loader.nix { inherit pkgs system; };
@@ -198,8 +210,12 @@
                 system.stateVersion = "24.05";
                 networking.hostName = config.hostname;
                 nix.settings.experimental-features = [ "nix-command" "flakes" ];
-                nixpkgs.overlays = [ (import rust-overlay) ];
+                nixpkgs.overlays = [
+                  (import rust-overlay)
+                  jetpack.overlays.default
+                ];
                 nixpkgs.config.allowUnfree = true;
+                nixpkgs.config.cudaSupport = true;
 
                 users.users = builtins.listToAttrs (
                   map

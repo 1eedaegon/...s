@@ -2,6 +2,24 @@
 # 모든 환경에서 공통으로 사용되는 패키지 목록
 { pkgs, system }:
 
+let
+  # Jetson 디바이스 감지 (환경 변수 또는 시스템 설정으로 제어)
+  isJetson = builtins.getEnv "IS_JETSON" == "1" || builtins.pathExists "/etc/nv_tegra_release";
+
+  # CUDA 패키지 선택
+  cudaPackages = if isJetson then [
+    # Jetson용 JetPack (anduril/jetpack-nixos overlay 사용)
+    # 환경 변수 설정: export IS_JETSON=1
+    pkgs.cudaPackages.cudatoolkit  # JetPack CUDA toolkit
+    pkgs.cudaPackages.tensorrt     # TensorRT for Jetson
+  ] else [
+    # 일반 CUDA toolkit (x86_64 GPU)
+    pkgs.cudaPackages.cuda_nvcc
+    pkgs.cudaPackages.cuda_cudart
+    pkgs.cudaPackages.cudatoolkit
+  ];
+in
+
 {
   # 공통 패키지 목록
   packages = with pkgs; [
@@ -67,6 +85,8 @@
     # Zip
     p7zip
 
+    # KVM Switch
+    # barrier
   ] ++ (if system == "x86_64-darwin" || system == "aarch64-darwin" then [
     # macOS-specific packages
     coreutils
@@ -76,7 +96,8 @@
     systemd
     net-tools
     nmap
-  ] else [ ]);
+  ] ++ cudaPackages  # CUDA 패키지 추가 (Jetson or 일반 CUDA)
+  else [ ]);
 
   # 공통 프로그램 설정 (programs.*.enable)
   programs = {
