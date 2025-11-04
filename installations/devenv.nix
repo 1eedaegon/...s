@@ -96,6 +96,12 @@ in
 
         # Jupyter
         jupyter
+
+        # CUDA & MPI
+        openmpi
+        cudaPackages.cudatoolkit
+        cudaPackages.cuda_nvcc
+        cudaPackages.cuda_cudart
       ];
 
       programs = {

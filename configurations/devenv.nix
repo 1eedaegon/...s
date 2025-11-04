@@ -235,7 +235,9 @@ rec {
 
         # Virtual environment
         VIRTUAL_ENV_DISABLE_PROMPT = "1";
-
+        CUDA_PATH = "${pkgs.cudaPackages.cuda_cudart}";
+        CUDA_HOME = "${pkgs.cudaPackages.cuda_cudart}";
+        LD_LIBRARY_PATH = "${pkgs.cudaPackages.cuda_cudart}/lib:${pkgs.cudaPackages.cuda_nvcc}/lib";
       };
 
       # Python tools configuration
