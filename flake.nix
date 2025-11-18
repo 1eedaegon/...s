@@ -179,6 +179,7 @@
           go = mkEnv { name = "go"; };
           py = mkEnv { name = "py"; };
           node = mkEnv { name = "node"; };
+          java = mkEnv { name = "java"; };
 
           # Custom environments
           custom = mkEnv {
