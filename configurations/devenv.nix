@@ -437,6 +437,12 @@ rec {
         clean = "rm -rf dist node_modules .turbo .next out";
       };
     };
+    java = {
+      environment = common.environment // {
+        JAVA_HOME = "${pkgs.jdk}";
+        # PATH = "${JAVA_HOME}/bin:${PATH}";
+      };
+    }
 
     # Docker/Container development environment configuration
     docker = {

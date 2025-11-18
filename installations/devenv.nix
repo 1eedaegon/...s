@@ -134,6 +134,22 @@ in
       };
     };
 
+    # Java development environment
+    java = {
+      packages = with pkgs; [
+        # OpenJDK
+        jdk
+
+        # Build tools
+        maven
+        gradle
+      ];
+
+      programs = {
+        # Java-specific program configurations can go here
+      };
+    };
+
     # Docker/Container development environment
     docker = {
       packages = with pkgs; [
