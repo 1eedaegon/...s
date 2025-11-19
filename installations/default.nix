@@ -23,6 +23,12 @@ in
 {
   # 공통 패키지 목록
   packages = with pkgs; [
+    # pkg config
+    pkg-config
+
+    # Encoding
+    libiconv
+
     # Version Control
     git
     gh
@@ -49,9 +55,11 @@ in
 
     # Development tools
     nodejs_24 # full stack web
+    jdk # OpenJDK
     just
     act
     asciinema
+    protobuf
 
     # Fonts
     nerd-fonts.symbols-only
@@ -64,6 +72,10 @@ in
     # Editor
     neovim
 
+    # Debuggers
+    lldb
+    gdb
+
     # System utilities
     fontconfig
 
@@ -74,13 +86,14 @@ in
 
     # VPN
     tailscale
-    
+
     # Common C Modules
     gcc
     libgcc
     gnumake
     cmake
     extra-cmake-modules
+
 
     # Zip
     p7zip

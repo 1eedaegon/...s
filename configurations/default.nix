@@ -58,6 +58,7 @@
     # Nix settings
     NIX_SHELL_PRESERVE_PROMPT = "1";
 
+    JAVA_HOME = "${pkgs.jdk}";
   };
 
   # Git global configuration

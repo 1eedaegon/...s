@@ -143,6 +143,11 @@ in
         # Build tools
         maven
         gradle
+
+        # Verify systems
+        tlaplus
+        tlaps
+        # tlaplusToolbox
       ];
 
       programs = {
