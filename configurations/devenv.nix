@@ -34,6 +34,7 @@ rec {
           target-dir = "target";
           jobs = 8;
           incremental = true;
+	  rustc-wrapper = "sccache";
         };
 
         # Network settings
