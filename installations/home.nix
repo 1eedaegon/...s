@@ -48,7 +48,7 @@ in
     # Bash configuration
     bash = {
       enable = true;
-      enableCompletion = false;  # Disable to prevent early loading - we'll load it manually after bash switch
+      enableCompletion = false; # Disable to prevent early loading - we'll load it manually after bash switch
       historySize = 10000;
       historyFileSize = 100000;
       historyControl = [ "ignoredups" "ignorespace" ];

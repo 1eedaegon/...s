@@ -7,17 +7,18 @@ let
   isJetson = builtins.getEnv "IS_JETSON" == "1" || builtins.pathExists "/etc/nv_tegra_release";
 
   # CUDA 패키지 선택
-  cudaPackages = if isJetson then [
-    # Jetson용 JetPack (anduril/jetpack-nixos overlay 사용)
-    # 환경 변수 설정: export IS_JETSON=1
-    pkgs.cudaPackages.cudatoolkit  # JetPack CUDA toolkit
-    pkgs.cudaPackages.tensorrt     # TensorRT for Jetson
-  ] else [
-    # 일반 CUDA toolkit (x86_64 GPU)
-    pkgs.cudaPackages.cuda_nvcc
-    pkgs.cudaPackages.cuda_cudart
-    pkgs.cudaPackages.cudatoolkit
-  ];
+  cudaPackages =
+    if isJetson then [
+      # Jetson용 JetPack (anduril/jetpack-nixos overlay 사용)
+      # 환경 변수 설정: export IS_JETSON=1
+      pkgs.cudaPackages.cudatoolkit # JetPack CUDA toolkit
+      pkgs.cudaPackages.tensorrt # TensorRT for Jetson
+    ] else [
+      # 일반 CUDA toolkit (x86_64 GPU)
+      pkgs.cudaPackages.cuda_nvcc
+      pkgs.cudaPackages.cuda_cudart
+      pkgs.cudaPackages.cudatoolkit
+    ];
 in
 
 {

@@ -27,7 +27,7 @@ let
       inherit name;
       buildInputs = packages;
       # With native cpp and c modules 
-      nativeBuildInputs = with pkgs; [ 
+      nativeBuildInputs = with pkgs; [
         stdenv.cc.cc.lib
       ];
 
