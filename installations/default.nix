@@ -75,7 +75,6 @@ in
 
     # Debuggers
     lldb
-    gdb
 
     # System utilities
     fontconfig
@@ -105,6 +104,7 @@ in
     # macOS-specific packages
     coreutils
     asitop
+    gdb
   ] else if system == "x86_64-linux" || system == "aarch64-linux" then [
     # Linux-specific packages
     systemd
