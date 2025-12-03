@@ -94,12 +94,12 @@ in
     cmake
     extra-cmake-modules
 
-
     # Zip
     p7zip
 
-    # KVM Switch
-    # barrier
+    # AWS CLI
+    awscli2
+
   ] ++ (if system == "x86_64-darwin" || system == "aarch64-darwin" then [
     # macOS-specific packages
     coreutils
