@@ -152,7 +152,8 @@ in
     libgcc
     # Memory Profiler
     valgrind
-  ] ++ cudaPackages  # CUDA 패키지 추가 (Jetson or 일반 CUDA)
+  ]
+  # ++ cudaPackages  # CUDA 패키지 추가 (Jetson or 일반 CUDA)
   else [ ]);
 
   # 공통 프로그램 설정 (programs.*.enable)
