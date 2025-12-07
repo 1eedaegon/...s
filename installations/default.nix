@@ -53,7 +53,7 @@ in
     # Build tools
     gcc
     gnumake
-
+ 
     # Development tools
     nodejs_24 # full stack web
     jdk # OpenJDK
@@ -93,8 +93,10 @@ in
     cmake
     extra-cmake-modules
 
-    # Zip
+    # Zip and Compression
     p7zip
+    zlib
+    zstd
 
     # AWS CLI
     awscli2
@@ -109,12 +111,14 @@ in
 
     # Prover
     z3
+    spass
 
     # Proof assistant
     isabelle
 
     # Based SMT Solver
-    cvc5
+    cvc5 
+    # cvc4
     # verit
     yices
 

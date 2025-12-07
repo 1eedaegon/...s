@@ -9,29 +9,39 @@ let
   # Base environment builder
   buildEnv = { name, packages ? [ ], aliases ? { }, environment ? { }, shellHook ? "" }:
     let
+      # LD_LIBRARY_PATH 처리
+      extraLibPath = environment.LD_LIBRARY_PATH or "";
+      envWithoutLdPath = builtins.removeAttrs environment [ "LD_LIBRARY_PATH" ];
+
       # Convert aliases to shell commands
       aliasesStr = builtins.concatStringsSep "\n" (
         builtins.attrValues (
-          builtins.mapAttrs (name: value: "alias ${name}='${value}'") aliases
+          builtins.mapAttrs (n: value: "alias ${n}='${value}'") aliases
         )
       );
 
-      # Set environment variables
+      # Set environment variables (LD_LIBRARY_PATH 제외)
       envVarsStr = builtins.concatStringsSep "\n" (
         builtins.attrValues (
-          builtins.mapAttrs (name: value: "export ${name}='${toString value}'") environment
+          builtins.mapAttrs (n: value: "export ${n}='${toString value}'") envWithoutLdPath
         )
       );
+
+      # LD_LIBRARY_PATH 설정 (전달값 + 기존 시스템값)
+      ldLibPathHook = pkgs.lib.optionalString (extraLibPath != "") ''
+        export LD_LIBRARY_PATH="${extraLibPath}''${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+      '';
     in
     pkgs.mkShell {
       inherit name;
       buildInputs = packages;
-      # With native cpp and c modules 
+      # With native cpp and c modules
       nativeBuildInputs = with pkgs; [
         stdenv.cc.cc.lib
       ];
 
       shellHook = ''
+        ${ldLibPathHook}
         ${envVarsStr}
         ${aliasesStr}
         ${shellHook}
