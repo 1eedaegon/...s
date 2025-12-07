@@ -136,6 +136,8 @@ in
       exec ${pkgs.cvc5}/bin/cvc5 "$@"
     '')
 
+    # Heterogeneous Memory Usage Locator
+    pkgs.nvtopPackages.full
   ] ++ (if system == "x86_64-darwin" || system == "aarch64-darwin" then [
     # macOS-specific packages
     coreutils
