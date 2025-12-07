@@ -139,15 +139,9 @@ in
       packages = with pkgs; [
         # OpenJDK
         jdk
-
         # Build tools
         maven
         gradle
-
-        # Verify systems
-        tlaplus
-        tlaps
-        # tlaplusToolbox
       ];
 
       programs = {

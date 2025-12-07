@@ -89,7 +89,6 @@ in
 
     # Common C Modules
     gcc
-    libgcc
     gnumake
     cmake
     extra-cmake-modules
@@ -99,6 +98,26 @@ in
 
     # AWS CLI
     awscli2
+
+    # Docker CLI
+    docker
+    docker-compose
+
+    # Verify systems
+    tlaplus
+    tlaps
+
+    # Prover
+    z3
+
+    # Proof assistant
+    isabelle
+
+    # Based SMT Solver
+    cvc5
+    # verit
+    yices
+
 
   ] ++ (if system == "x86_64-darwin" || system == "aarch64-darwin" then [
     # macOS-specific packages
@@ -110,6 +129,7 @@ in
     systemd
     net-tools
     nmap
+    libgcc
   ] ++ cudaPackages  # CUDA 패키지 추가 (Jetson or 일반 CUDA)
   else [ ]);
 
