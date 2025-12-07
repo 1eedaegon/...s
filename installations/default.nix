@@ -136,13 +136,14 @@ in
       exec ${pkgs.cvc5}/bin/cvc5 "$@"
     '')
 
-    # Heterogeneous Memory Usage Locator
-    pkgs.nvtopPackages.full
   ] ++ (if system == "x86_64-darwin" || system == "aarch64-darwin" then [
     # macOS-specific packages
     coreutils
     asitop
     gdb
+
+    # Heterogeneous Memory Usage Locator
+    pkgs.nvtopPackages.full
   ] else if system == "x86_64-linux" || system == "aarch64-linux" then [
     # Linux-specific packages
     systemd
