@@ -5,6 +5,11 @@
 {
   # Common environment variables
   environment = {
+    # Compiler settings (use nix wrapped compiler)
+    # Use gcc for better compatibility with older C++ code
+    CC = "gcc";
+    CXX = "g++";
+
     # Editor settings
     EDITOR = "vim";
     VISUAL = "vim";

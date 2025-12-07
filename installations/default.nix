@@ -26,9 +26,14 @@ in
   packages = with pkgs; [
     # pkg config
     pkg-config
+    openssl.dev
 
     # Encoding
+    libxml2
+    libxslt
     libiconv
+    libffi
+
 
     # Version Control
     git
@@ -53,7 +58,7 @@ in
     # Build tools
     gcc
     gnumake
- 
+
     # Development tools
     nodejs_24 # full stack web
     jdk # OpenJDK
@@ -96,6 +101,7 @@ in
     # Zip and Compression
     p7zip
     zlib
+    zlib.dev
     zstd
 
     # AWS CLI
@@ -117,11 +123,10 @@ in
     isabelle
 
     # Based SMT Solver
-    cvc5 
+    cvc5
     # cvc4
     # verit
     yices
-
 
   ] ++ (if system == "x86_64-darwin" || system == "aarch64-darwin" then [
     # macOS-specific packages

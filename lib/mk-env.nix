@@ -35,9 +35,12 @@ let
     pkgs.mkShell {
       inherit name;
       buildInputs = packages;
-      # With native cpp and c modules
+      # Native build inputs
       nativeBuildInputs = with pkgs; [
+        pkg-config
         stdenv.cc.cc.lib
+        # C/C++ zlib libraries (dev packages for headers)
+        zlib.dev
       ];
 
       shellHook = ''
