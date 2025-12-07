@@ -66,6 +66,7 @@
     c = "clear";
     h = "history";
     e = "exit";
+
     reload = "source ~/.zshrc";
 
     # Directory navigation

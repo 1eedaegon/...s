@@ -124,9 +124,16 @@ in
 
     # Based SMT Solver
     cvc5
-    # cvc4
-    # verit
+    veriT
     yices
+
+    # TLAPM compatibility wrappers (isabelle-process, cvc4)
+    (pkgs.writeShellScriptBin "isabelle-process" ''
+      exec ${pkgs.isabelle}/bin/isabelle process "$@"
+    '')
+    (pkgs.writeShellScriptBin "cvc4" ''
+      exec ${pkgs.cvc5}/bin/cvc5 "$@"
+    '')
 
   ] ++ (if system == "x86_64-darwin" || system == "aarch64-darwin" then [
     # macOS-specific packages
