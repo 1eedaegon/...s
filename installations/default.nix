@@ -18,6 +18,7 @@ let
       pkgs.cudaPackages.cuda_nvcc
       pkgs.cudaPackages.cuda_cudart
       pkgs.cudaPackages.cudatoolkit
+      pkgsnvtopPackages.nvidia
     ];
 in
 
@@ -140,12 +141,16 @@ in
     coreutils
     asitop
     gdb
+    # Memory Profiler(MacOS)
+    leaks
   ] else if system == "x86_64-linux" || system == "aarch64-linux" then [
     # Linux-specific packages
     systemd
     net-tools
     nmap
     libgcc
+    # Memory Profiler
+    valgrind
   ] ++ cudaPackages  # CUDA 패키지 추가 (Jetson or 일반 CUDA)
   else [ ]);
 
