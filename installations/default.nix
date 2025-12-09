@@ -57,7 +57,6 @@ in
     yq # YAML processor
 
     # Build tools
-    gcc
     gnumake
 
     # Development tools
@@ -94,7 +93,8 @@ in
     tailscale
 
     # Common C Modules
-    gcc
+    # Note: Don't add standalone gcc on macOS - use stdenv.cc instead
+    # gcc breaks SDK sysroot detection for cargo/cc-rs builds
     gnumake
     cmake
     extra-cmake-modules
