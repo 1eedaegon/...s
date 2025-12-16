@@ -20,9 +20,11 @@ in
     # Git configuration
     git = {
       enable = true;
-      userName = username;
-      userEmail = email;
-      extraConfig = {
+      settings = {
+        user = {
+          name = username;
+          email = email;
+        };
         init.defaultBranch = "main";
         pull.rebase = true;
         push.autoSetupRemote = true;

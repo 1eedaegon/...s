@@ -21,28 +21,6 @@
 
   outputs = { self, nixpkgs, flake-utils, home-manager, rust-overlay, jetpack, ... }:
     let
-      # For PC Global profile
-      userConfigurations = {
-        "default" = {
-          name = "leedaegon"; # For system user
-          username = "1eedaegon"; # For service user
-          email = "d8726243@gmail.com";
-          module = ./home/home.nix;
-        };
-        "1eedaegon" = {
-          name = "leedaegon"; # For system user
-          username = "1eedaegon"; # For service user
-          email = "d8726243@gmail.com";
-          module = ./home/home.nix;
-        };
-        "root" = {
-          # Hmm..... is useful?
-          name = "root";
-          username = "root";
-          email = "root@localhost";
-          module = ./home/home.nix;
-        };
-      };
       getHomeDirectory = system: username:
         if builtins.match ".*darwin.*" system != null then
           "/Users/${username}"
@@ -74,81 +52,18 @@
           };
         };
 
-      mkAllHomeConfigurations =
-        let
-          # Platform suffix mapping
-          platformSuffixes = {
-            "x86_64-linux" = "linux";
-            "aarch64-linux" = "aarch64-linux";
-            "x86_64-darwin" = "darwin";
-            "aarch64-darwin" = "aarch64-darwin";
-          };
-
-          # Generate configurations for a specific system
-          mkSystemConfigs = system:
-            let
-              overlays = [
-                (import rust-overlay)
-                jetpack.overlays.default
-              ];
-              pkgs = import nixpkgs {
-                inherit system overlays;
-                config.allowUnfree = true;
-                config.cudaSupport = true;
-              };
-            in
-            builtins.mapAttrs
-              (name: config:
-                home-manager.lib.homeManagerConfiguration {
-                  inherit pkgs;
-                  extraSpecialArgs = {
-                    systemUsername = config.name;
-                    username = config.username;
-                    email = config.email;
-                    inherit system;
-                  };
-                  modules = [
-                    config.module
-                    {
-                      home.username = config.name;
-                      home.homeDirectory = getHomeDirectory system config.name;
-                      home.stateVersion = "24.05";
-                      programs.home-manager.enable = true;
-                    }
-                  ];
-                }
-              )
-              userConfigurations;
-
-          # Generate all user.platform combinations
-          allConfigs = builtins.foldl'
-            (acc: system:
-              let
-                suffix = platformSuffixes.${system};
-                systemConfigs = mkSystemConfigs system;
-
-                # Create user.platform entries
-                namedConfigs = builtins.listToAttrs (
-                  map
-                    (userName: {
-                      name = "${userName}.${suffix}";
-                      value = systemConfigs.${userName};
-                    })
-                    (builtins.attrNames systemConfigs)
-                );
-              in
-              acc // namedConfigs
-            )
-            { }
-            (builtins.attrNames platformSuffixes);
-        in
-        allConfigs;
     in
     (flake-utils.lib.eachDefaultSystem (system:
       let
         overlays = [
           (import rust-overlay)
           jetpack.overlays.default
+          (final: prev: {
+            nix = prev.nix.overrideAttrs (old: {
+              doCheck = false;
+              doInstallCheck = false;
+            });
+          })
         ];
         pkgs = import nixpkgs {
           inherit system overlays;
@@ -191,12 +106,77 @@
           };
         };
 
+        # nix run . 으로 home-manager switch 실행
+        apps.default = {
+          type = "app";
+          program = "${pkgs.writeShellScript "hm-switch" ''
+            ${home-manager.packages.${system}.home-manager}/bin/home-manager switch --flake ${self}#default --impure -b backup "$@"
+          ''}";
+        };
+
         # Export modules for debugging/testing
         inherit modules;
       }
     )) //
     {
-      homeConfigurations = mkAllHomeConfigurations;
+      homeConfigurations = {
+        default = let
+          # 런타임 감지 (--impure 필요)
+          currentUser = builtins.getEnv "USER";
+          currentSystem = builtins.currentSystem;
+
+          # 환경변수에서 email 가져오기
+          envEmail = builtins.getEnv "EMAIL";
+
+          # 기본값 처리
+          user = if currentUser == "" then "nobody" else currentUser;
+
+          # 서비스 유저명 및 이메일 매핑
+          serviceUsername = if user == "leedaegon" then "1eedaegon" else user;
+          email =
+            if envEmail != "" then envEmail
+            else if user == "leedaegon" || user == "1eedaegon" then "d8726243@gmail.com"
+            else "test@localhost";
+
+          # 현재 호스트 시스템 사용
+          system = currentSystem;
+
+          overlays = [
+            (import rust-overlay)
+            jetpack.overlays.default
+            (final: prev: {
+              nix = prev.nix.overrideAttrs (old: {
+                doCheck = false;
+                doInstallCheck = false;
+              });
+            })
+          ];
+          # CUDA는 Linux에서만 지원
+          isCudaSupported = builtins.match ".*linux.*" system != null;
+
+          pkgs = import nixpkgs {
+            inherit system overlays;
+            config.allowUnfree = true;
+            config.cudaSupport = isCudaSupported;
+          };
+        in home-manager.lib.homeManagerConfiguration {
+          inherit pkgs;
+          extraSpecialArgs = {
+            systemUsername = user;
+            username = serviceUsername;
+            inherit email system;
+          };
+          modules = [
+            ./home/home.nix
+            {
+              home.username = user;
+              home.homeDirectory = getHomeDirectory system user;
+              home.stateVersion = "24.05";
+              programs.home-manager.enable = true;
+            }
+          ];
+        };
+      };
       # nixosConfigurations (기존 유지)
       nixosConfigurations = builtins.mapAttrs
         (hostName: config:

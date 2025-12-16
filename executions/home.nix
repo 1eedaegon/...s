@@ -10,13 +10,13 @@ in
 {
   # Merge common aliases with home-manager specific ones
   aliases = common.aliases // {
-    # Home-manager specific aliases
-    hm = "home-manager";
-    hms = "home-manager switch";
-    hmb = "home-manager build";
-    hmn = "home-manager news";
-    hme = "home-manager edit";
-    hmg = "home-manager generations";
+    # Home-manager specific aliases (nix run 사용 - home-manager가 시스템에 없으므로)
+    hm = "nix run home-manager --";
+    hms = "nix run home-manager -- switch --flake . --impure -b backup";
+    hmb = "nix run home-manager -- build --flake . --impure";
+    hmn = "nix run home-manager -- news";
+    hme = "nix run home-manager -- edit";
+    hmg = "nix run home-manager -- generations";
 
     # Editor shortcuts
     v = "nvim";
@@ -25,12 +25,6 @@ in
 
     # Zed editor (if on macOS)
     zhere = if isDarwin then "zed ." else "code .";
-
-    # iTerm restart (macOS only)
-    iterm-restart =
-      if isDarwin then
-        "osascript -e 'quit app \"iTerm\"' && sleep 2 && open -a iTerm"
-      else "";
 
     # System specific
     # Note: darwin-rebuild and nixos-rebuild get noglob wrapper from common.initScript

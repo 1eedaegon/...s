@@ -25,14 +25,15 @@ in
     HOMEBREW_NO_AUTO_UPDATE = if isDarwin then "1" else "0";
   };
   git = {
-    userName = username;
-    userEmail = email;
-    extraConfig = {
+    settings = {
+      user = {
+        name = username;
+        email = email;
+      };
       init.defaultBranch = "main";
       pull.rebase = true;
       push.autoSetupRemote = true;
       core = {
-        editor = "vim";
         whitespace = "fix,-indent-with-non-tab,trailing-space,cr-at-eol";
         pager = "less -FRX --RAW-CONTROL-CHARS";
         autocrlf = "input";
@@ -324,54 +325,6 @@ in
     selection = {
       semantic_escape_chars = ",│`|:\"' ()[]{}<>\t";
       save_to_clipboard = true;
-    };
-  };
-
-  # iTerm2 configuration (macOS)
-  iterm2 = lib.optionalAttrs isDarwin {
-    profile = "Snazzy";
-
-    settings = {
-      # Font
-      "Normal Font" = "MesloLGS-NF-Regular 13";
-      "Non Ascii Font" = "MesloLGS-NF-Regular 13";
-      "Use Non-ASCII Font" = true;
-      "Vertical Spacing" = 1.1;
-      "Use Bold Font" = true;
-      "ASCII Ligatures" = true;
-      "Non-ASCII Ligatures" = true;
-
-      # Window
-      "Window Type" = 12; # No title bar
-      "Transparency" = 0.02;
-      "Blur" = false;
-      "Blur Radius" = 30;
-
-      # Terminal
-      "Scrollback Lines" = 10000;
-      "Unlimited Scrollback" = false;
-      "Close Sessions On End" = true;
-      "Prompt Before Closing 2" = 0;
-
-      # Behavior
-      "Option Key Sends" = 2; # Meta
-      "Right Option Key Sends" = 2;
-      "Application Keypad Allowed" = true;
-      "Send Code When Idle" = false;
-      "Silence Bell" = true;
-      "Visual Bell" = false;
-      "Flashing Bell" = false;
-
-      # Session
-      "Custom Command" = "No";
-      "Initial Text" = "";
-      "Working Directory" = "/Users/${username}";
-
-      # Keys
-      "Hotkey" = true;
-      "HotkeyChar" = 32; # Space
-      "HotkeyCode" = 49;
-      "HotkeyModifiers" = 524288; # Cmd
     };
   };
 

@@ -139,7 +139,7 @@ in
   ] ++ (if system == "x86_64-darwin" || system == "aarch64-darwin" then [
     # macOS-specific packages
     coreutils
-    asitop
+    macpm
     gdb
 
     # Heterogeneous Memory Usage Locator
