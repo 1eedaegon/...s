@@ -53,8 +53,8 @@ in
         ${common.preserveEnvHook}
 
         echo "🦀 Rust development environment activated"
-        echo "   Rust version: $(rustc --version)"
-        echo "   Cargo version: $(cargo --version)"
+        echo "   Rust version: $(rustc --version 2>/dev/null || echo 'N/A')"
+        echo "   Cargo version: $(cargo --version 2>/dev/null || echo 'N/A')"
 
         # Set Rust environment variables
         export RUST_BACKTRACE=1

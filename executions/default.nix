@@ -83,8 +83,8 @@
     # for bash and zsh (via enableBashIntegration/enableZshIntegration/enableFzfIntegration)
     # This script is mainly for additional display and custom settings
 
-    # Display system info
-    if command -v fastfetch >/dev/null 2>&1; then
+    # Display system info (skip in nix develop to avoid library conflicts)
+    if [ -z "$IN_NIX_SHELL" ] && command -v fastfetch >/dev/null 2>&1; then
       fastfetch --logo-color-1 magenta --logo-color-2 cyan
     fi
 
@@ -152,11 +152,14 @@
   # Shell hook for preserving environment
   preserveEnvHook = ''
     # Preserve home-manager environment when entering devshell
+    # Note: Only source session vars, don't modify PATH to avoid library conflicts
+    # Nix devShell already sets up the correct PATH with proper library paths
     if [ -f "$HOME/.nix-profile/etc/profile.d/hm-session-vars.sh" ]; then
+      # Source but preserve current PATH
+      _SAVED_PATH="$PATH"
       source "$HOME/.nix-profile/etc/profile.d/hm-session-vars.sh"
+      export PATH="$_SAVED_PATH"
+      unset _SAVED_PATH
     fi
-
-    # Preserve existing PATH
-    export PATH="$HOME/.nix-profile/bin:/etc/profiles/per-user/$USER/bin:$PATH"
   '';
 }
