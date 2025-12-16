@@ -9,14 +9,6 @@ let
   # Platform detection
   isLinux = system == "x86_64-linux" || system == "aarch64-linux";
 
-  # NVIDIA library paths (dynamically detected at shell init)
-  nvidiaPaths = [
-    "/usr/lib/x86_64-linux-gnu" # Ubuntu/Debian
-    "/usr/lib64" # RHEL/Fedora
-    "/usr/lib/nvidia" # Some distros
-    "/opt/cuda/lib64" # Manual CUDA install
-  ];
-
   # Base environment builder
   buildEnv = { name, packages ? [ ], aliases ? { }, environment ? { }, shellHook ? "" }:
     let
@@ -38,48 +30,13 @@ let
         )
       );
 
-      # LD_LIBRARY_PATH: Default + NVIDIA + ...
+      # LD_LIBRARY_PATH: Preserve system paths only
+      # Note: Dynamic NVIDIA detection removed to avoid library conflicts
+      # NVIDIA paths should be set by the system/driver, not by nix shell
       ldLibPathHook = ''
-        # Preserve existing system LD_LIBRARY_PATH
-        _SYSTEM_LD_LIBRARY_PATH="''${LD_LIBRARY_PATH:-}"
-
-        # Dynamic NVIDIA library detection (Linux only)
-        _NVIDIA_LD_PATH=""
-        ${pkgs.lib.optionalString isLinux ''
-          # Check for NVIDIA driver
-          if command -v nvidia-smi &>/dev/null || [ -d /proc/driver/nvidia ]; then
-            for _nv_path in ${builtins.concatStringsSep " " nvidiaPaths}; do
-              if [ -d "$_nv_path" ] && ls "$_nv_path"/libcuda* &>/dev/null 2>&1; then
-                _NVIDIA_LD_PATH="$_nv_path''${_NVIDIA_LD_PATH:+:$_NVIDIA_LD_PATH}"
-              fi
-            done
-            # Also check ldconfig cache for nvidia libs
-            if command -v ldconfig &>/dev/null; then
-              _nv_from_ldconfig="$(ldconfig -p 2>/dev/null | grep -oP '/[^\s]+(?=/libcuda\.so)' | head -1)"
-              if [ -n "$_nv_from_ldconfig" ] && [ -d "$_nv_from_ldconfig" ]; then
-                case ":$_NVIDIA_LD_PATH:" in
-                  *":$_nv_from_ldconfig:"*) ;;
-                  *) _NVIDIA_LD_PATH="$_nv_from_ldconfig''${_NVIDIA_LD_PATH:+:$_NVIDIA_LD_PATH}" ;;
-                esac
-              fi
-            fi
-          fi
-        ''}
-
-        # Build final LD_LIBRARY_PATH: extra + nvidia + system
-        _FINAL_LD_PATH=""
-        ${pkgs.lib.optionalString (extraLibPath != "") ''
-          _FINAL_LD_PATH="${extraLibPath}"
-        ''}
-        if [ -n "$_NVIDIA_LD_PATH" ]; then
-          _FINAL_LD_PATH="''${_FINAL_LD_PATH:+$_FINAL_LD_PATH:}$_NVIDIA_LD_PATH"
-        fi
-        if [ -n "$_SYSTEM_LD_LIBRARY_PATH" ]; then
-          _FINAL_LD_PATH="''${_FINAL_LD_PATH:+$_FINAL_LD_PATH:}$_SYSTEM_LD_LIBRARY_PATH"
-        fi
-
-        export LD_LIBRARY_PATH="$_FINAL_LD_PATH"
-        unset _SYSTEM_LD_LIBRARY_PATH _NVIDIA_LD_PATH _FINAL_LD_PATH _nv_path _nv_from_ldconfig
+        # Just preserve existing system LD_LIBRARY_PATH, don't run external commands
+        # Running ls/grep/etc here can cause glibc conflicts on some systems
+        :
       '';
     in
     pkgs.mkShell {
