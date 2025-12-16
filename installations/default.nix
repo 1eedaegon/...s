@@ -86,7 +86,7 @@ in
 
     # Dynamic dev toolset
     mise
-    devenv
+    # devenv  # Disabled: nix-util build fails on aarch64-darwin, install separately with: nix profile install nixpkgs#devenv
     devcontainer
 
     # VPN
