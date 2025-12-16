@@ -11,10 +11,10 @@ let
 
   # NVIDIA library paths (dynamically detected at shell init)
   nvidiaPaths = [
-    "/usr/lib/x86_64-linux-gnu"      # Ubuntu/Debian
-    "/usr/lib64"                      # RHEL/Fedora
-    "/usr/lib/nvidia"                 # Some distros
-    "/opt/cuda/lib64"                 # Manual CUDA install
+    "/usr/lib/x86_64-linux-gnu" # Ubuntu/Debian
+    "/usr/lib64" # RHEL/Fedora
+    "/usr/lib/nvidia" # Some distros
+    "/opt/cuda/lib64" # Manual CUDA install
   ];
 
   # Base environment builder

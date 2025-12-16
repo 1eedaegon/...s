@@ -120,62 +120,64 @@
     )) //
     {
       homeConfigurations = {
-        default = let
-          # 런타임 감지 (--impure 필요)
-          currentUser = builtins.getEnv "USER";
-          currentSystem = builtins.currentSystem;
+        default =
+          let
+            # 런타임 감지 (--impure 필요)
+            currentUser = builtins.getEnv "USER";
+            currentSystem = builtins.currentSystem;
 
-          # 환경변수에서 email 가져오기
-          envEmail = builtins.getEnv "EMAIL";
+            # 환경변수에서 email 가져오기
+            envEmail = builtins.getEnv "EMAIL";
 
-          # 기본값 처리
-          user = if currentUser == "" then "nobody" else currentUser;
+            # 기본값 처리
+            user = if currentUser == "" then "nobody" else currentUser;
 
-          # 서비스 유저명 및 이메일 매핑
-          serviceUsername = if user == "leedaegon" then "1eedaegon" else user;
-          email =
-            if envEmail != "" then envEmail
-            else if user == "leedaegon" || user == "1eedaegon" then "d8726243@gmail.com"
-            else "test@localhost";
+            # 서비스 유저명 및 이메일 매핑
+            serviceUsername = if user == "leedaegon" then "1eedaegon" else user;
+            email =
+              if envEmail != "" then envEmail
+              else if user == "leedaegon" || user == "1eedaegon" then "d8726243@gmail.com"
+              else "test@localhost";
 
-          # 현재 호스트 시스템 사용
-          system = currentSystem;
+            # 현재 호스트 시스템 사용
+            system = currentSystem;
 
-          overlays = [
-            (import rust-overlay)
-            jetpack.overlays.default
-            (final: prev: {
-              nix = prev.nix.overrideAttrs (old: {
-                doCheck = false;
-                doInstallCheck = false;
-              });
-            })
-          ];
-          # CUDA는 Linux에서만 지원
-          isCudaSupported = builtins.match ".*linux.*" system != null;
+            overlays = [
+              (import rust-overlay)
+              jetpack.overlays.default
+              (final: prev: {
+                nix = prev.nix.overrideAttrs (old: {
+                  doCheck = false;
+                  doInstallCheck = false;
+                });
+              })
+            ];
+            # CUDA는 Linux에서만 지원
+            isCudaSupported = builtins.match ".*linux.*" system != null;
 
-          pkgs = import nixpkgs {
-            inherit system overlays;
-            config.allowUnfree = true;
-            config.cudaSupport = isCudaSupported;
+            pkgs = import nixpkgs {
+              inherit system overlays;
+              config.allowUnfree = true;
+              config.cudaSupport = isCudaSupported;
+            };
+          in
+          home-manager.lib.homeManagerConfiguration {
+            inherit pkgs;
+            extraSpecialArgs = {
+              systemUsername = user;
+              username = serviceUsername;
+              inherit email system;
+            };
+            modules = [
+              ./home/home.nix
+              {
+                home.username = user;
+                home.homeDirectory = getHomeDirectory system user;
+                home.stateVersion = "24.05";
+                programs.home-manager.enable = true;
+              }
+            ];
           };
-        in home-manager.lib.homeManagerConfiguration {
-          inherit pkgs;
-          extraSpecialArgs = {
-            systemUsername = user;
-            username = serviceUsername;
-            inherit email system;
-          };
-          modules = [
-            ./home/home.nix
-            {
-              home.username = user;
-              home.homeDirectory = getHomeDirectory system user;
-              home.stateVersion = "24.05";
-              programs.home-manager.enable = true;
-            }
-          ];
-        };
       };
       # nixosConfigurations (기존 유지)
       nixosConfigurations = builtins.mapAttrs
