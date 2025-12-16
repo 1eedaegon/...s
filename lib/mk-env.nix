@@ -88,7 +88,8 @@ let
       # Native build inputs
       nativeBuildInputs = with pkgs; [
         pkg-config
-        stdenv.cc.cc.lib
+        # Note: stdenv.cc.cc.lib removed - it causes glibc conflicts on Linux
+        # ("__vdso_gettimeofday: invalid mode for dlopen()" errors)
         # C/C++ zlib libraries (dev packages for headers)
         zlib.dev
       ];
