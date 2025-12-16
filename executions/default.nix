@@ -151,15 +151,9 @@
 
   # Shell hook for preserving environment
   preserveEnvHook = ''
-    # Preserve home-manager environment when entering devshell
-    # Note: Only source session vars, don't modify PATH to avoid library conflicts
-    # Nix devShell already sets up the correct PATH with proper library paths
-    if [ -f "$HOME/.nix-profile/etc/profile.d/hm-session-vars.sh" ]; then
-      # Source but preserve current PATH
-      _SAVED_PATH="$PATH"
-      source "$HOME/.nix-profile/etc/profile.d/hm-session-vars.sh"
-      export PATH="$_SAVED_PATH"
-      unset _SAVED_PATH
-    fi
+    # Note: Do NOT source hm-session-vars.sh in nix develop
+    # It can cause library conflicts between Nix and system binaries
+    # The devShell already provides all necessary environment setup
+    :
   '';
 }
