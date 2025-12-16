@@ -55,6 +55,9 @@
     in
     (flake-utils.lib.eachDefaultSystem (system:
       let
+        # CUDA only supported on Linux
+        isLinux = system == "x86_64-linux" || system == "aarch64-linux";
+
         overlays = [
           (import rust-overlay)
           jetpack.overlays.default
@@ -68,7 +71,7 @@
         pkgs = import nixpkgs {
           inherit system overlays;
           config.allowUnfree = true;
-          config.cudaSupport = true;
+          config.cudaSupport = isLinux;
         };
 
         moduleLoader = import ./lib/module-loader.nix { inherit pkgs system; };

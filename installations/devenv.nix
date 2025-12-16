@@ -5,6 +5,9 @@
 let
   # Import rust-overlay if needed
   rust-bin = pkgs.rust-bin or null;
+
+  # Platform detection - CUDA only available on Linux
+  isLinux = system == "x86_64-linux" || system == "aarch64-linux";
 in
 {
   # Development environment specific packages
@@ -97,12 +100,14 @@ in
         # Jupyter
         jupyter
 
-        # CUDA & MPI
+        # MPI
         openmpi
+      ] ++ (if isLinux then [
+        # CUDA (Linux only)
         cudaPackages.cudatoolkit
         cudaPackages.cuda_nvcc
         cudaPackages.cuda_cudart
-      ];
+      ] else []);
 
       programs = {
         # Python-specific program configurations can go here
