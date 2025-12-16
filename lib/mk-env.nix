@@ -30,13 +30,17 @@ let
         )
       );
 
-      # LD_LIBRARY_PATH: Preserve system paths only
-      # Note: Dynamic NVIDIA detection removed to avoid library conflicts
-      # NVIDIA paths should be set by the system/driver, not by nix shell
+      # LD_LIBRARY_PATH: Add Nix library paths for runtime linking
+      # Note: Dynamic NVIDIA detection removed to avoid glibc conflicts
       ldLibPathHook = ''
-        # Just preserve existing system LD_LIBRARY_PATH, don't run external commands
-        # Running ls/grep/etc here can cause glibc conflicts on some systems
-        :
+        # Add Nix library paths for OpenSSL and other dependencies
+        # This allows binaries built in nix develop to find their libraries at runtime
+        _NIX_LIB_PATH="${pkgs.lib.makeLibraryPath [
+          pkgs.openssl
+          pkgs.zlib
+        ]}"
+        export LD_LIBRARY_PATH="''${_NIX_LIB_PATH}''${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+        unset _NIX_LIB_PATH
       '';
     in
     pkgs.mkShell {
