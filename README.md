@@ -67,7 +67,7 @@ language specific(e.g rust)
 
 ## Global Settings using home-manager
 
-`> nix run github:1eedaegon/...s`
+`> nix run github:1eedaegon/...s --impure`
 
 
 ## Uninstall
