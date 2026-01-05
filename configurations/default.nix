@@ -62,6 +62,7 @@
 
     # Nix settings
     NIX_SHELL_PRESERVE_PROMPT = "1";
+    ENABLE_BACKGROUND_TASKS = "1";
 
     JAVA_HOME = "${pkgs.jdk}";
   };
