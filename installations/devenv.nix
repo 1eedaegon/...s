@@ -97,17 +97,16 @@ in
         mypy
         poetry
 
-        # Jupyter
-        jupyter
+        # Marimo (reactive notebook)
+        marimo
+
+        # CLI tools for research
+        gh       # GitHub CLI
+        kaggle   # Kaggle CLI
 
         # MPI
         openmpi
-      ] ++ (if isLinux then [
-        # CUDA (Linux only)
-        cudaPackages.cudatoolkit
-        cudaPackages.cuda_nvcc
-        cudaPackages.cuda_cudart
-      ] else []);
+      ];
 
       programs = {
         # Python-specific program configurations can go here

@@ -166,9 +166,10 @@ in
         ptv = "pytest -v";
         ptc = "pytest --cov";
 
-        # Jupyter
-        jn = "jupyter notebook";
-        jl = "jupyter lab";
+        # Marimo
+        me = "marimo edit";    # 편집 모드
+        mr = "marimo run";     # 앱 실행
+        mn = "marimo new";     # 새 노트북
 
         # Package management
         pipi = "uv pip install";

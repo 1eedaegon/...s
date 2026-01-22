@@ -30,17 +30,31 @@ let
         )
       );
 
-      # LD_LIBRARY_PATH: Add Nix library paths for runtime linking
-      # Note: Dynamic NVIDIA detection removed to avoid glibc conflicts
+      # LD_LIBRARY_PATH: Nix packages + system CUDA paths
       ldLibPathHook = ''
-        # Add Nix library paths for OpenSSL and other dependencies
-        # This allows binaries built in nix develop to find their libraries at runtime
-        _NIX_LIB_PATH="${pkgs.lib.makeLibraryPath [
-          pkgs.openssl
-          pkgs.zlib
-        ]}"
-        export LD_LIBRARY_PATH="''${_NIX_LIB_PATH}''${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
-        unset _NIX_LIB_PATH
+        # 1. Nix 패키지에서 지정한 LD_LIBRARY_PATH 추가
+        ${if extraLibPath != "" then ''
+          export LD_LIBRARY_PATH="${extraLibPath}''${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+        '' else ""}
+
+        # 2. Linux에서 시스템 CUDA 경로 자동 감지
+        if [[ "$(uname)" == "Linux" ]]; then
+          # Jetson (JetPack) or standard CUDA installation
+          if [[ -d "/usr/local/cuda/lib64" ]]; then
+            export LD_LIBRARY_PATH="/usr/local/cuda/lib64''${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+            export CUDA_HOME="/usr/local/cuda"
+            export CUDA_PATH="/usr/local/cuda"
+          fi
+
+          # NVIDIA GPU driver libraries
+          if [[ -e "/dev/nvidia0" ]]; then
+            for p in /usr/lib/x86_64-linux-gnu /usr/lib64 /usr/lib/aarch64-linux-gnu; do
+              if [[ -d "$p/nvidia" ]]; then
+                export LD_LIBRARY_PATH="$p/nvidia''${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+              fi
+            done
+          fi
+        fi
       '';
     in
     pkgs.mkShell {
