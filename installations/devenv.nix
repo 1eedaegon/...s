@@ -101,8 +101,8 @@ in
         marimo
 
         # CLI tools for research
-        gh       # GitHub CLI
-        kaggle   # Kaggle CLI
+        gh # GitHub CLI
+        kaggle # Kaggle CLI
 
         # MPI
         openmpi
