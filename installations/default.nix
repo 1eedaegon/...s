@@ -86,7 +86,6 @@ in
 
     # Dynamic dev toolset
     mise
-    # devenv  # Disabled: nix-util build fails on aarch64-darwin, install separately with: nix profile install nixpkgs#devenv
     devcontainer
 
     # VPN
@@ -136,25 +135,37 @@ in
       exec ${pkgs.cvc5}/bin/cvc5 "$@"
     '')
 
-  ] ++ (if system == "x86_64-darwin" || system == "aarch64-darwin" then [
-    # macOS-specific packages
+  ] ++ (if system == "x86_64-darwin" then [
+    # x86_64-darwin specific packages
     coreutils
     macpm
     gdb
-
-    # Heterogeneous Memory Usage Locator
     pkgs.nvtopPackages.full
-  ] else if system == "x86_64-linux" || system == "aarch64-linux" then [
-    # Linux-specific packages
+    # devenv: x86_64-darwin에서 nix-util 빌드 실패, 별도 설치 필요: nix profile install nixpkgs#devenv
+  ] else if system == "aarch64-darwin" then [
+    # aarch64-darwin (Apple Silicon) specific packages
+    coreutils
+    macpm
+    gdb
+    pkgs.nvtopPackages.full
+    devenv
+  ] else if system == "x86_64-linux" then [
+    # x86_64-linux specific packages
     systemd
     net-tools
     nmap
     libgcc
-    # Memory Profiler
     valgrind
-  ]
-  # ++ cudaPackages  # CUDA 패키지 추가 (Jetson or 일반 CUDA)
-  else [ ]);
+    # devenv: x86_64-linux에서 빌드 문제 있음, 별도 설치 필요: nix profile install nixpkgs#devenv
+  ] else if system == "aarch64-linux" then [
+    # aarch64-linux specific packages
+    systemd
+    net-tools
+    nmap
+    libgcc
+    valgrind
+    devenv
+  ] else [ ]);
 
   # 공통 프로그램 설정 (programs.*.enable)
   programs = {
