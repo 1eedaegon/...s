@@ -209,13 +209,20 @@ in
           uv init
           uv venv
           source .venv/bin/activate
+          # Enable pip in uv venv
+          python -m ensurepip
+          python -m pip install --upgrade pip
+          echo "Project '$name' created with pip enabled"
         }
 
         # Create and activate virtual environment
         venv-create() {
           uv venv
           source .venv/bin/activate
-          echo "Virtual environment created and activated"
+          # Enable pip in uv venv
+          python -m ensurepip
+          python -m pip install --upgrade pip
+          echo "Virtual environment created with pip enabled"
         }
 
         # Install requirements
