@@ -66,8 +66,8 @@
     in
     (flake-utils.lib.eachDefaultSystem (system:
       let
-        # CUDA only supported on Linux
-        isLinux = system == "x86_64-linux" || system == "aarch64-linux";
+        # CUDA only supported on x86_64-linux (aarch64-linux에서 libcufile이 지원되지 않음)
+        isCudaSupported = system == "x86_64-linux";
 
         overlays = [
           (import rust-overlay)
@@ -82,7 +82,7 @@
         pkgs = import nixpkgs {
           inherit system overlays;
           config.allowUnfree = true;
-          config.cudaSupport = isLinux;
+          config.cudaSupport = isCudaSupported;
         };
 
         moduleLoader = import ./lib/module-loader.nix { inherit pkgs system; };
@@ -178,8 +178,8 @@
                 });
               })
             ];
-            # CUDA는 Linux에서만 지원
-            isCudaSupported = builtins.match ".*linux.*" system != null;
+            # CUDA는 x86_64-linux에서만 지원 (aarch64-linux에서 libcufile이 지원되지 않음)
+            isCudaSupported = system == "x86_64-linux";
 
             pkgs = import nixpkgs {
               inherit system overlays;
