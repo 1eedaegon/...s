@@ -1,6 +1,6 @@
 # darwin/default.nix
 # nix-darwin configuration for macOS
-{ config, pkgs, lib, username, email, ... }:
+{ config, pkgs, lib, systemUsername, username, email, ... }:
 
 {
   # Nix configuration
@@ -10,6 +10,7 @@
 
   # System configuration
   system.stateVersion = 5;
+  system.primaryUser = systemUsername;
 
   # Homebrew configuration (managed by nix-homebrew)
   homebrew = {
