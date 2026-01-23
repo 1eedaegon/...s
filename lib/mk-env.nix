@@ -37,7 +37,12 @@ let
           export LD_LIBRARY_PATH="${extraLibPath}''${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
         '' else ""}
 
-        # 2. Linux에서 시스템 CUDA 경로 자동 감지
+        # 2. Linux에서 libstdc++ 경로 추가 (PyTorch 등 C++ 라이브러리용)
+        ${if isLinux then ''
+          export LD_LIBRARY_PATH="${pkgs.stdenv.cc.cc.lib}/lib''${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+        '' else ""}
+
+        # 3. Linux에서 시스템 CUDA 경로 자동 감지
         if [[ "$(uname)" == "Linux" ]]; then
           # Jetson (JetPack) or standard CUDA installation
           if [[ -d "/usr/local/cuda/lib64" ]]; then
@@ -63,8 +68,9 @@ let
       # Native build inputs
       nativeBuildInputs = with pkgs; [
         pkg-config
-        # Note: stdenv.cc.cc.lib removed - it causes glibc conflicts on Linux
+        # Note: stdenv.cc.cc.lib is NOT in nativeBuildInputs - it causes glibc conflicts
         # ("__vdso_gettimeofday: invalid mode for dlopen()" errors)
+        # Instead, we add its lib path to LD_LIBRARY_PATH in ldLibPathHook for Linux
         # C/C++ zlib libraries (dev packages for headers)
         zlib.dev
       ];
