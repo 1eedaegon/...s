@@ -224,7 +224,8 @@
                   jetpack.overlays.default
                 ];
                 nixpkgs.config.allowUnfree = true;
-                nixpkgs.config.cudaSupport = true;
+                # CUDA disabled by default; enable per-host if needed
+                nixpkgs.config.cudaSupport = false;
 
                 users.users = builtins.listToAttrs (
                   map
@@ -252,11 +253,23 @@
                 home-manager.useUserPackages = true;
                 home-manager.backupFileExtension = "backup";
 
+                home-manager.extraSpecialArgs = {
+                  systemUsername = builtins.elemAt config.users 0;
+                  username =
+                    let u = builtins.elemAt config.users 0;
+                    in if u == "leedaegon" || u == "1eedaegon" then "1eedaegon" else u;
+                  email =
+                    let u = builtins.elemAt config.users 0;
+                    in if u == "leedaegon" || u == "1eedaegon" then "d8726243@gmail.com" else "test@localhost";
+                  system = config.system;
+                  inherit everything-claude-code;
+                };
+
                 home-manager.users = builtins.listToAttrs (
                   map
                     (username: {
                       name = username;
-                      value = self.homeManagerModules.${config.system}.${username};
+                      value = import ./home/home.nix;
                     })
                     config.users
                 );

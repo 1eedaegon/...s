@@ -2,6 +2,12 @@
 { config, pkgs, lib, hostname, ... }:
 
 {
+  # Filesystem (override in hardware-configuration.nix for real deployments)
+  fileSystems."/" = lib.mkDefault {
+    device = "/dev/disk/by-label/nixos";
+    fsType = "ext4";
+  };
+
   # Boot loader
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
@@ -39,8 +45,8 @@
   };
 
   # Desktop Environment - GNOME
-  services.xserver.displayManager.gdm.enable = true;
-  services.xserver.desktopManager.gnome.enable = true;
+  services.displayManager.gdm.enable = true;
+  services.desktopManager.gnome.enable = true;
 
   # Exclude some GNOME applications
   environment.gnome.excludePackages = (with pkgs; [
@@ -52,7 +58,7 @@
     epiphany # web browser
     geary # email reader
     evince # document viewer
-  ]) ++ (with pkgs.gnome; [
+  ]) ++ (with pkgs; [
     cheese # webcam tool
     gnome-terminal
     gnome-calendar
@@ -62,7 +68,7 @@
   ]);
 
   # Audio
-  hardware.pulseaudio.enable = false;
+  services.pulseaudio.enable = false;
   security.rtkit.enable = true;
   services.pipewire = {
     enable = true;
@@ -80,10 +86,9 @@
   services.printing.enable = true;
 
   # Hardware acceleration
-  hardware.opengl = {
+  hardware.graphics = {
     enable = true;
-    driSupport = true;
-    driSupport32Bit = true;
+    enable32Bit = true;
   };
 
   # Steam (gaming)
@@ -97,11 +102,12 @@
   fonts.packages = with pkgs; [
     noto-fonts
     noto-fonts-cjk-sans
-    noto-fonts-emoji
+    noto-fonts-color-emoji
     liberation_ttf
     fira-code
     fira-code-symbols
-    (nerdfonts.override { fonts = [ "FiraCode" "DroidSansMono" ]; })
+    nerd-fonts.fira-code
+    nerd-fonts.droid-sans-mono
   ];
 
   # System packages
@@ -141,18 +147,15 @@
     nautilus
 
     # System monitoring
-    gnome.gnome-system-monitor
+    gnome-system-monitor
 
     # Screenshot tool
-    gnome.gnome-screenshot
+    gnome-screenshot
     flameshot
   ];
 
   # Enable touchpad support
-  services.xserver.libinput.enable = true;
-
-  # Enable CUPS to print documents
-  services.printing.enable = true;
+  services.libinput.enable = true;
 
   # Services
   services.openssh.enable = true;
