@@ -6,6 +6,9 @@ let
   # Import common executions
   common = import ./default.nix { inherit pkgs system; };
   isDarwin = pkgs.stdenv.isDarwin;
+
+  # Import unified LD_LIBRARY_PATH configuration
+  ldConfig = import ../lib/ld-library-path.nix { inherit pkgs system; };
 in
 {
   # Merge common aliases with home-manager specific ones
@@ -73,6 +76,7 @@ in
   # Zsh specific configuration
   zshConfig = {
     initExtra = ''
+      ${ldConfig.shellHook}
       ${common.initScript}
       ${common.functions}
 
@@ -228,6 +232,7 @@ in
   # Bash specific configuration
   bashConfig = {
     initExtra = ''
+      ${ldConfig.shellHook}
       ${common.initScript}
       ${common.functions}
 

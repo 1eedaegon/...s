@@ -3,11 +3,11 @@
 { pkgs, system, modules }:
 
 let
-  # Extract modules from arguments: 구조 분해를 좀 더 명확하게 한거긴 한데...
+  # Extract modules from arguments
   inherit (modules) commonInstalls commonExec devInstalls devExec devConfig;
 
-  # Platform detection
-  isLinux = system == "x86_64-linux" || system == "aarch64-linux";
+  # Import unified LD_LIBRARY_PATH configuration
+  ldConfig = import ./ld-library-path.nix { inherit pkgs system; };
 
   # Base environment builder
   buildEnv = { name, packages ? [ ], aliases ? { }, environment ? { }, shellHook ? "" }:
@@ -30,36 +30,15 @@ let
         )
       );
 
-      # LD_LIBRARY_PATH: Nix packages + system CUDA paths
+      # LD_LIBRARY_PATH: Use unified configuration + any extra paths
       ldLibPathHook = ''
-        # 1. Nix 패키지에서 지정한 LD_LIBRARY_PATH 추가
+        # Extra LD_LIBRARY_PATH from environment override
         ${if extraLibPath != "" then ''
           export LD_LIBRARY_PATH="${extraLibPath}''${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
         '' else ""}
 
-        # 2. Linux에서 libstdc++ 경로 추가 (PyTorch 등 C++ 라이브러리용)
-        ${if isLinux then ''
-          export LD_LIBRARY_PATH="${pkgs.stdenv.cc.cc.lib}/lib''${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
-        '' else ""}
-
-        # 3. Linux에서 시스템 CUDA 경로 자동 감지
-        if [[ "$(uname)" == "Linux" ]]; then
-          # Jetson (JetPack) or standard CUDA installation
-          if [[ -d "/usr/local/cuda/lib64" ]]; then
-            export LD_LIBRARY_PATH="/usr/local/cuda/lib64''${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
-            export CUDA_HOME="/usr/local/cuda"
-            export CUDA_PATH="/usr/local/cuda"
-          fi
-
-          # NVIDIA GPU driver libraries
-          if [[ -e "/dev/nvidia0" ]]; then
-            for p in /usr/lib/x86_64-linux-gnu /usr/lib64 /usr/lib/aarch64-linux-gnu; do
-              if [[ -d "$p/nvidia" ]]; then
-                export LD_LIBRARY_PATH="$p/nvidia''${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
-              fi
-            done
-          fi
-        fi
+        # Unified LD_LIBRARY_PATH setup (from lib/ld-library-path.nix)
+        ${ldConfig.shellHook}
       '';
     in
     pkgs.mkShell {

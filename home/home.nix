@@ -57,6 +57,7 @@ in
     # Bash
     bash = homeInstalls.programs.bash // {
       shellAliases = homeExec.aliases // claudeCode.aliases;
+      initExtra = homeExec.bashConfig.initExtra;
     };
 
     # Bat configuration
