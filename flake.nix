@@ -76,6 +76,10 @@
               doCheck = false;
               doInstallCheck = false;
             });
+            rustup = prev.rustup.overrideAttrs (old: {
+              doCheck = false;
+              doInstallCheck = false;
+            });
           })
         ];
         pkgs = import nixpkgs {
@@ -172,6 +176,10 @@
               jetpack.overlays.default
               (final: prev: {
                 nix = prev.nix.overrideAttrs (old: {
+                  doCheck = false;
+                  doInstallCheck = false;
+                });
+                rustup = prev.rustup.overrideAttrs (old: {
                   doCheck = false;
                   doInstallCheck = false;
                 });
@@ -289,6 +297,10 @@
                 (import rust-overlay)
                 (final: prev: {
                   nix = prev.nix.overrideAttrs (old: {
+                    doCheck = false;
+                    doInstallCheck = false;
+                  });
+                  rustup = prev.rustup.overrideAttrs (old: {
                     doCheck = false;
                     doInstallCheck = false;
                   });
