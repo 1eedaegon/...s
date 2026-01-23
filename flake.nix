@@ -66,9 +66,8 @@
     in
     (flake-utils.lib.eachDefaultSystem (system:
       let
-        # CUDA only supported on x86_64-linux (aarch64-linux에서 libcufile이 지원되지 않음)
-        isCudaSupported = system == "x86_64-linux";
-
+        # CUDA disabled: libcusparse_lt is broken on x86_64-linux in nixpkgs
+        # Enable manually if needed with allowUnsupportedSystem
         overlays = [
           (import rust-overlay)
           jetpack.overlays.default
@@ -82,7 +81,7 @@
         pkgs = import nixpkgs {
           inherit system overlays;
           config.allowUnfree = true;
-          config.cudaSupport = isCudaSupported;
+          config.cudaSupport = false;
         };
 
         moduleLoader = import ./lib/module-loader.nix { inherit pkgs system; };
@@ -178,13 +177,11 @@
                 });
               })
             ];
-            # CUDA는 x86_64-linux에서만 지원 (aarch64-linux에서 libcufile이 지원되지 않음)
-            isCudaSupported = system == "x86_64-linux";
-
+            # CUDA disabled: libcusparse_lt is broken on x86_64-linux in nixpkgs
             pkgs = import nixpkgs {
               inherit system overlays;
               config.allowUnfree = true;
-              config.cudaSupport = isCudaSupported;
+              config.cudaSupport = false;
             };
           in
           home-manager.lib.homeManagerConfiguration {

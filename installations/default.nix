@@ -150,7 +150,7 @@ in
   ] ++ (if system == "x86_64-darwin" then [
     # x86_64-darwin specific packages
     coreutils
-    macpm
+    # macpm: aarch64-darwin only
     gdb
     pkgs.nvtopPackages.full
     # devenv: x86_64-darwin에서 nix-util 빌드 실패, 별도 설치 필요: nix profile install nixpkgs#devenv
