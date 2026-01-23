@@ -15,10 +15,23 @@ jobs:
         os: [ubuntu-latest, macos-latest]
     runs-on: ${{ matrix.os }}
     steps:
+      - name: Free disk space (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          echo "Before cleanup:"
+          df -h
+          sudo rm -rf /usr/share/dotnet /opt/ghc /usr/local/share/boost "$AGENT_TOOLSDIRECTORY"
+          sudo docker image prune -af || true
+          echo "After cleanup:"
+          df -h
       - uses: actions/checkout@v4
       - uses: cachix/install-nix-action@v30
         with:
           github_access_token: ${{ secrets.GITHUB_TOKEN }}
+      - uses: cachix/cachix-action@v15
+        with:
+          name: 3dots
+          authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
       - name: Check flake
         run: nix flake check
 
@@ -30,10 +43,23 @@ jobs:
         shell: [default, rust, go, py, node]
     runs-on: ${{ matrix.os }}
     steps:
+      - name: Free disk space (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          echo "Before cleanup:"
+          df -h
+          sudo rm -rf /usr/share/dotnet /opt/ghc /usr/local/share/boost "$AGENT_TOOLSDIRECTORY"
+          sudo docker image prune -af || true
+          echo "After cleanup:"
+          df -h
       - uses: actions/checkout@v4
       - uses: cachix/install-nix-action@v30
         with:
           github_access_token: ${{ secrets.GITHUB_TOKEN }}
+      - uses: cachix/cachix-action@v15
+        with:
+          name: 3dots
+          authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
       - name: Test ${{ matrix.shell }} shell
         run: nix develop .#${{ matrix.shell }} --command echo "✓ ${{ matrix.shell }} shell works"
 
@@ -44,10 +70,23 @@ jobs:
         os: [ubuntu-latest, macos-latest]
     runs-on: ${{ matrix.os }}
     steps:
+      - name: Free disk space (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          echo "Before cleanup:"
+          df -h
+          sudo rm -rf /usr/share/dotnet /opt/ghc /usr/local/share/boost "$AGENT_TOOLSDIRECTORY"
+          sudo docker image prune -af || true
+          echo "After cleanup:"
+          df -h
       - uses: actions/checkout@v4
       - uses: cachix/install-nix-action@v30
         with:
           github_access_token: ${{ secrets.GITHUB_TOKEN }}
+      - uses: cachix/cachix-action@v15
+        with:
+          name: 3dots
+          authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
       - name: Check default homeConfiguration
         run: nix eval .#homeConfigurations.default --impure > /dev/null && echo "✓ default homeConfiguration is valid"
 
@@ -55,9 +94,16 @@ jobs:
     name: Format Check
     runs-on: ubuntu-latest
     steps:
+      - name: Free disk space
+        run: |
+          sudo rm -rf /usr/share/dotnet /opt/ghc /usr/local/share/boost "$AGENT_TOOLSDIRECTORY"
+          sudo docker image prune -af || true
       - uses: actions/checkout@v4
       - uses: cachix/install-nix-action@v30
         with:
           github_access_token: ${{ secrets.GITHUB_TOKEN }}
+      - uses: cachix/cachix-action@v15
+        with:
+          name: 3dots
       - name: Check formatting
         run: nix run nixpkgs#nixpkgs-fmt -- --check .
