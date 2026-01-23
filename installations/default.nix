@@ -112,6 +112,9 @@ in
     google-cloud-sdk
     azure-cli
 
+    # Infrastructure as Code
+    opentofu
+
     # Python package manager 
     uv
 
