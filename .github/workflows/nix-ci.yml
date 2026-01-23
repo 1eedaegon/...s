@@ -28,10 +28,14 @@ jobs:
       - uses: cachix/install-nix-action@v30
         with:
           github_access_token: ${{ secrets.GITHUB_TOKEN }}
+          extra_nix_config: |
+            extra-substituters = https://3dots.cachix.org
+            extra-trusted-public-keys = 3dots.cachix.org-1:pnvCVLIBCnvtknOoDB+36GL9S6ObcbfxsLV6cZm3krI=
       - uses: cachix/cachix-action@v15
         with:
           name: 3dots
           authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
+          skipConfiguring: true
       - name: Check flake
         run: nix flake check
 
@@ -56,10 +60,14 @@ jobs:
       - uses: cachix/install-nix-action@v30
         with:
           github_access_token: ${{ secrets.GITHUB_TOKEN }}
+          extra_nix_config: |
+            extra-substituters = https://3dots.cachix.org
+            extra-trusted-public-keys = 3dots.cachix.org-1:pnvCVLIBCnvtknOoDB+36GL9S6ObcbfxsLV6cZm3krI=
       - uses: cachix/cachix-action@v15
         with:
           name: 3dots
           authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
+          skipConfiguring: true
       - name: Detect system
         id: system
         run: |
@@ -93,10 +101,14 @@ jobs:
       - uses: cachix/install-nix-action@v30
         with:
           github_access_token: ${{ secrets.GITHUB_TOKEN }}
+          extra_nix_config: |
+            extra-substituters = https://3dots.cachix.org
+            extra-trusted-public-keys = 3dots.cachix.org-1:pnvCVLIBCnvtknOoDB+36GL9S6ObcbfxsLV6cZm3krI=
       - uses: cachix/cachix-action@v15
         with:
           name: 3dots
           authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
+          skipConfiguring: true
       - name: Check default homeConfiguration
         run: nix eval .#homeConfigurations.default --impure > /dev/null && echo "✓ default homeConfiguration is valid"
 
@@ -112,8 +124,12 @@ jobs:
       - uses: cachix/install-nix-action@v30
         with:
           github_access_token: ${{ secrets.GITHUB_TOKEN }}
+          extra_nix_config: |
+            extra-substituters = https://3dots.cachix.org
+            extra-trusted-public-keys = 3dots.cachix.org-1:pnvCVLIBCnvtknOoDB+36GL9S6ObcbfxsLV6cZm3krI=
       - uses: cachix/cachix-action@v15
         with:
           name: 3dots
+          skipConfiguring: true
       - name: Check formatting
         run: nix run nixpkgs#nixpkgs-fmt -- --check .
