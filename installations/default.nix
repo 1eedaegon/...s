@@ -142,6 +142,7 @@ in
     gdb
     pkgs.nvtopPackages.full
     # devenv: x86_64-darwin에서 nix-util 빌드 실패, 별도 설치 필요: nix profile install nixpkgs#devenv
+    # Zed, Claude Code: nix-darwin의 homebrew 모듈로 관리
   ] else if system == "aarch64-darwin" then [
     # aarch64-darwin (Apple Silicon) specific packages
     coreutils
@@ -149,6 +150,7 @@ in
     gdb
     pkgs.nvtopPackages.full
     devenv
+    # Zed, Claude Code: nix-darwin의 homebrew 모듈로 관리
   ] else if system == "x86_64-linux" then [
     # x86_64-linux specific packages
     systemd
@@ -156,6 +158,7 @@ in
     nmap
     libgcc
     valgrind
+    zed-editor
     # devenv: x86_64-linux에서 빌드 문제 있음, 별도 설치 필요: nix profile install nixpkgs#devenv
   ] else if system == "aarch64-linux" then [
     # aarch64-linux specific packages
@@ -165,6 +168,7 @@ in
     libgcc
     valgrind
     devenv
+    zed-editor
   ] else [ ]);
 
   # 공통 프로그램 설정 (programs.*.enable)

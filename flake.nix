@@ -9,6 +9,13 @@
       url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    nix-darwin = {
+      url = "github:LnL7/nix-darwin";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    nix-homebrew = {
+      url = "github:zhaofengli-wip/nix-homebrew";
+    };
     rust-overlay = {
       url = "github:oxalica/rust-overlay";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -17,9 +24,13 @@
       url = "github:anduril/jetpack-nixos";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    everything-claude-code = {
+      url = "github:affaan-m/everything-claude-code";
+      flake = false;
+    };
   };
 
-  outputs = { self, nixpkgs, flake-utils, home-manager, rust-overlay, jetpack, ... }:
+  outputs = { self, nixpkgs, flake-utils, home-manager, nix-darwin, nix-homebrew, rust-overlay, jetpack, everything-claude-code, ... }:
     let
       getHomeDirectory = system: username:
         if builtins.match ".*darwin.*" system != null then
@@ -109,11 +120,22 @@
           };
         };
 
-        # nix run . 으로 home-manager switch 실행
+        # nix run . 으로 darwin-rebuild 또는 home-manager switch 실행
         apps.default = {
           type = "app";
-          program = "${pkgs.writeShellScript "hm-switch" ''
-            ${home-manager.packages.${system}.home-manager}/bin/home-manager switch --flake ${self}#default --impure -b backup "$@"
+          program = "${pkgs.writeShellScript "nix-switch" ''
+            if [[ "$(uname)" == "Darwin" ]]; then
+              # macOS: use nix-darwin
+              if command -v darwin-rebuild &> /dev/null; then
+                darwin-rebuild switch --flake ${self}#default --impure "$@"
+              else
+                echo "Installing nix-darwin for the first time..."
+                nix run nix-darwin -- switch --flake ${self}#default --impure "$@"
+              fi
+            else
+              # Linux: use home-manager
+              ${home-manager.packages.${system}.home-manager}/bin/home-manager switch --flake ${self}#default --impure -b backup "$@"
+            fi
           ''}";
         };
 
@@ -169,7 +191,7 @@
             extraSpecialArgs = {
               systemUsername = user;
               username = serviceUsername;
-              inherit email system;
+              inherit email system everything-claude-code;
             };
             modules = [
               ./home/home.nix
@@ -241,5 +263,86 @@
             ] ++ config.modules;
           })
         nixosSystemConfigs;
+
+      # darwinConfigurations for macOS
+      darwinConfigurations =
+        let
+          mkDarwinConfig = { system, username }:
+            let
+              serviceUsername = if username == "leedaegon" then "1eedaegon" else username;
+              email =
+                if username == "leedaegon" || username == "1eedaegon" then "d8726243@gmail.com"
+                else "test@localhost";
+
+              overlays = [
+                (import rust-overlay)
+                (final: prev: {
+                  nix = prev.nix.overrideAttrs (old: {
+                    doCheck = false;
+                    doInstallCheck = false;
+                  });
+                })
+              ];
+
+              pkgs = import nixpkgs {
+                inherit system overlays;
+                config.allowUnfree = true;
+              };
+            in
+            nix-darwin.lib.darwinSystem {
+              inherit system;
+              specialArgs = {
+                inherit email;
+                systemUsername = username;
+                username = serviceUsername;
+              };
+              modules = [
+                ./darwin/default.nix
+                nix-homebrew.darwinModules.nix-homebrew
+                {
+                  nix-homebrew = {
+                    enable = true;
+                    enableRosetta = system == "aarch64-darwin";
+                    user = username;
+                  };
+                }
+                home-manager.darwinModules.home-manager
+                {
+                  home-manager.useGlobalPkgs = true;
+                  home-manager.useUserPackages = true;
+                  home-manager.backupFileExtension = "backup";
+                  home-manager.extraSpecialArgs = {
+                    systemUsername = username;
+                    username = serviceUsername;
+                    inherit email system everything-claude-code;
+                  };
+                  home-manager.users.${username} = import ./home/home.nix;
+                }
+                {
+                  users.users.${username} = {
+                    name = username;
+                    home = getHomeDirectory system username;
+                  };
+                }
+              ];
+            };
+        in
+        {
+          # Default darwin configuration (auto-detect current user)
+          default = mkDarwinConfig {
+            system = builtins.currentSystem;
+            username = builtins.getEnv "USER";
+          };
+
+          # Explicit configurations
+          "aarch64" = mkDarwinConfig {
+            system = "aarch64-darwin";
+            username = "leedaegon";
+          };
+          "x86_64" = mkDarwinConfig {
+            system = "x86_64-darwin";
+            username = "leedaegon";
+          };
+        };
     };
 }

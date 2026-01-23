@@ -1,5 +1,5 @@
 # home/home.nix
-{ config, lib, pkgs, username, systemUsername, email, system, ... }:
+{ config, lib, pkgs, username, systemUsername, email, system, everything-claude-code, ... }:
 let
   isDarwin = pkgs.stdenv.isDarwin;
 
@@ -17,12 +17,20 @@ let
     inherit systemUsername username;
   };
   commonExec = import ../executions/default.nix { inherit pkgs system; };
+
+  # Claude Code configuration
+  claudeCode = import ../installations/claude-code.nix {
+    inherit config lib pkgs everything-claude-code;
+  };
 in
 {
   home.username = systemUsername;
   home.stateVersion = "24.05";
 
-  home.packages = homeInstalls.packages;
+  home.packages = homeInstalls.packages ++ claudeCode.packages;
+
+  # Claude Code activation scripts
+  home.activation = claudeCode.activation;
 
   programs = lib.recursiveUpdate homeInstalls.programs {
     # Git
@@ -33,7 +41,7 @@ in
 
     # Zsh
     zsh = homeInstalls.programs.zsh // homeConfig.zsh // {
-      shellAliases = homeExec.aliases // {
+      shellAliases = homeExec.aliases // claudeCode.aliases // {
         # Noglob settings for nix commands (prevents "no matches found" errors with .#flake syntax)
         nix = "noglob nix";
       };
@@ -42,7 +50,7 @@ in
 
     # Bash
     bash = homeInstalls.programs.bash // {
-      shellAliases = homeExec.aliases;
+      shellAliases = homeExec.aliases // claudeCode.aliases;
     };
 
     # Bat configuration

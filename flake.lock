@@ -1,5 +1,22 @@
 {
   "nodes": {
+    "brew-src": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1763638478,
+        "narHash": "sha256-n/IMowE9S23ovmTkKX7KhxXC2Yq41EAVFR2FBIXPcT8=",
+        "owner": "Homebrew",
+        "repo": "brew",
+        "rev": "fbfdbaba008189499958a7aeb1e2c36ab10c067d",
+        "type": "github"
+      },
+      "original": {
+        "owner": "Homebrew",
+        "ref": "5.0.3",
+        "repo": "brew",
+        "type": "github"
+      }
+    },
     "cuda-legacy": {
       "inputs": {
         "flake-parts": [
@@ -22,6 +39,22 @@
       "original": {
         "owner": "nixos-cuda",
         "repo": "cuda-legacy",
+        "type": "github"
+      }
+    },
+    "everything-claude-code": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1769129107,
+        "narHash": "sha256-CVyoLuaftRTZyr/sW6RRiHHvfA2qH0HBpz01LDgGCwM=",
+        "owner": "affaan-m",
+        "repo": "everything-claude-code",
+        "rev": "19345df79d8e66d77304b1b4e8a2e5b8571ba9d3",
+        "type": "github"
+      },
+      "original": {
+        "owner": "affaan-m",
+        "repo": "everything-claude-code",
         "type": "github"
       }
     },
@@ -84,6 +117,44 @@
         "type": "github"
       }
     },
+    "nix-darwin": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1768764703,
+        "narHash": "sha256-5ulSDyOG1U+1sJhkJHYsUOWEsmtLl97O0NTVMvgIVyc=",
+        "owner": "LnL7",
+        "repo": "nix-darwin",
+        "rev": "0fc4e7ac670a0ed874abacf73c4b072a6a58064b",
+        "type": "github"
+      },
+      "original": {
+        "owner": "LnL7",
+        "repo": "nix-darwin",
+        "type": "github"
+      }
+    },
+    "nix-homebrew": {
+      "inputs": {
+        "brew-src": "brew-src"
+      },
+      "locked": {
+        "lastModified": 1764473698,
+        "narHash": "sha256-C91gPgv6udN5WuIZWNehp8qdLqlrzX6iF/YyboOj6XI=",
+        "owner": "zhaofengli-wip",
+        "repo": "nix-homebrew",
+        "rev": "6a8ab60bfd66154feeaa1021fc3b32684814a62a",
+        "type": "github"
+      },
+      "original": {
+        "owner": "zhaofengli-wip",
+        "repo": "nix-homebrew",
+        "type": "github"
+      }
+    },
     "nixpkgs": {
       "locked": {
         "lastModified": 1765779637,
@@ -102,9 +173,12 @@
     },
     "root": {
       "inputs": {
+        "everything-claude-code": "everything-claude-code",
         "flake-utils": "flake-utils",
         "home-manager": "home-manager",
         "jetpack": "jetpack",
+        "nix-darwin": "nix-darwin",
+        "nix-homebrew": "nix-homebrew",
         "nixpkgs": "nixpkgs",
         "rust-overlay": "rust-overlay"
       }
