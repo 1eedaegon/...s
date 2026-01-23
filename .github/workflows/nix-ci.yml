@@ -41,23 +41,15 @@ jobs:
     name: Test Home Configs
     strategy:
       matrix:
-        include:
-          - os: ubuntu-latest
-            config: default.linux
-          - os: ubuntu-latest
-            config: 1eedaegon.linux
-          - os: macos-latest
-            config: default.darwin
-          - os: macos-latest
-            config: 1eedaegon.darwin
+        os: [ubuntu-latest, macos-latest]
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
       - uses: cachix/install-nix-action@v30
         with:
           github_access_token: ${{ secrets.GITHUB_TOKEN }}
-      - name: Check ${{ matrix.config }}
-        run: nix eval .#homeConfigurations."${{ matrix.config }}" > /dev/null && echo "✓ ${{ matrix.config }} is valid"
+      - name: Check default homeConfiguration
+        run: nix eval .#homeConfigurations.default --impure > /dev/null && echo "✓ default homeConfiguration is valid"
 
   format:
     name: Format Check
