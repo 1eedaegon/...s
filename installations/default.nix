@@ -159,6 +159,7 @@ in
     libgcc
     valgrind
     zed-editor
+    code-cursor # Cursor AI editor
     # devenv: x86_64-linux에서 빌드 문제 있음, 별도 설치 필요: nix profile install nixpkgs#devenv
   ] else if system == "aarch64-linux" then [
     # aarch64-linux specific packages
@@ -169,6 +170,7 @@ in
     valgrind
     devenv
     zed-editor
+    code-cursor # Cursor AI editor
   ] else [ ]);
 
   # 공통 프로그램 설정 (programs.*.enable)
