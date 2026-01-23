@@ -125,12 +125,13 @@
           type = "app";
           program = "${pkgs.writeShellScript "nix-switch" ''
             if [[ "$(uname)" == "Darwin" ]]; then
-              # macOS: use nix-darwin
+              # macOS: use nix-darwin (requires sudo)
+              # Use sudo -H to reset HOME to root, avoiding "$HOME is not owned by you" warning
               if command -v darwin-rebuild &> /dev/null; then
-                darwin-rebuild switch --flake ${self}#default --impure "$@"
+                sudo -H darwin-rebuild switch --flake ${self}#default --impure "$@"
               else
                 echo "Installing nix-darwin for the first time..."
-                nix run nix-darwin -- switch --flake ${self}#default --impure "$@"
+                sudo -H nix run nix-darwin -- switch --flake ${self}#default --impure "$@"
               fi
             else
               # Linux: use home-manager

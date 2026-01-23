@@ -27,6 +27,12 @@ in
   home.username = systemUsername;
   home.stateVersion = "24.05";
 
+  # Disable manual generation to avoid "builtins.toFile options.json" warning
+  # See: https://github.com/nix-community/home-manager/issues/7935
+  manual.manpages.enable = false;
+  manual.html.enable = false;
+  manual.json.enable = false;
+
   home.packages = homeInstalls.packages ++ claudeCode.packages;
 
   # Claude Code activation scripts
