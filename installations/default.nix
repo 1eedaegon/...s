@@ -123,6 +123,14 @@ in
     docker
     docker-compose
 
+    # Kubernetes CLI
+    kubectl
+    kubernetes-helm # helm
+    k9s # terminal UI
+    kubectx # context/namespace switcher
+    stern # multi-pod log tailing
+    kustomize # config management
+
     # Verify systems
     tlaplus
     tlaps
