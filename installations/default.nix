@@ -40,6 +40,9 @@ in
     git
     gh
 
+    # Nix tools
+    cachix
+
     # Terminal improvements
     lsd # better ls
     bat # better cat
