@@ -23,6 +23,56 @@ in
     # macOS specific
     HOMEBREW_NO_ANALYTICS = if isDarwin then "1" else "0";
     HOMEBREW_NO_AUTO_UPDATE = if isDarwin then "1" else "0";
+
+    # ===== Global Auth & Tools Configuration =====
+
+    # --- ML Tools ---
+    # HuggingFace - token stored in $HF_HOME/token
+    HF_HOME = "$HOME/.config/huggingface";
+    HUGGINGFACE_HUB_CACHE = "$HOME/.cache/huggingface/hub";
+
+    # Weights & Biases - credentials in $WANDB_DIR/settings
+    WANDB_DIR = "$HOME/.config/wandb";
+    WANDB_CACHE_DIR = "$HOME/.cache/wandb";
+
+    # --- API Keys (set these manually or use .envrc) ---
+    # ANTHROPIC_API_KEY - for Claude API (set via: export ANTHROPIC_API_KEY=sk-ant-...)
+    # OPENAI_API_KEY - for OpenAI API (set via: export OPENAI_API_KEY=sk-...)
+
+    # --- DevOps & Cloud ---
+    # GitHub CLI
+    GH_CONFIG_DIR = "$HOME/.config/gh";
+
+    # AWS CLI
+    AWS_CONFIG_FILE = "$HOME/.config/aws/config";
+    AWS_SHARED_CREDENTIALS_FILE = "$HOME/.config/aws/credentials";
+
+    # Google Cloud SDK
+    CLOUDSDK_CONFIG = "$HOME/.config/gcloud";
+    GOOGLE_APPLICATION_CREDENTIALS = "$HOME/.config/gcloud/application_default_credentials.json";
+
+    # Azure CLI
+    AZURE_CONFIG_DIR = "$HOME/.config/azure";
+
+    # Docker
+    DOCKER_CONFIG = "$HOME/.config/docker";
+
+    # --- Package Managers ---
+    # uv (Python)
+    UV_CACHE_DIR = "$HOME/.cache/uv";
+    UV_PYTHON_PREFERENCE = "managed";
+
+    # PyPI/pip
+    PIP_CONFIG_FILE = "$HOME/.config/pip/pip.conf";
+    PYPIRC = "$HOME/.config/pip/pypirc";
+
+    # npm/node
+    NPM_CONFIG_USERCONFIG = "$HOME/.config/npm/npmrc";
+    NPM_CONFIG_CACHE = "$HOME/.cache/npm";
+
+    # Cargo/Rust
+    CARGO_HOME = "$HOME/.config/cargo";
+    RUSTUP_HOME = "$HOME/.config/rustup";
   };
   git = {
     settings = {
@@ -359,6 +409,31 @@ in
       setupDev = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
         $DRY_RUN_CMD mkdir -p $HOME/Projects/{personal,work,learning,experiments}
         $DRY_RUN_CMD mkdir -p $HOME/.config/git
+      '';
+
+      # Setup global auth directories
+      # These store credentials that all uv venvs and devShells can access
+      setupAuthDirs = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+        # --- ML Tools ---
+        $DRY_RUN_CMD mkdir -p $HOME/.config/huggingface
+        $DRY_RUN_CMD mkdir -p $HOME/.cache/huggingface/hub
+        $DRY_RUN_CMD mkdir -p $HOME/.config/wandb
+        $DRY_RUN_CMD mkdir -p $HOME/.cache/wandb
+
+        # --- DevOps & Cloud ---
+        $DRY_RUN_CMD mkdir -p $HOME/.config/gh
+        $DRY_RUN_CMD mkdir -p $HOME/.config/aws
+        $DRY_RUN_CMD mkdir -p $HOME/.config/gcloud
+        $DRY_RUN_CMD mkdir -p $HOME/.config/azure
+        $DRY_RUN_CMD mkdir -p $HOME/.config/docker
+
+        # --- Package Managers ---
+        $DRY_RUN_CMD mkdir -p $HOME/.cache/uv
+        $DRY_RUN_CMD mkdir -p $HOME/.config/pip
+        $DRY_RUN_CMD mkdir -p $HOME/.config/npm
+        $DRY_RUN_CMD mkdir -p $HOME/.cache/npm
+        $DRY_RUN_CMD mkdir -p $HOME/.config/cargo
+        $DRY_RUN_CMD mkdir -p $HOME/.config/rustup
       '';
     };
   };

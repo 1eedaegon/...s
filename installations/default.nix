@@ -104,8 +104,20 @@ in
     zlib.dev
     zstd
 
-    # AWS CLI
+    # Cloud CLI
     awscli2
+    google-cloud-sdk
+    azure-cli
+
+    # Python package manager 
+    uv
+
+    # ML tools 
+    (python313.withPackages (ps: with ps; [
+      marimo # Reactive Python notebook
+      wandb # Weights & Biases ML tracking
+      huggingface-hub # HuggingFace CLI & Hub
+    ]))
 
     # Docker CLI
     docker
@@ -150,7 +162,7 @@ in
     gdb
     pkgs.nvtopPackages.full
     devenv
-    # Zed, Claude Code: nix-darwin의 homebrew 모듈로 관리
+    # Zed, Claude Code: use nix-darwin
   ] else if system == "x86_64-linux" then [
     # x86_64-linux specific packages
     systemd
@@ -160,7 +172,6 @@ in
     valgrind
     zed-editor
     code-cursor # Cursor AI editor
-    # devenv: x86_64-linux에서 빌드 문제 있음, 별도 설치 필요: nix profile install nixpkgs#devenv
   ] else if system == "aarch64-linux" then [
     # aarch64-linux specific packages
     systemd
@@ -170,7 +181,7 @@ in
     valgrind
     devenv
     zed-editor
-    code-cursor # Cursor AI editor
+    code-cursor
   ] else [ ]);
 
   # 공통 프로그램 설정 (programs.*.enable)
