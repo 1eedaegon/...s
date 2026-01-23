@@ -5,6 +5,8 @@
 let
   # Claude Code native installer script
   installClaudeCode = pkgs.writeShellScript "install-claude-code" ''
+    export PATH="${pkgs.curl}/bin:${pkgs.coreutils}/bin:${pkgs.bash}/bin:${pkgs.perl}/bin:${pkgs.gnutar}/bin:${pkgs.gzip}/bin:$PATH"
+
     if ! command -v claude &> /dev/null; then
       echo "Installing Claude Code via native installer..."
       ${pkgs.curl}/bin/curl -fsSL https://claude.ai/install.sh | ${pkgs.bash}/bin/bash

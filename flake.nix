@@ -304,6 +304,7 @@
                     enable = true;
                     enableRosetta = system == "aarch64-darwin";
                     user = username;
+                    autoMigrate = true;
                   };
                 }
                 home-manager.darwinModules.home-manager
@@ -329,9 +330,15 @@
         in
         {
           # Default darwin configuration (auto-detect current user)
+          # SUDO_USER is set when running with sudo, fallback to USER
           default = mkDarwinConfig {
             system = builtins.currentSystem;
-            username = builtins.getEnv "USER";
+            username =
+              let
+                sudoUser = builtins.getEnv "SUDO_USER";
+                user = builtins.getEnv "USER";
+              in
+              if sudoUser != "" then sudoUser else user;
           };
 
           # Explicit configurations

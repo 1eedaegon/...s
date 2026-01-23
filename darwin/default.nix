@@ -3,10 +3,8 @@
 { config, pkgs, lib, systemUsername, username, email, ... }:
 
 {
-  # Nix configuration
-  nix.settings = {
-    experimental-features = [ "nix-command" "flakes" ];
-  };
+  # Disable nix-darwin's Nix management (using Determinate Nix)
+  nix.enable = false;
 
   # System configuration
   system.stateVersion = 5;
@@ -20,12 +18,11 @@
     onActivation = {
       autoUpdate = true;
       upgrade = true;
-      cleanup = "zap"; # Remove unlisted packages
+      cleanup = "uninstall"; # "zap" requires Full Disk Access
     };
 
     # Homebrew taps
     taps = [
-      "homebrew/bundle"
     ];
 
     # CLI packages (brew install)
