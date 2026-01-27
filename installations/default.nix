@@ -118,7 +118,7 @@ in
     # Python package manager 
     uv
 
-    # ML tools 
+    # ML tools
     (python313.withPackages (ps: with ps; [
       marimo # Reactive Python notebook
       wandb # Weights & Biases ML tracking
@@ -195,7 +195,7 @@ in
     valgrind
     devenv
     zed-editor
-    code-cursor
+    cursor-arm # Cursor AI editor for ARM (from github:coder/cursor-arm)
   ] else [ ]);
 
   # 공통 프로그램 설정 (programs.*.enable)

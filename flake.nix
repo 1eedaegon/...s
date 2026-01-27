@@ -28,9 +28,13 @@
       url = "github:affaan-m/everything-claude-code";
       flake = false;
     };
+    cursor-arm = {
+      url = "github:coder/cursor-arm";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
-  outputs = { self, nixpkgs, flake-utils, home-manager, nix-darwin, nix-homebrew, rust-overlay, jetpack, everything-claude-code, ... }:
+  outputs = { self, nixpkgs, flake-utils, home-manager, nix-darwin, nix-homebrew, rust-overlay, jetpack, everything-claude-code, cursor-arm, ... }:
     let
       getHomeDirectory = system: username:
         if builtins.match ".*darwin.*" system != null then
@@ -80,6 +84,8 @@
               doCheck = false;
               doInstallCheck = false;
             });
+            # cursor-arm for aarch64-linux
+            cursor-arm = cursor-arm.packages.${system}.default or null;
           })
         ];
         pkgs = import nixpkgs {
