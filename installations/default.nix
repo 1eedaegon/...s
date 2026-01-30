@@ -165,7 +165,6 @@ in
     # x86_64-darwin specific packages
     coreutils
     # macpm: aarch64-darwin only
-    gdb
     pkgs.nvtopPackages.full
     # devenv: x86_64-darwin에서 nix-util 빌드 실패, 별도 설치 필요: nix profile install nixpkgs#devenv
     # Zed, Claude Code: nix-darwin의 homebrew 모듈로 관리
@@ -173,7 +172,6 @@ in
     # aarch64-darwin (Apple Silicon) specific packages
     coreutils
     macpm
-    gdb
     pkgs.nvtopPackages.full
     devenv
     # Zed, Claude Code: use nix-darwin
