@@ -42,6 +42,15 @@
     };
   };
 
+  # Nix trusted-users (Determinate Nix uses nix.custom.conf)
+  system.activationScripts.postActivation.text = ''
+    CONF="/etc/nix/nix.custom.conf"
+    if ! grep -q "trusted-users" "$CONF" 2>/dev/null; then
+      echo "trusted-users = root ${systemUsername}" >> "$CONF"
+      launchctl kickstart -k system/systems.determinate.nix-daemon 2>/dev/null || true
+    fi
+  '';
+
   # Enable zsh (default shell on macOS)
   programs.zsh.enable = true;
 
