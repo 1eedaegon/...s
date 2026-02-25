@@ -112,8 +112,14 @@ in
     google-cloud-sdk
     azure-cli
 
+    # Cloudflare
+    cloudflared # Tunnel, Access, DNS-over-HTTPS
+    wrangler # Workers CLI
+    flarectl # Cloudflare API CLI
+
     # Infrastructure as Code
     opentofu
+    cf-terraforming # Import Cloudflare resources into Terraform/OpenTofu
 
     # Python package manager 
     uv
