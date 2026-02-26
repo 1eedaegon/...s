@@ -97,6 +97,7 @@ in
     # Common C Modules
     # Note: Don't add standalone gcc on macOS - use stdenv.cc instead
     # gcc breaks SDK sysroot detection for cargo/cc-rs builds
+    ccache # C/C++ compilation cache
     gnumake
     cmake
     extra-cmake-modules

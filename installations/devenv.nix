@@ -33,6 +33,9 @@ in
         # Rust installer
         rustup
 
+        # Build cache
+        sccache # Compilation cache with cloud storage support (S3, GCS, Azure)
+
         # Rust development tools
         pkg-config
         openssl.dev
@@ -131,6 +134,7 @@ in
 
         # Build tools
         webpack-cli
+        turbo-unwrapped # Turborepo monorepo build cache
       ];
 
       programs = {
@@ -146,6 +150,7 @@ in
         # Build tools
         maven
         gradle
+        mvnd # Maven Daemon for faster JVM builds
       ];
 
       programs = {
