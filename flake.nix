@@ -179,7 +179,8 @@
 
             overlays = [
               (import rust-overlay)
-              jetpack.overlays.default
+              # jetpack overlay는 devShell/nixos 전용 (CUDA/Jetson)
+              # homeConfigurations에서는 불필요하며 평가 시간을 대폭 증가시킴
               (final: prev: {
                 nix = prev.nix.overrideAttrs (old: {
                   doCheck = false;
@@ -191,11 +192,9 @@
                 });
               })
             ];
-            # CUDA disabled: libcusparse_lt is broken on x86_64-linux in nixpkgs
             pkgs = import nixpkgs {
               inherit system overlays;
               config.allowUnfree = true;
-              config.cudaSupport = false;
             };
           in
           home-manager.lib.homeManagerConfiguration {

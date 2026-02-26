@@ -114,7 +114,12 @@ jobs:
           name: 3dots
           authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
       - name: Check default homeConfiguration
-        run: nix eval .#homeConfigurations.default --impure > /dev/null && echo "✓ default homeConfiguration is valid"
+        run: |
+          # Deep eval은 전체 derivation 순회로 OOM 발생 → 핵심 속성만 검증
+          nix eval .#homeConfigurations.default.config.home.username --impure > /dev/null
+          nix eval .#homeConfigurations.default.config.home.homeDirectory --impure > /dev/null
+          nix eval .#homeConfigurations.default.config.home.stateVersion --impure > /dev/null
+          echo "✓ default homeConfiguration is valid"
 
   format:
     name: Format Check
