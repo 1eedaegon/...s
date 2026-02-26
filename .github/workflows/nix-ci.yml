@@ -14,6 +14,7 @@ jobs:
       matrix:
         os: [ubuntu-latest, macos-latest]
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
     steps:
       - name: Free disk space (Linux)
         if: runner.os == 'Linux'
@@ -31,21 +32,23 @@ jobs:
           extra_nix_config: |
             extra-substituters = https://3dots.cachix.org
             extra-trusted-public-keys = 3dots.cachix.org-1:pnvCVLIBCnvtknOoDB+36GL9S6ObcbfxsLV6cZm3krI=
+      - uses: DeterminateSystems/magic-nix-cache-action@v8
       - uses: cachix/cachix-action@v15
         with:
           name: 3dots
           authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
-          skipConfiguring: true
       - name: Check flake
         run: nix flake check
 
   test-shells:
     name: Test Shells
     strategy:
+      fail-fast: false
       matrix:
         os: [ubuntu-latest, macos-latest]
         shell: [default, rust, go, py, node, java]
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 45
     steps:
       - name: Free disk space (Linux)
         if: runner.os == 'Linux'
@@ -63,11 +66,11 @@ jobs:
           extra_nix_config: |
             extra-substituters = https://3dots.cachix.org
             extra-trusted-public-keys = 3dots.cachix.org-1:pnvCVLIBCnvtknOoDB+36GL9S6ObcbfxsLV6cZm3krI=
+      - uses: DeterminateSystems/magic-nix-cache-action@v8
       - uses: cachix/cachix-action@v15
         with:
           name: 3dots
           authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
-          skipConfiguring: true
       - name: Detect system
         id: system
         run: |
@@ -87,6 +90,7 @@ jobs:
       matrix:
         os: [ubuntu-latest, macos-latest]
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 45
     steps:
       - name: Free disk space (Linux)
         if: runner.os == 'Linux'
@@ -104,17 +108,18 @@ jobs:
           extra_nix_config: |
             extra-substituters = https://3dots.cachix.org
             extra-trusted-public-keys = 3dots.cachix.org-1:pnvCVLIBCnvtknOoDB+36GL9S6ObcbfxsLV6cZm3krI=
+      - uses: DeterminateSystems/magic-nix-cache-action@v8
       - uses: cachix/cachix-action@v15
         with:
           name: 3dots
           authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
-          skipConfiguring: true
       - name: Check default homeConfiguration
         run: nix eval .#homeConfigurations.default --impure > /dev/null && echo "✓ default homeConfiguration is valid"
 
   format:
     name: Format Check
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - name: Free disk space
         run: |
@@ -127,9 +132,9 @@ jobs:
           extra_nix_config: |
             extra-substituters = https://3dots.cachix.org
             extra-trusted-public-keys = 3dots.cachix.org-1:pnvCVLIBCnvtknOoDB+36GL9S6ObcbfxsLV6cZm3krI=
+      - uses: DeterminateSystems/magic-nix-cache-action@v8
       - uses: cachix/cachix-action@v15
         with:
           name: 3dots
-          skipConfiguring: true
       - name: Check formatting
         run: nix run nixpkgs#nixpkgs-fmt -- --check .
