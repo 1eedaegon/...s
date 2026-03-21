@@ -45,6 +45,9 @@ in
         cargo-expand
         lldb
 
+        # WASM
+        trunk # Build, bundle & ship Rust WASM to the web
+
         # Protocol buffers
         protobuf
       ];
