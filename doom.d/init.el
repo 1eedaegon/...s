@@ -6,7 +6,7 @@
 (doom! :input
 
        :completion
-       company           ; the ultimate code completion backend
+       (corfu +orderless)  ; modern completion (replaces legacy company)
        vertico           ; the search engine of the future
 
        :ui
@@ -14,19 +14,13 @@
        doom-dashboard    ; a nifty splash screen for Emacs
        hl-todo           ; highlight TODO/FIXME/NOTE/DEPRECATED/HACK/REVIEW
        modeline          ; snazzy, Atom-inspired modeline, plus API
-       ophints           ; highlight the region an operation acts on
        (popup +defaults) ; tame sudden yet inevitable temporary windows
-       treemacs          ; a project drawer, like neotree but cooler
        vc-gutter         ; vcs diff in the fringe
-       vi-tilde-fringe   ; fringe tildes to mark beyond EOB
-       workspaces        ; tab emulation, persistence & separate workspaces
 
        :editor
        (evil +everywhere); come to the dark side, we have cookies
-       file-templates    ; auto-snippets for empty files
-       fold              ; (nstrstrst) universal code folding
+       fold              ; universal code folding
        (format +onsave)  ; automated prettiness
-       snippets          ; my elves. They type so I don't have to
 
        :emacs
        dired             ; making dired pretty [functional]
@@ -42,14 +36,14 @@
 
        :tools
        direnv
-       (eval +overlay)   ; run code, run (also, determine type information on-the-fly)
+       (eval +overlay)   ; run code, run
        lookup            ; navigate your code and its documentation
        magit             ; a git porcelain for Emacs
        lsp
        tree-sitter
 
        :os
-       (:if (featurep :system 'macos) macos) ; improve compatibility with macOS
+       (:if (featurep :system 'macos) macos)
 
        :lang
        emacs-lisp        ; drown in parentheses
@@ -57,10 +51,10 @@
        markdown          ; writing docs for people to ignore
        nix               ; I hereby declare "everything combinator"
        org               ; organize your plain life in plain text
-       (rust +lsp +tree-sitter) ; Fe2O3.unwrap().hierarchical()
+       (rust +lsp +tree-sitter)
        sh                ; she sells {ba,z,fi}sh shells on the C xor
        yaml              ; JSON, but readable
-       (web +lsp +tree-sitter) ; the hierarchical hierarchical
+       (web +lsp +tree-sitter)
 
        :config
        (default +bindings +smartparens))
