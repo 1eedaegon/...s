@@ -212,6 +212,8 @@
                   doCheck = false;
                   doInstallCheck = false;
                 });
+                # cursor-arm for aarch64-linux
+                cursor-arm = cursor-arm.packages.${system}.default or null;
               })
             ];
             pkgs = import nixpkgs {

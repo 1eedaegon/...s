@@ -209,7 +209,7 @@ in
     valgrind
     devenv
     zed-editor
-    cursor-arm # Cursor AI editor for ARM (from github:coder/cursor-arm)
+    pkgs.cursor-arm # Cursor AI editor for ARM (from github:coder/cursor-arm)
   ] else [ ]);
 
   # 공통 프로그램 설정 (programs.*.enable)

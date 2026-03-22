@@ -22,6 +22,41 @@ let
   claudeCode = import ../installations/claude-code.nix {
     inherit config lib pkgs everything-claude-code;
   };
+
+  # Doom Emacs: user-editable config directory
+  homeDirectory = config.home.homeDirectory;
+  userDoomDir = "${homeDirectory}/.doom.d";
+  userDoomDirExists = builtins.pathExists (builtins.toPath userDoomDir);
+
+  # Default doom config (from repo) with user identity injected
+  defaultDoomDir = pkgs.symlinkJoin {
+    name = "doom.d";
+    paths = [
+      (pkgs.writeTextDir "init.el" (builtins.readFile ../doom.d/init.el))
+      (pkgs.writeTextDir "packages.el" (builtins.readFile ../doom.d/packages.el))
+      (pkgs.writeTextDir "config.el" ''
+        ;;; config.el -*- lexical-binding: t; -*-
+        ;; User identity (injected from flake)
+        (setq user-full-name "${username}"
+              user-mail-address "${email}")
+
+        ${builtins.readFile ../doom.d/config.el}
+      '')
+    ];
+  };
+
+  # Activation script: copy defaults to ~/.doom.d/ only if not exists
+  doomActivationScript = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    if [ ! -d "${userDoomDir}" ]; then
+      echo "Initializing Doom Emacs config at ${userDoomDir}..."
+      mkdir -p "${userDoomDir}"
+      cp "${defaultDoomDir}"/init.el "${userDoomDir}/init.el"
+      cp "${defaultDoomDir}"/packages.el "${userDoomDir}/packages.el"
+      cp "${defaultDoomDir}"/config.el "${userDoomDir}/config.el"
+      chmod -R u+w "${userDoomDir}"
+      echo "Done. Edit files in ${userDoomDir} to customize Doom Emacs."
+    fi
+  '';
 in
 {
   home.username = systemUsername;
@@ -35,28 +70,19 @@ in
 
   home.packages = homeInstalls.packages ++ claudeCode.packages;
 
-  # Claude Code activation scripts
-  home.activation = claudeCode.activation;
+  # Activation scripts: Claude Code + Doom Emacs default config
+  home.activation = claudeCode.activation // {
+    initDoomConfig = doomActivationScript;
+  };
 
   programs = lib.recursiveUpdate homeInstalls.programs {
     # Doom Emacs (via nix-doom-emacs-unstraightened)
+    # Uses ~/.doom.d/ if it exists (user-editable), otherwise repo defaults
     doom-emacs = {
       enable = true;
-      doomDir = pkgs.symlinkJoin {
-        name = "doom.d";
-        paths = [
-          (pkgs.writeTextDir "init.el" (builtins.readFile ../doom.d/init.el))
-          (pkgs.writeTextDir "packages.el" (builtins.readFile ../doom.d/packages.el))
-          (pkgs.writeTextDir "config.el" ''
-            ;;; config.el -*- lexical-binding: t; -*-
-            ;; User identity (injected from flake)
-            (setq user-full-name "${username}"
-                  user-mail-address "${email}")
-
-            ${builtins.readFile ../doom.d/config.el}
-          '')
-        ];
-      };
+      doomDir = if userDoomDirExists
+        then builtins.toPath userDoomDir
+        else defaultDoomDir;
     };
 
     # Git
