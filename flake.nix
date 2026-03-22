@@ -45,8 +45,8 @@
       # Example:
       #   "john" = { serviceUsername = "johndoe"; email = "john@example.com"; };
       userRegistry = {
-        "leedaegon"  = { serviceUsername = "1eedaegon"; email = "d8726243@gmail.com"; };
-        "1eedaegon"  = { serviceUsername = "1eedaegon"; email = "d8726243@gmail.com"; };
+        "leedaegon" = { serviceUsername = "1eedaegon"; email = "d8726243@gmail.com"; };
+        "1eedaegon" = { serviceUsername = "1eedaegon"; email = "d8726243@gmail.com"; };
       };
       defaultIdentity = { serviceUsername = null; email = "test@localhost"; };
 
@@ -290,7 +290,8 @@
                   let
                     u = builtins.elemAt config.users 0;
                     identity = lookupUser u;
-                  in {
+                  in
+                  {
                     systemUsername = u;
                     username = identity.serviceUsername;
                     email = identity.email;
