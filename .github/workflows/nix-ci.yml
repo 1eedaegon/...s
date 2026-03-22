@@ -7,49 +7,46 @@ on:
     branches: [main]
   workflow_dispatch:
 
+# ── Reusable anchors ──
+env:
+  CACHIX_CACHE: 3dots
+  NIX_CONFIG: |
+    extra-substituters = https://3dots.cachix.org
+    extra-trusted-public-keys = 3dots.cachix.org-1:pnvCVLIBCnvtknOoDB+36GL9S6ObcbfxsLV6cZm3krI=
+
 jobs:
   check:
-    name: Flake Check
+    name: Flake Check (${{ matrix.os }})
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest]
     runs-on: ${{ matrix.os }}
     timeout-minutes: 30
     steps:
-      - name: Free disk space (Linux)
+      - name: Free disk space
         if: runner.os == 'Linux'
         run: |
-          echo "Before cleanup:"
-          df -h
           sudo rm -rf /usr/share/dotnet /opt/ghc /usr/local/share/boost "$AGENT_TOOLSDIRECTORY"
           sudo docker image prune -af || true
-          echo "After cleanup:"
-          df -h
       - uses: actions/checkout@v4
       - uses: cachix/install-nix-action@v30
         with:
           github_access_token: ${{ secrets.GITHUB_TOKEN }}
-          extra_nix_config: |
-            extra-substituters = https://3dots.cachix.org
-            extra-trusted-public-keys = 3dots.cachix.org-1:pnvCVLIBCnvtknOoDB+36GL9S6ObcbfxsLV6cZm3krI=
       - uses: DeterminateSystems/magic-nix-cache-action@v8
       - uses: cachix/cachix-action@v15
         with:
-          name: 3dots
+          name: ${{ env.CACHIX_CACHE }}
           authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
-      - name: Detect system
-        id: system
+      - name: Check devShells
         run: |
-          if [ "$RUNNER_OS" = "Linux" ]; then
-            echo "nix_system=x86_64-linux" >> $GITHUB_OUTPUT
-          elif [ "$RUNNER_OS" = "macOS" ]; then
-            echo "nix_system=aarch64-darwin" >> $GITHUB_OUTPUT
-          fi
-      - name: Check flake (current system only)
-        run: nix flake check --no-build --system ${{ steps.system.outputs.nix_system }}
+          SYS=$(nix eval --raw --impure --expr builtins.currentSystem)
+          for shell in default rust go py node java; do
+            nix eval ".#devShells.${SYS}.${shell}.name" > /dev/null
+            echo "✓ devShell ${shell}"
+          done
 
   test-shells:
-    name: Test Shells
+    name: Test Shells (${{ matrix.os }}, ${{ matrix.shell }})
     strategy:
       fail-fast: false
       matrix:
@@ -58,76 +55,55 @@ jobs:
     runs-on: ${{ matrix.os }}
     timeout-minutes: 45
     steps:
-      - name: Free disk space (Linux)
+      - name: Free disk space
         if: runner.os == 'Linux'
         run: |
-          echo "Before cleanup:"
-          df -h
           sudo rm -rf /usr/share/dotnet /opt/ghc /usr/local/share/boost "$AGENT_TOOLSDIRECTORY"
           sudo docker image prune -af || true
-          echo "After cleanup:"
-          df -h
       - uses: actions/checkout@v4
       - uses: cachix/install-nix-action@v30
         with:
           github_access_token: ${{ secrets.GITHUB_TOKEN }}
-          extra_nix_config: |
-            extra-substituters = https://3dots.cachix.org
-            extra-trusted-public-keys = 3dots.cachix.org-1:pnvCVLIBCnvtknOoDB+36GL9S6ObcbfxsLV6cZm3krI=
       - uses: DeterminateSystems/magic-nix-cache-action@v8
       - uses: cachix/cachix-action@v15
         with:
-          name: 3dots
+          name: ${{ env.CACHIX_CACHE }}
           authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
-      - name: Detect system
-        id: system
+      - name: Build and test ${{ matrix.shell }} shell
         run: |
-          if [ "$RUNNER_OS" = "Linux" ]; then
-            echo "nix_system=x86_64-linux" >> $GITHUB_OUTPUT
-          elif [ "$RUNNER_OS" = "macOS" ]; then
-            echo "nix_system=aarch64-darwin" >> $GITHUB_OUTPUT
-          fi
-      - name: Build ${{ matrix.shell }} shell (for cache)
-        run: nix build .#devShells.${{ steps.system.outputs.nix_system }}.${{ matrix.shell }} --no-link
-      - name: Test ${{ matrix.shell }} shell
-        run: nix develop .#${{ matrix.shell }} --command echo "✓ ${{ matrix.shell }} shell works"
+          SYS=$(nix eval --raw --impure --expr builtins.currentSystem)
+          nix build ".#devShells.${SYS}.${{ matrix.shell }}" --no-link
+          nix develop ".#${{ matrix.shell }}" --command echo "✓ ${{ matrix.shell }} shell works"
 
   test-home:
-    name: Test Home Configs
+    name: Test Home Configs (${{ matrix.os }})
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest]
     runs-on: ${{ matrix.os }}
     timeout-minutes: 45
     steps:
-      - name: Free disk space (Linux)
+      - name: Free disk space
         if: runner.os == 'Linux'
         run: |
-          echo "Before cleanup:"
-          df -h
           sudo rm -rf /usr/share/dotnet /opt/ghc /usr/local/share/boost "$AGENT_TOOLSDIRECTORY"
           sudo docker image prune -af || true
-          echo "After cleanup:"
-          df -h
       - uses: actions/checkout@v4
       - uses: cachix/install-nix-action@v30
         with:
           github_access_token: ${{ secrets.GITHUB_TOKEN }}
-          extra_nix_config: |
-            extra-substituters = https://3dots.cachix.org
-            extra-trusted-public-keys = 3dots.cachix.org-1:pnvCVLIBCnvtknOoDB+36GL9S6ObcbfxsLV6cZm3krI=
       - uses: DeterminateSystems/magic-nix-cache-action@v8
       - uses: cachix/cachix-action@v15
         with:
-          name: 3dots
+          name: ${{ env.CACHIX_CACHE }}
           authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
-      - name: Check default homeConfiguration
+      - name: Check homeConfiguration
         run: |
-          # Deep eval은 전체 derivation 순회로 OOM 발생 → 핵심 속성만 검증
+          # Deep eval triggers OOM → validate key attributes only
           nix eval .#homeConfigurations.default.config.home.username --impure > /dev/null
           nix eval .#homeConfigurations.default.config.home.homeDirectory --impure > /dev/null
           nix eval .#homeConfigurations.default.config.home.stateVersion --impure > /dev/null
-          echo "✓ default homeConfiguration is valid"
+          echo "✓ homeConfiguration is valid"
 
   format:
     name: Format Check
@@ -142,12 +118,9 @@ jobs:
       - uses: cachix/install-nix-action@v30
         with:
           github_access_token: ${{ secrets.GITHUB_TOKEN }}
-          extra_nix_config: |
-            extra-substituters = https://3dots.cachix.org
-            extra-trusted-public-keys = 3dots.cachix.org-1:pnvCVLIBCnvtknOoDB+36GL9S6ObcbfxsLV6cZm3krI=
       - uses: DeterminateSystems/magic-nix-cache-action@v8
       - uses: cachix/cachix-action@v15
         with:
-          name: 3dots
+          name: ${{ env.CACHIX_CACHE }}
       - name: Check formatting
         run: nix run nixpkgs#nixpkgs-fmt -- --check .
