@@ -32,79 +32,120 @@
     ╚═══════════════╩═══════════════╩══════════════╝
 ```
 
+## TL;DR
 
-## Install Nix
+```bash
+# Install Nix + apply everything in one shot
+curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix | sh -s -- install
+nix run github:1eedaegon/...s --impure
 
-Install determinate systems nix
+# Or just grab a devShell (no install, no fork needed)
+nix develop github:1eedaegon/...s#rust
+```
 
-Use `install-determinate-nix.sh`
+## Quick Start
 
-Or
+### 1. Install Nix
 
 ```bash
 curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix | sh -s -- install
 ```
 
-- Download nix tar file & Make temp dir
-- Make dir /nix
-- Move to /nix
-- Creating 32 build-user-group [Build user group?](https://nixos.org/manual/nix/stable/installation/multi-user#setting-up-the-build-users)
-- Creating default nix profile
-- Set flag experimental-feature to /etc/nix/nix.conf & Some others
-- Setting shell profile
-- Regist nix daemon to systemd
-- Clean temp dir
+### 2. Set your identity
 
-## Make subshell
+Fork this repo, then edit `flake.nix` — replace the `userRegistry` with your own:
 
-default
+```nix
+userRegistry = {
+  # Remove existing entries and add yours:
+  "your-username" = { serviceUsername = "your-service-name"; email = "you@example.com"; };
+};
+```
 
-`❯ nix develop github:1eedaegon/...s`
+This single table drives all configurations (home-manager, NixOS, nix-darwin, Doom Emacs).
+No other files need user-specific changes.
 
-language specific(e.g rust)
+### 3. (Optional) Customize Doom Emacs
 
-`❯ nix develop github:1eedaegon/...s#rust`
+Edit `doom.d/init.el` to select modules, `doom.d/config.el` for settings, `doom.d/packages.el` for extra packages. User identity is auto-injected from `userRegistry`.
 
-## Global Settings using home-manager
+### 4. Apply
 
-`> nix run github:1eedaegon/...s --impure`
+```bash
+# macOS (nix-darwin + home-manager)
+nix run . --impure
 
+# Linux (home-manager only)
+nix run . --impure
+```
+
+## DevShells (no install required)
+
+Use language-specific development environments without installing anything globally:
+
+```bash
+nix develop github:1eedaegon/...s          # default
+nix develop github:1eedaegon/...s#rust     # rust + sccache + trunk (wasm)
+nix develop github:1eedaegon/...s#go       # go + gopls + protobuf
+nix develop github:1eedaegon/...s#py       # python + uv + ruff
+nix develop github:1eedaegon/...s#node     # node + pnpm + turbo
+nix develop github:1eedaegon/...s#java     # jdk + maven + gradle + mvnd
+```
+
+Or in a project directory with direnv:
+
+```bash
+echo 'use flake github:1eedaegon/...s#rust' > .envrc
+direnv allow
+```
+
+## What's included
+
+### Common packages (all platforms)
+
+| Category | Packages |
+|----------|----------|
+| Cloud CLI | awscli2, google-cloud-sdk, azure-cli |
+| Cloudflare | cloudflared, wrangler, flarectl, cf-terraforming |
+| Kubernetes | kubectl, helm, k9s, kubectx, stern, kustomize |
+| Editor | neovim, Doom Emacs (nix-managed) |
+| Build cache | ccache (C/C++) |
+| IaC | opentofu |
+| VPN | tailscale |
+| Formal verification | TLA+, z3, Isabelle, cvc5 |
+
+### Per-language build cache
+
+| Language | Tool | Location |
+|----------|------|----------|
+| Rust | sccache | devShell `#rust` |
+| Node.js | turbo (Turborepo) | devShell `#node` |
+| Java | mvnd (Maven Daemon) | devShell `#java` |
+| C/C++ | ccache | common (all shells) |
+| Go | built-in `$GOCACHE` | n/a |
+
+### Platform support
+
+| Platform | devShell | home-manager | nix-darwin | NixOS |
+|----------|----------|-------------|------------|-------|
+| aarch64-darwin (Apple Silicon) | O | O | O | - |
+| x86_64-darwin | O | O | O | - |
+| x86_64-linux | O | O | - | O |
+| aarch64-linux | O | O | - | O |
 
 ## Uninstall
 
-1. Clean devshells
-
-`❯ nix-collect-garbage`
-
-2. Clean home-manager
-
-`❯ nix run home-manager -- uninstall`
-
-3. Clean profile
-
-`> nix profie remove --all`
-
-4. Search profile
-
-`❯ nix profile list`
-
 ```bash
-❯ nix profile list
-Name:               git+file:///Users/leedaegon/workspace/...s#packages.aarch64-darwin.default
-Flake attribute:    packages.aarch64-darwin.default
-Original flake URL: git+file:///Users/leedaegon/workspace/...s
-Locked flake URL:   git+file:///Users/leedaegon/workspace/...s
-Store paths:        /nix/store/ggcd2k0fxjnyfc0qvc3s9bnqdyshz7rx-default
-...
-# And other profiles...
-```
+# 1. Clean devshells
+nix-collect-garbage
 
-5. Remove specific profile
+# 2. Clean home-manager
+nix run home-manager -- uninstall
 
-`❯ nix profile remove [NAME]`
+# 3. Remove all profiles
+nix profile remove --all
 
-```bash
-
-❯ nix profile remove git+file:///Users/leedaegon/workspace/...s#packages.aarch64-darwin.default
-
+# 4. Or remove specific profile
+nix profile list
+nix profile remove [NAME]
 ```

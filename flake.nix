@@ -32,10 +32,32 @@
       url = "github:coder/cursor-arm";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    nix-doom-emacs-unstraightened = {
+      url = "github:marienz/nix-doom-emacs-unstraightened";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
-  outputs = { self, nixpkgs, flake-utils, home-manager, nix-darwin, nix-homebrew, rust-overlay, jetpack, everything-claude-code, cursor-arm, ... }:
+  outputs = { self, nixpkgs, flake-utils, home-manager, nix-darwin, nix-homebrew, rust-overlay, jetpack, everything-claude-code, cursor-arm, nix-doom-emacs-unstraightened, ... }:
     let
+      # ── User identity mapping (single source of truth) ──
+      # Replace with your own identity. All configurations derive from this table.
+      # Example:
+      #   "john" = { serviceUsername = "johndoe"; email = "john@example.com"; };
+      userRegistry = {
+        "leedaegon"  = { serviceUsername = "1eedaegon"; email = "d8726243@gmail.com"; };
+        "1eedaegon"  = { serviceUsername = "1eedaegon"; email = "d8726243@gmail.com"; };
+      };
+      defaultIdentity = { serviceUsername = null; email = "test@localhost"; };
+
+      # Lookup helpers
+      lookupUser = user:
+        let entry = userRegistry.${user} or defaultIdentity;
+        in {
+          serviceUsername = if entry.serviceUsername != null then entry.serviceUsername else user;
+          email = entry.email;
+        };
+
       getHomeDirectory = system: username:
         if builtins.match ".*darwin.*" system != null then
           "/Users/${username}"
@@ -166,13 +188,13 @@
 
             # 기본값 처리
             user = if currentUser == "" then "nobody" else currentUser;
+            identity = lookupUser user;
 
-            # 서비스 유저명 및 이메일 매핑
-            serviceUsername = if user == "leedaegon" then "1eedaegon" else user;
+            # 서비스 유저명 및 이메일 매핑 (userRegistry에서 조회)
+            serviceUsername = identity.serviceUsername;
             email =
               if envEmail != "" then envEmail
-              else if user == "leedaegon" || user == "1eedaegon" then "d8726243@gmail.com"
-              else "test@localhost";
+              else identity.email;
 
             # 현재 호스트 시스템 사용
             system = currentSystem;
@@ -205,6 +227,7 @@
               inherit email system everything-claude-code;
             };
             modules = [
+              nix-doom-emacs-unstraightened.homeModule
               ./home/home.nix
               {
                 home.username = user;
@@ -263,17 +286,20 @@
                 home-manager.useUserPackages = true;
                 home-manager.backupFileExtension = "backup";
 
-                home-manager.extraSpecialArgs = {
-                  systemUsername = builtins.elemAt config.users 0;
-                  username =
-                    let u = builtins.elemAt config.users 0;
-                    in if u == "leedaegon" || u == "1eedaegon" then "1eedaegon" else u;
-                  email =
-                    let u = builtins.elemAt config.users 0;
-                    in if u == "leedaegon" || u == "1eedaegon" then "d8726243@gmail.com" else "test@localhost";
-                  system = config.system;
-                  inherit everything-claude-code;
-                };
+                home-manager.extraSpecialArgs =
+                  let
+                    u = builtins.elemAt config.users 0;
+                    identity = lookupUser u;
+                  in {
+                    systemUsername = u;
+                    username = identity.serviceUsername;
+                    email = identity.email;
+                    system = config.system;
+                    inherit everything-claude-code;
+                  };
+                home-manager.sharedModules = [
+                  nix-doom-emacs-unstraightened.homeModule
+                ];
 
                 home-manager.users = builtins.listToAttrs (
                   map
@@ -293,10 +319,9 @@
         let
           mkDarwinConfig = { system, username }:
             let
-              serviceUsername = if username == "leedaegon" then "1eedaegon" else username;
-              email =
-                if username == "leedaegon" || username == "1eedaegon" then "d8726243@gmail.com"
-                else "test@localhost";
+              identity = lookupUser username;
+              serviceUsername = identity.serviceUsername;
+              email = identity.email;
 
               overlays = [
                 (import rust-overlay)
@@ -345,6 +370,9 @@
                     username = serviceUsername;
                     inherit email system everything-claude-code;
                   };
+                  home-manager.sharedModules = [
+                    nix-doom-emacs-unstraightened.homeModule
+                  ];
                   home-manager.users.${username} = import ./home/home.nix;
                 }
                 {

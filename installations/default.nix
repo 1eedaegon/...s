@@ -80,6 +80,15 @@ in
 
     # Editor
     neovim
+    # Emacs + Doom: nix-doom-emacs-unstraightened flake으로 관리 (home/home.nix)
+
+    # Doom Emacs system dependencies
+    fd # fast file finder (doom uses this)
+    sqlite # org-roam, magit-forge
+    graphviz # org-roam graph
+    shellcheck # sh/bash linting
+    editorconfig-core-c # .editorconfig support
+    nixfmt-rfc-style # nix formatting for doom nix module
 
     # Debuggers
     lldb

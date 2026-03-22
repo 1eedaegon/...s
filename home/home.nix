@@ -39,6 +39,26 @@ in
   home.activation = claudeCode.activation;
 
   programs = lib.recursiveUpdate homeInstalls.programs {
+    # Doom Emacs (via nix-doom-emacs-unstraightened)
+    doom-emacs = {
+      enable = true;
+      doomDir = pkgs.symlinkJoin {
+        name = "doom.d";
+        paths = [
+          (pkgs.writeTextDir "init.el" (builtins.readFile ../doom.d/init.el))
+          (pkgs.writeTextDir "packages.el" (builtins.readFile ../doom.d/packages.el))
+          (pkgs.writeTextDir "config.el" ''
+            ;;; config.el -*- lexical-binding: t; -*-
+            ;; User identity (injected from flake)
+            (setq user-full-name "${username}"
+                  user-mail-address "${email}")
+
+            ${builtins.readFile ../doom.d/config.el}
+          '')
+        ];
+      };
+    };
+
     # Git
     git = homeInstalls.programs.git // homeConfig.git;
 

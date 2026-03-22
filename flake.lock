@@ -62,6 +62,45 @@
         "type": "github"
       }
     },
+    "doomemacs": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1774080407,
+        "narHash": "sha256-FYbalilgDFjIVwK+D6DjDos1IMmMGA20lRf8k6Ykm1Y=",
+        "owner": "doomemacs",
+        "repo": "doomemacs",
+        "rev": "d8d75443d39d95f3c5256504eb838e0acc62ef44",
+        "type": "github"
+      },
+      "original": {
+        "owner": "doomemacs",
+        "repo": "doomemacs",
+        "type": "github"
+      }
+    },
+    "emacs-overlay": {
+      "inputs": {
+        "nixpkgs": [
+          "nix-doom-emacs-unstraightened"
+        ],
+        "nixpkgs-stable": [
+          "nix-doom-emacs-unstraightened"
+        ]
+      },
+      "locked": {
+        "lastModified": 1774168555,
+        "narHash": "sha256-8MaMTblYgRxfoHCYCVsVKg7bfD1YOwoWtgFKofOqJLo=",
+        "owner": "nix-community",
+        "repo": "emacs-overlay",
+        "rev": "cc288f918615db71ed0afeff4342caab52ffa0e9",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nix-community",
+        "repo": "emacs-overlay",
+        "type": "github"
+      }
+    },
     "everything-claude-code": {
       "flake": false,
       "locked": {
@@ -157,6 +196,29 @@
         "type": "github"
       }
     },
+    "nix-doom-emacs-unstraightened": {
+      "inputs": {
+        "doomemacs": "doomemacs",
+        "emacs-overlay": "emacs-overlay",
+        "nixpkgs": [
+          "nixpkgs"
+        ],
+        "systems": "systems_2"
+      },
+      "locked": {
+        "lastModified": 1774169581,
+        "narHash": "sha256-d+UHSquqxQxxmH0zw+z7x5ce40aXpc0uKgiBQDyxBnY=",
+        "owner": "marienz",
+        "repo": "nix-doom-emacs-unstraightened",
+        "rev": "7e894222a0b3254dbb5810e9ba0d0ff7acd50089",
+        "type": "github"
+      },
+      "original": {
+        "owner": "marienz",
+        "repo": "nix-doom-emacs-unstraightened",
+        "type": "github"
+      }
+    },
     "nix-homebrew": {
       "inputs": {
         "brew-src": "brew-src"
@@ -199,6 +261,7 @@
         "home-manager": "home-manager",
         "jetpack": "jetpack",
         "nix-darwin": "nix-darwin",
+        "nix-doom-emacs-unstraightened": "nix-doom-emacs-unstraightened",
         "nix-homebrew": "nix-homebrew",
         "nixpkgs": "nixpkgs",
         "rust-overlay": "rust-overlay"
@@ -225,6 +288,21 @@
       }
     },
     "systems": {
+      "locked": {
+        "lastModified": 1681028828,
+        "narHash": "sha256-Vy1rq5AaRuLzOxct8nz4T6wlgyUR7zLU309k9mBC768=",
+        "owner": "nix-systems",
+        "repo": "default",
+        "rev": "da67096a3b9bf56a91d16901293e51ba5b49a27e",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nix-systems",
+        "repo": "default",
+        "type": "github"
+      }
+    },
+    "systems_2": {
       "locked": {
         "lastModified": 1681028828,
         "narHash": "sha256-Vy1rq5AaRuLzOxct8nz4T6wlgyUR7zLU309k9mBC768=",
