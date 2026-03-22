@@ -80,7 +80,8 @@ in
     # Uses ~/.doom.d/ if it exists (user-editable), otherwise repo defaults
     doom-emacs = {
       enable = true;
-      doomDir = if userDoomDirExists
+      doomDir =
+        if userDoomDirExists
         then builtins.toPath userDoomDir
         else defaultDoomDir;
     };
