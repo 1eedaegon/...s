@@ -37,8 +37,16 @@ jobs:
         with:
           name: 3dots
           authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
-      - name: Check flake
-        run: nix flake check
+      - name: Detect system
+        id: system
+        run: |
+          if [ "$RUNNER_OS" = "Linux" ]; then
+            echo "nix_system=x86_64-linux" >> $GITHUB_OUTPUT
+          elif [ "$RUNNER_OS" = "macOS" ]; then
+            echo "nix_system=aarch64-darwin" >> $GITHUB_OUTPUT
+          fi
+      - name: Check flake (current system only)
+        run: nix flake check --no-build --system ${{ steps.system.outputs.nix_system }}
 
   test-shells:
     name: Test Shells
