@@ -88,7 +88,7 @@ in
     graphviz # org-roam graph
     shellcheck # sh/bash linting
     editorconfig-core-c # .editorconfig support
-    nixfmt-rfc-style # nix formatting for doom nix module
+    nixfmt # nix formatting for doom nix module
 
     # Debuggers
     lldb
