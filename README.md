@@ -67,7 +67,44 @@ No other files need user-specific changes.
 
 ### 3. (Optional) Customize Doom Emacs
 
-Edit `doom.d/init.el` to select modules, `doom.d/config.el` for settings, `doom.d/packages.el` for extra packages. User identity is auto-injected from `userRegistry`.
+Doom Emacs is installed via `nix-doom-emacs-unstraightened`. After `nix run .`:
+
+- `~/.doom.d/` — Doom config (init.el, config.el, packages.el)
+- Knowledge base directory — auto-created with folder structure + `git init`
+
+**Set your knowledge base directory** — edit one line in `~/.doom.d/config.el`:
+
+```elisp
+(defvar knowledge-base (expand-file-name "~/your-knowledge-base"))
+```
+
+All paths (org-roam, citar, agenda, journal) are derived from this single variable. The directory is auto-created on first `nix run .` with this structure:
+
+```
+~/your-knowledge-base/       ← git initialized
+├── inbox/                   ← Quick capture
+├── papers/reading/          ← Paper notes (org-roam)
+├── concepts/                ← Concept notes (Zettelkasten)
+├── pe/topics/               ← Study topic notes
+├── pe/mock-answers/         ← Daily writing practice (org-journal)
+├── review/                  ← Paper review notes
+├── weekly/                  ← Weekly review logs
+├── shutdown.org             ← Daily checklist (org-agenda)
+├── references.bib           ← Zotero auto-export (citar)
+└── .gitignore               ← PDF/binary excluded
+```
+
+Key shortcuts:
+
+| Key | Action |
+|-----|--------|
+| `SPC n r f` | Find/create org-roam note |
+| `SPC n r c` | Capture with template (paper/concept/review) |
+| `SPC n r i` | Insert link to another note |
+| `SPC n j` | Open today's journal |
+| `SPC o a` | Open agenda (shutdown checklist) |
+| `SPC @` | Search Zotero bibliography |
+| `SPC g g` | Git (Magit) |
 
 ### 4. Apply
 

@@ -1,5 +1,9 @@
 ;;; config.el -*- lexical-binding: t; -*-
-;; Note: user-full-name and user-mail-address are injected by Nix
+;; Note: user-full-name and user-mail-address are injected by Nix from userRegistry.
+
+;; ── Knowledge base path (CHANGE THIS to your location) ──
+(defvar knowledge-base (expand-file-name "~/research-git")
+  "Root directory for org-roam, papers, journal, and agenda files.")
 
 ;; Theme
 (setq doom-theme 'doom-one)
@@ -11,24 +15,15 @@
 (setq doom-font (font-spec :family "JetBrainsMono Nerd Font" :size 14)
       doom-variable-pitch-font (font-spec :family "FiraCode Nerd Font" :size 14))
 
-;; ── org + org-roam ──
-(setq org-directory (expand-file-name "~/research-git"))
-(setq org-roam-directory (expand-file-name "~/research-git"))
-(setq org-roam-db-location (expand-file-name "~/research-git/.org-roam.db"))
-
-;; ── citar (Zotero BibTeX) ──
-(setq citar-bibliography
-      (list (expand-file-name "~/research-git/references.bib")))
-(setq citar-notes-paths
-      (list (expand-file-name "~/research-git/papers/reading")))
-
-;; ── org-agenda (shutdown checklist) ──
-(setq org-agenda-files
-      (list (expand-file-name "~/research-git/shutdown.org")
-            (expand-file-name "~/research-git/weekly/")))
-
-;; ── org-journal (PE writing practice) ──
-(setq org-journal-dir (expand-file-name "~/research-git/pe/mock-answers/"))
+;; ── Paths derived from vault ──
+(setq org-directory knowledge-base)
+(setq org-roam-directory knowledge-base)
+(setq org-roam-db-location (expand-file-name ".org-roam.db" knowledge-base))
+(setq citar-bibliography (list (expand-file-name "references.bib" knowledge-base)))
+(setq citar-notes-paths (list (expand-file-name "papers/reading" knowledge-base)))
+(setq org-agenda-files (list (expand-file-name "shutdown.org" knowledge-base)
+                             (expand-file-name "weekly/" knowledge-base)))
+(setq org-journal-dir (expand-file-name "pe/mock-answers/" knowledge-base))
 (setq org-journal-file-format "%Y-%m-%d.org")
 (setq org-journal-date-format "#+title: %Y-%m-%d PE Writing\n")
 

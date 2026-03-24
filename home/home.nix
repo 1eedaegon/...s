@@ -45,8 +45,12 @@ let
     ];
   };
 
-  # Activation script: copy defaults to ~/.doom.d/ only if not exists
+  # Knowledge base directory (read from doom.d/config.el default)
+  kbDir = "${homeDirectory}/research-git";
+
+  # Activation script: init doom config + knowledge base directory
   doomActivationScript = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    # Doom config
     if [ ! -d "${userDoomDir}" ]; then
       echo "Initializing Doom Emacs config at ${userDoomDir}..."
       mkdir -p "${userDoomDir}"
@@ -55,6 +59,43 @@ let
       cp "${defaultDoomDir}"/config.el "${userDoomDir}/config.el"
       chmod -R u+w "${userDoomDir}"
       echo "Done. Edit files in ${userDoomDir} to customize Doom Emacs."
+    fi
+
+    # Knowledge base directory structure + git init
+    if [ ! -d "${kbDir}" ]; then
+      echo "Initializing knowledge base at ${kbDir}..."
+      mkdir -p "${kbDir}"/{inbox,concepts,weekly,blog-drafts}
+      mkdir -p "${kbDir}"/papers/{reading,done}
+      mkdir -p "${kbDir}"/projects/{research,saas,work}
+      mkdir -p "${kbDir}"/pe/{topics,keywords,mock-answers,answer-templates}
+      mkdir -p "${kbDir}"/review/{protein,multimodal}
+
+      cat > "${kbDir}/shutdown.org" << 'SHUTDOWN'
+    #+title: Shutdown
+
+    * Daily checklist
+    - [ ] Anki cards created
+    - [ ] inbox cleared
+    - [ ] Tomorrow's paper ready
+    - [ ] Deep Block goal written
+
+    ** Tomorrow's goal
+
+    SHUTDOWN
+
+      cat > "${kbDir}/.gitignore" << 'GITIGNORE'
+    .DS_Store
+    *.elc
+    .org-id-locations
+    .org-roam.db
+    .#*
+    \#*\#
+    *.pdf
+    *.epub
+    GITIGNORE
+
+      cd "${kbDir}" && ${pkgs.git}/bin/git init
+      echo "Done. Knowledge base initialized at ${kbDir}"
     fi
   '';
 in
