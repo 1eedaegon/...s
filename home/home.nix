@@ -4,7 +4,7 @@ let
   isDarwin = pkgs.stdenv.isDarwin;
 
   # Import new module structures
-  homeInstalls = import ../installations/home.nix {
+  homeInstalls = import ./packages.nix {
     inherit config lib pkgs email system;
     inherit systemUsername username;
   };
@@ -19,7 +19,7 @@ let
   commonExec = import ../executions/default.nix { inherit pkgs system; };
 
   # Claude Code configuration
-  claudeCode = import ../installations/claude-code.nix {
+  claudeCode = import ./claude-code.nix {
     inherit config lib pkgs everything-claude-code;
   };
 
