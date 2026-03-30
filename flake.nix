@@ -40,6 +40,8 @@
 
   outputs = { self, nixpkgs, flake-utils, home-manager, nix-darwin, nix-homebrew, rust-overlay, jetpack, everything-claude-code, cursor-arm, nix-doom-emacs-unstraightened, ... }:
     let
+      lib = nixpkgs.lib;
+
       # ── User identity mapping (single source of truth) ──
       # Replace with your own identity. All configurations derive from this table.
       # Example:
@@ -57,6 +59,11 @@
           serviceUsername = if entry.serviceUsername != null then entry.serviceUsername else user;
           email = entry.email;
         };
+
+      # All unique serviceUsernames from registry (for NixOS user creation)
+      registeredUsers = lib.unique (
+        lib.mapAttrsToList (_: v: v.serviceUsername) userRegistry
+      );
 
       getHomeDirectory = system: username:
         if builtins.match ".*darwin.*" system != null then
@@ -79,13 +86,36 @@
         in
 
         {
+          # x86_64 full desktop (legacy, uses desktop.nix)
           "desktop" = {
             system = nixosSystem;
             hostname = "1eedaegon";
-            users = [ "1eedaegon" ];
-            modules = [
-              ./nixos/desktop.nix
-            ];
+            users = registeredUsers;
+            modules = [ ./nixos/desktop.nix ];
+          };
+
+          # x86_64 AMD/Intel development workstation
+          "workstation" = {
+            system = "x86_64-linux";
+            hostname = "workstation";
+            users = registeredUsers;
+            modules = [ ./nixos/workstation.nix ];
+          };
+
+          # aarch64 Jetson (Orin/Thor) — GPU + ML inference
+          "jetson" = {
+            system = "aarch64-linux";
+            hostname = "jetson";
+            users = registeredUsers;
+            modules = [ ./nixos/jetson.nix ];
+          };
+
+          # aarch64 SBC (Odroid, RPi) — lightweight headless
+          "sbc" = {
+            system = "aarch64-linux";
+            hostname = "sbc";
+            users = registeredUsers;
+            modules = [ ./nixos/sbc.nix ];
           };
         };
 

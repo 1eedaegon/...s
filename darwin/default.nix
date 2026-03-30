@@ -42,13 +42,18 @@
     };
   };
 
-  # Nix trusted-users (Determinate Nix uses nix.custom.conf)
+  # Nix trusted-users + store optimization (Determinate Nix uses nix.custom.conf)
   system.activationScripts.postActivation.text = ''
     CONF="/etc/nix/nix.custom.conf"
     if ! grep -q "trusted-users" "$CONF" 2>/dev/null; then
       echo "trusted-users = root ${systemUsername}" >> "$CONF"
-      launchctl kickstart -k system/systems.determinate.nix-daemon 2>/dev/null || true
     fi
+    if ! grep -q "auto-optimise-store" "$CONF" 2>/dev/null; then
+      echo "auto-optimise-store = true" >> "$CONF"
+      echo "min-free = 1073741824" >> "$CONF"
+      echo "max-free = 3221225472" >> "$CONF"
+    fi
+    launchctl kickstart -k system/systems.determinate.nix-daemon 2>/dev/null || true
   '';
 
   # Enable zsh (default shell on macOS)
