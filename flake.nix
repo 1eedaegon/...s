@@ -94,15 +94,31 @@
           };
         };
         mkEnv = envLib.mkEnv;
+        # Combination packages
+        combinations = {
+          fullstack = import ./packages/combinations/fullstack.nix { inherit pkgs; };
+          ml        = import ./packages/combinations/ml.nix { inherit pkgs; };
+          infra     = import ./packages/combinations/infra.nix { inherit pkgs; };
+          research  = import ./packages/combinations/research.nix { inherit pkgs; };
+        };
       in {
         devShells = {
+          # Toolchains (independent, each includes base)
           default = mkEnv { name = "default"; };
           rust    = mkEnv { name = "rust"; };
           go      = mkEnv { name = "go"; };
           py      = mkEnv { name = "py"; };
           node    = mkEnv { name = "node"; };
           java    = mkEnv { name = "java"; };
-          custom  = mkEnv { name = "default"; extraPackages = with pkgs; [ docker kubectl ]; extraShellHook = "echo 'Custom environment loaded'"; };
+
+          # Combinations (compose toolchains, each includes base)
+          fullstack = mkEnv { name = "default"; extraPackages = combinations.fullstack.packages; };
+          ml        = mkEnv { name = "default"; extraPackages = combinations.ml.packages; };
+          infra     = mkEnv { name = "default"; extraPackages = combinations.infra.packages; };
+          research  = mkEnv { name = "default"; extraPackages = combinations.research.packages; };
+
+          # Custom example
+          custom = mkEnv { name = "default"; extraPackages = with pkgs; [ docker kubectl ]; extraShellHook = "echo 'Custom environment loaded'"; };
         };
 
         apps.default = {
