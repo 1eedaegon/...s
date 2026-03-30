@@ -42,75 +42,47 @@
     let
       lib = nixpkgs.lib;
 
-      # ── User identity mapping (single source of truth) ──
-      # Replace with your own identity. All configurations derive from this table.
-      # Example:
-      #   "john" = { serviceUsername = "johndoe"; email = "john@example.com"; };
+      # ── User config (EDIT THIS) ──
       userRegistry = {
-        "leedaegon" = { serviceUsername = "1eedaegon"; email = "d8726243@gmail.com"; };
-        "1eedaegon" = { serviceUsername = "1eedaegon"; email = "d8726243@gmail.com"; };
+        "leedaegon"  = { serviceUsername = "1eedaegon"; email = "d8726243@gmail.com"; };
+        "1eedaegon"  = { serviceUsername = "1eedaegon"; email = "d8726243@gmail.com"; };
       };
-      defaultIdentity = { serviceUsername = null; email = "test@localhost"; };
 
-      # Lookup helpers
-      lookupUser = user:
-        let entry = userRegistry.${user} or defaultIdentity;
-        in {
-          serviceUsername = if entry.serviceUsername != null then entry.serviceUsername else user;
-          email = entry.email;
-        };
+      # ── Lib imports ──
+      identity = import ./lib/identity.nix { inherit lib userRegistry; };
+      overlaysLib = import ./lib/overlays.nix { inherit rust-overlay jetpack cursor-arm; };
 
-      # All unique serviceUsernames from registry (for NixOS user creation)
-      registeredUsers = lib.unique (
-        lib.mapAttrsToList (_: v: v.serviceUsername) userRegistry
-      );
+      inherit (identity) lookupUser registeredUsers getHomeDirectory;
 
-      getHomeDirectory = system: username:
-        if builtins.match ".*darwin.*" system != null then
-          "/Users/${username}"
-        else if username == "root" then
-          "/root"
-        else
-          "/home/${username}";
-
-      # For NixOS Global profile
+      # ── NixOS profiles (data only) ──
       nixosSystemConfigs =
         let
           currentSystem = builtins.currentSystem or "x86_64-linux";
-          # NixOS support only Linux
           nixosSystem =
             if builtins.match ".*darwin.*" currentSystem != null then
-              "x86_64-linux"  # darwin, use x86_64-linux
+              "x86_64-linux"
             else
-              currentSystem; # linux
+              currentSystem;
         in
-
         {
-          # x86_64 full desktop (legacy, uses desktop.nix)
           "desktop" = {
             system = nixosSystem;
             hostname = "1eedaegon";
             users = registeredUsers;
             modules = [ ./nixos/desktop.nix ];
           };
-
-          # x86_64 AMD/Intel development workstation
           "workstation" = {
             system = "x86_64-linux";
             hostname = "workstation";
             users = registeredUsers;
             modules = [ ./nixos/workstation.nix ];
           };
-
-          # aarch64 Jetson (Orin/Thor) — GPU + ML inference
           "jetson" = {
             system = "aarch64-linux";
             hostname = "jetson";
             users = registeredUsers;
             modules = [ ./nixos/jetson.nix ];
           };
-
-          # aarch64 SBC (Odroid, RPi) — lightweight headless
           "sbc" = {
             system = "aarch64-linux";
             hostname = "sbc";
@@ -122,28 +94,14 @@
     in
     (flake-utils.lib.eachDefaultSystem (system:
       let
-        # CUDA disabled: libcusparse_lt is broken on x86_64-linux in nixpkgs
-        # Enable manually if needed with allowUnsupportedSystem
-        overlays = [
-          (import rust-overlay)
-          jetpack.overlays.default
-          (final: prev: {
-            nix = prev.nix.overrideAttrs (old: {
-              doCheck = false;
-              doInstallCheck = false;
-            });
-            rustup = prev.rustup.overrideAttrs (old: {
-              doCheck = false;
-              doInstallCheck = false;
-            });
-            # cursor-arm for aarch64-linux
-            cursor-arm = cursor-arm.packages.${system}.default or null;
-          })
-        ];
-        pkgs = import nixpkgs {
-          inherit system overlays;
-          config.allowUnfree = true;
-          config.cudaSupport = false;
+        overlays = overlaysLib.mkOverlays {
+          includeJetpack = true;
+          includeCursorArm = true;
+          inherit system;
+        };
+        pkgs = overlaysLib.mkPkgs {
+          inherit nixpkgs system overlays;
+          cudaSupport = false;
         };
 
         moduleLoader = import ./lib/module-loader.nix { inherit pkgs system; };
@@ -160,7 +118,6 @@
           };
         };
         mkEnv = envLib.mkEnv;
-
       in
       {
         devShells = {
@@ -170,8 +127,6 @@
           py = mkEnv { name = "py"; };
           node = mkEnv { name = "node"; };
           java = mkEnv { name = "java"; };
-
-          # Custom environments
           custom = mkEnv {
             name = "default";
             extraPackages = with pkgs; [ docker kubectl ];
@@ -181,13 +136,10 @@
           };
         };
 
-        # nix run . 으로 darwin-rebuild 또는 home-manager switch 실행
         apps.default = {
           type = "app";
           program = "${pkgs.writeShellScript "nix-switch" ''
             if [[ "$(uname)" == "Darwin" ]]; then
-              # macOS: use nix-darwin (requires sudo)
-              # Use sudo -H to reset HOME to root, avoiding "$HOME is not owned by you" warning
               if command -v darwin-rebuild &> /dev/null; then
                 sudo -H darwin-rebuild switch --flake ${self}#default --impure "$@"
               else
@@ -195,61 +147,34 @@
                 sudo -H nix run nix-darwin -- switch --flake ${self}#default --impure "$@"
               fi
             else
-              # Linux: use home-manager
               ${home-manager.packages.${system}.home-manager}/bin/home-manager switch --flake ${self}#default --impure -b backup "$@"
             fi
           ''}";
         };
 
-        # Export modules for debugging/testing
         inherit modules;
       }
     )) //
     {
+      # ── homeConfigurations ──
       homeConfigurations = {
         default =
           let
-            # 런타임 감지 (--impure 필요)
             currentUser = builtins.getEnv "USER";
             currentSystem = builtins.currentSystem;
-
-            # 환경변수에서 email 가져오기
             envEmail = builtins.getEnv "EMAIL";
 
-            # 기본값 처리
             user = if currentUser == "" then "nobody" else currentUser;
-            identity = lookupUser user;
-
-            # 서비스 유저명 및 이메일 매핑 (userRegistry에서 조회)
-            serviceUsername = identity.serviceUsername;
-            email =
-              if envEmail != "" then envEmail
-              else identity.email;
-
-            # 현재 호스트 시스템 사용
+            ident = lookupUser user;
+            serviceUsername = ident.serviceUsername;
+            email = if envEmail != "" then envEmail else ident.email;
             system = currentSystem;
 
-            overlays = [
-              (import rust-overlay)
-              # jetpack overlay는 devShell/nixos 전용 (CUDA/Jetson)
-              # homeConfigurations에서는 불필요하며 평가 시간을 대폭 증가시킴
-              (final: prev: {
-                nix = prev.nix.overrideAttrs (old: {
-                  doCheck = false;
-                  doInstallCheck = false;
-                });
-                rustup = prev.rustup.overrideAttrs (old: {
-                  doCheck = false;
-                  doInstallCheck = false;
-                });
-                # cursor-arm for aarch64-linux
-                cursor-arm = cursor-arm.packages.${system}.default or null;
-              })
-            ];
-            pkgs = import nixpkgs {
-              inherit system overlays;
-              config.allowUnfree = true;
+            overlays = overlaysLib.mkOverlays {
+              includeCursorArm = true;
+              inherit system;
             };
+            pkgs = overlaysLib.mkPkgs { inherit nixpkgs system overlays; };
           in
           home-manager.lib.homeManagerConfiguration {
             inherit pkgs;
@@ -270,7 +195,8 @@
             ];
           };
       };
-      # nixosConfigurations (기존 유지)
+
+      # ── nixosConfigurations ──
       nixosConfigurations = builtins.mapAttrs
         (hostName: config:
           nixpkgs.lib.nixosSystem {
@@ -284,26 +210,23 @@
                 system.stateVersion = "24.05";
                 networking.hostName = config.hostname;
                 nix.settings.experimental-features = [ "nix-command" "flakes" ];
-                nixpkgs.overlays = [
-                  (import rust-overlay)
-                  jetpack.overlays.default
-                ];
+                nixpkgs.overlays = overlaysLib.mkOverlays {
+                  includeJetpack = true;
+                  system = config.system;
+                };
                 nixpkgs.config.allowUnfree = true;
-                # CUDA disabled by default; enable per-host if needed
                 nixpkgs.config.cudaSupport = false;
 
                 users.users = builtins.listToAttrs (
-                  map
-                    (username: {
-                      name = username;
-                      value = {
-                        isNormalUser = true;
-                        description = username;
-                        home = getHomeDirectory config.system username;
-                        extraGroups = [ "networkmanager" "wheel" "docker" ];
-                      };
-                    })
-                    config.users
+                  map (username: {
+                    name = username;
+                    value = {
+                      isNormalUser = true;
+                      description = username;
+                      home = getHomeDirectory config.system username;
+                      extraGroups = [ "networkmanager" "wheel" "docker" ];
+                    };
+                  }) config.users
                 );
 
                 programs.zsh.enable = true;
@@ -321,12 +244,11 @@
                 home-manager.extraSpecialArgs =
                   let
                     u = builtins.elemAt config.users 0;
-                    identity = lookupUser u;
-                  in
-                  {
+                    ident = lookupUser u;
+                  in {
                     systemUsername = u;
-                    username = identity.serviceUsername;
-                    email = identity.email;
+                    username = ident.serviceUsername;
+                    email = ident.email;
                     system = config.system;
                     inherit everything-claude-code;
                   };
@@ -335,45 +257,27 @@
                 ];
 
                 home-manager.users = builtins.listToAttrs (
-                  map
-                    (username: {
-                      name = username;
-                      value = import ./home/home.nix;
-                    })
-                    config.users
+                  map (username: {
+                    name = username;
+                    value = import ./home/home.nix;
+                  }) config.users
                 );
               }
             ] ++ config.modules;
           })
         nixosSystemConfigs;
 
-      # darwinConfigurations for macOS
+      # ── darwinConfigurations ──
       darwinConfigurations =
         let
           mkDarwinConfig = { system, username }:
             let
-              identity = lookupUser username;
-              serviceUsername = identity.serviceUsername;
-              email = identity.email;
+              ident = lookupUser username;
+              serviceUsername = ident.serviceUsername;
+              email = ident.email;
 
-              overlays = [
-                (import rust-overlay)
-                (final: prev: {
-                  nix = prev.nix.overrideAttrs (old: {
-                    doCheck = false;
-                    doInstallCheck = false;
-                  });
-                  rustup = prev.rustup.overrideAttrs (old: {
-                    doCheck = false;
-                    doInstallCheck = false;
-                  });
-                })
-              ];
-
-              pkgs = import nixpkgs {
-                inherit system overlays;
-                config.allowUnfree = true;
-              };
+              overlays = overlaysLib.mkOverlays { inherit system; };
+              pkgs = overlaysLib.mkPkgs { inherit nixpkgs system overlays; };
             in
             nix-darwin.lib.darwinSystem {
               inherit system;
@@ -418,8 +322,6 @@
             };
         in
         {
-          # Default darwin configuration (auto-detect current user)
-          # SUDO_USER is set when running with sudo, fallback to USER
           default = mkDarwinConfig {
             system = builtins.currentSystem;
             username =
@@ -429,8 +331,6 @@
               in
               if sudoUser != "" then sudoUser else user;
           };
-
-          # Explicit configurations
           "aarch64" = mkDarwinConfig {
             system = "aarch64-darwin";
             username = "leedaegon";

@@ -1,235 +1,39 @@
 # installations/devenv.nix
-# Development environment specific packages and configurations
+# Compatibility shim — delegates to packages/toolchains/
 { pkgs, system }:
 
 let
-  # Import rust-overlay if needed
-  rust-bin = pkgs.rust-bin or null;
-
-  # Platform detection - CUDA only available on Linux
-  isLinux = system == "x86_64-linux" || system == "aarch64-linux";
+  mkToolchain = file:
+    if builtins.pathExists file
+    then (import file { inherit pkgs; }) // { programs = (import file { inherit pkgs; }).programs or { }; }
+    else { packages = [ ]; programs = { }; };
 in
 {
-  # Development environment specific packages
   environments = {
-    # Rust development environment
-    rust = {
-      packages = with pkgs; [
-        # Rust toolchain
-        (if rust-bin != null then
-          rust-bin.stable.latest.default.override
-            {
-              extensions = [
-                "rust-src"
-                "rust-analyzer"
-                "clippy"
-                "rustfmt"
-              ];
-            }
-        else
-          rustc
-        )
+    rust = mkToolchain ../packages/toolchains/rust.nix;
+    go = mkToolchain ../packages/toolchains/go.nix;
+    py = mkToolchain ../packages/toolchains/py.nix;
+    node = mkToolchain ../packages/toolchains/node.nix;
+    java = mkToolchain ../packages/toolchains/java.nix;
 
-        # Rust installer
-        rustup
-
-        # Build cache
-        sccache # Compilation cache with cloud storage support (S3, GCS, Azure)
-
-        # Rust development tools
-        pkg-config
-        openssl.dev
-        libiconv
-        cargo-edit
-        cargo-watch
-        cargo-expand
-        lldb
-
-        # WASM
-        trunk # Build, bundle & ship Rust WASM to the web
-
-        # Protocol buffers
-        protobuf
-      ];
-
-      programs = {
-        # Rust-specific program configurations can go here
-      };
-    };
-
-    # Go development environment
-    go = {
-      packages = with pkgs; [
-        # Go toolchain
-        go
-
-        # Go development tools
-        gopls
-        gotools
-        go-outline
-        gopkgs
-        godef
-        golint
-        golangci-lint
-        gotestsum
-
-        # Protocol buffers
-        protobuf
-        protoc-gen-go
-        protoc-gen-go-grpc
-
-        # Kubernetes tools
-        kind
-        kubectl
-      ];
-
-      programs = {
-        # Go-specific program configurations can go here
-      };
-    };
-
-    # Python development environment
-    py = {
-      packages = with pkgs; [
-        # Python package manager
-        uv
-
-        # Python interpreter
-        python312
-
-        # Python development tools
-        ruff
-        black
-        mypy
-        poetry
-
-        # Marimo (reactive notebook)
-        marimo
-
-        # CLI tools for research
-        gh # GitHub CLI
-        kaggle # Kaggle CLI
-
-        # MPI
-        openmpi
-      ];
-
-      programs = {
-        # Python-specific program configurations can go here
-      };
-    };
-
-    # Node.js development environment
-    node = {
-      packages = with pkgs; [
-        # Node.js runtime
-        nodejs_24
-
-        # Package managers
-        pnpm
-        yarn
-
-        # Development tools
-        typescript
-        typescript-language-server
-        eslint
-        prettier
-
-        # Build tools
-        webpack-cli
-        turbo-unwrapped # Turborepo monorepo build cache
-      ];
-
-      programs = {
-        # Node-specific program configurations can go here
-      };
-    };
-
-    # Java development environment
-    java = {
-      packages = with pkgs; [
-        # OpenJDK
-        jdk
-        # Build tools
-        maven
-        gradle
-        mvnd # Maven Daemon for faster JVM builds
-      ];
-
-      programs = {
-        # Java-specific program configurations can go here
-      };
-    };
-
-    # Docker/Container development environment
+    # These remain inline for now (not in devShells)
     docker = {
-      packages = with pkgs; [
-        docker
-        docker-compose
-        dive
-        lazydocker
-        hadolint
-        dockerfile-language-server-nodejs
-      ];
-
-      programs = {
-        # Docker-specific program configurations can go here
-      };
+      packages = with pkgs; [ docker docker-compose dive lazydocker hadolint dockerfile-language-server-nodejs ];
+      programs = { };
     };
-
-    # Kubernetes development environment
     k8s = {
-      packages = with pkgs; [
-        kubectl
-        kubernetes-helm
-        k9s
-        kind
-        minikube
-        stern
-        kubectx
-        kustomize
-      ];
-
-      programs = {
-        # K8s-specific program configurations can go here
-      };
+      packages = with pkgs; [ kubectl kubernetes-helm k9s kind minikube stern kubectx kustomize ];
+      programs = { };
     };
-
-    # Infrastructure as Code environment
     iac = {
-      packages = with pkgs; [
-        terraform
-        terragrunt
-        ansible
-        packer
-        vault
-        pulumi
-      ];
-
-      programs = {
-        # IaC-specific program configurations can go here
-      };
+      packages = with pkgs; [ terraform terragrunt ansible packer vault pulumi ];
+      programs = { };
     };
-
-    # Database tools environment
     database = {
-      packages = with pkgs; [
-        postgresql
-        mysql
-        sqlite
-        redis
-        mongosh
-        pgcli
-        mycli
-        litecli
-      ];
-
-      programs = {
-        # Database-specific program configurations can go here
-      };
+      packages = with pkgs; [ postgresql mysql sqlite redis mongosh pgcli mycli litecli ];
+      programs = { };
     };
 
-    # Default development environment (empty, uses only common packages)
     default = {
       packages = [ ];
       programs = { };
