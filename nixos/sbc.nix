@@ -16,7 +16,10 @@
 
   # Minimal initrd for embedded
   boot.initrd.availableKernelModules = [
-    "usbhid" "usb_storage" "sd_mod" "mmc_block"
+    "usbhid"
+    "usb_storage"
+    "sd_mod"
+    "mmc_block"
   ];
 
   # Filesystem — SD card / eMMC

@@ -1,4 +1,4 @@
-# installations/claude-code.nix
+# home/claude-code.nix
 # Claude Code installation and everything-claude-code configuration
 { config, lib, pkgs, everything-claude-code, ... }:
 

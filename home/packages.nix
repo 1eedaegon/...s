@@ -3,8 +3,17 @@
 { config, lib, pkgs, username, email, system, ... }:
 
 let
-  # Import common packages and programs
-  common = import ../installations/default.nix { inherit pkgs system; };
+  # Import common + platform packages
+  commonPkgs = import ../packages/common.nix { inherit pkgs; };
+  platformFile = ../packages/platform/${system}.nix;
+  platformPkgs =
+    if builtins.pathExists platformFile
+    then import platformFile { inherit pkgs; }
+    else { packages = [ ]; };
+  common = {
+    packages = commonPkgs.packages ++ platformPkgs.packages;
+    programs = commonPkgs.programs;
+  };
   # Import common executions (aliases, functions, initScript)
   executions = import ../executions/default.nix { inherit pkgs system; };
   isDarwin = pkgs.stdenv.isDarwin;

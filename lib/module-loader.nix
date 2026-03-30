@@ -16,7 +16,7 @@ in
         packages = (import ../packages/common.nix { inherit pkgs; }).packages ++ platformPkgs.packages;
         programs = (import ../packages/common.nix { inherit pkgs; }).programs;
       };
-      dev = import ../installations/devenv.nix { inherit pkgs system; };
+      dev = import ../installations/devenv.nix { inherit pkgs system; }; # shim: maps toolchain names for executions/configurations
     };
     executions = {
       common = import ../executions/default.nix { inherit pkgs system; };

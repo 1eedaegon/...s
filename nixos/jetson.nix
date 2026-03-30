@@ -15,7 +15,12 @@
 
   # Jetson-specific kernel modules
   boot.initrd.availableKernelModules = [
-    "xhci_pci" "ahci" "usbhid" "usb_storage" "sd_mod" "nvme"
+    "xhci_pci"
+    "ahci"
+    "usbhid"
+    "usb_storage"
+    "sd_mod"
+    "nvme"
   ];
   boot.kernelModules = [ "nvidia" "nvidia_modeset" "nvidia_uvm" ];
 
@@ -45,7 +50,7 @@
   environment.systemPackages = with pkgs; [
     htop
     btop
-    nvtopPackages.nvidia    # GPU monitoring
+    nvtopPackages.nvidia # GPU monitoring
     usbutils
     pciutils
     lm_sensors
@@ -55,7 +60,7 @@
   # Docker — for ML container workflows
   virtualisation.docker = {
     enable = true;
-    enableNvidia = true;    # nvidia-container-toolkit
+    enableNvidia = true; # nvidia-container-toolkit
   };
 
   # Power management — Jetson power modes

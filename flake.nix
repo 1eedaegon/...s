@@ -42,8 +42,8 @@
 
       # ── User config (EDIT THIS) ──
       userRegistry = {
-        "leedaegon"  = { serviceUsername = "1eedaegon"; email = "d8726243@gmail.com"; };
-        "1eedaegon"  = { serviceUsername = "1eedaegon"; email = "d8726243@gmail.com"; };
+        "leedaegon" = { serviceUsername = "1eedaegon"; email = "d8726243@gmail.com"; };
+        "1eedaegon" = { serviceUsername = "1eedaegon"; email = "d8726243@gmail.com"; };
       };
 
       # ── Lib ──
@@ -68,11 +68,12 @@
             if builtins.match ".*darwin.*" currentSystem != null
             then "x86_64-linux"
             else currentSystem;
-        in {
-          "desktop"     = { system = nixosSystem;      hostname = "1eedaegon";   users = identity.registeredUsers; modules = [ ./nixos/desktop.nix ]; };
-          "workstation" = { system = "x86_64-linux";   hostname = "workstation"; users = identity.registeredUsers; modules = [ ./nixos/workstation.nix ]; };
-          "jetson"      = { system = "aarch64-linux";  hostname = "jetson";      users = identity.registeredUsers; modules = [ ./nixos/jetson.nix ]; };
-          "sbc"         = { system = "aarch64-linux";  hostname = "sbc";         users = identity.registeredUsers; modules = [ ./nixos/sbc.nix ]; };
+        in
+        {
+          "desktop" = { system = nixosSystem; hostname = "1eedaegon"; users = identity.registeredUsers; modules = [ ./nixos/desktop.nix ]; };
+          "workstation" = { system = "x86_64-linux"; hostname = "workstation"; users = identity.registeredUsers; modules = [ ./nixos/workstation.nix ]; };
+          "jetson" = { system = "aarch64-linux"; hostname = "jetson"; users = identity.registeredUsers; modules = [ ./nixos/jetson.nix ]; };
+          "sbc" = { system = "aarch64-linux"; hostname = "sbc"; users = identity.registeredUsers; modules = [ ./nixos/sbc.nix ]; };
         };
 
     in
@@ -97,25 +98,26 @@
         # Combination packages
         combinations = {
           fullstack = import ./packages/combinations/fullstack.nix { inherit pkgs; };
-          ml        = import ./packages/combinations/ml.nix { inherit pkgs; };
-          infra     = import ./packages/combinations/infra.nix { inherit pkgs; };
-          research  = import ./packages/combinations/research.nix { inherit pkgs; };
+          ml = import ./packages/combinations/ml.nix { inherit pkgs; };
+          infra = import ./packages/combinations/infra.nix { inherit pkgs; };
+          research = import ./packages/combinations/research.nix { inherit pkgs; };
         };
-      in {
+      in
+      {
         devShells = {
           # Toolchains (independent, each includes base)
           default = mkEnv { name = "default"; };
-          rust    = mkEnv { name = "rust"; };
-          go      = mkEnv { name = "go"; };
-          py      = mkEnv { name = "py"; };
-          node    = mkEnv { name = "node"; };
-          java    = mkEnv { name = "java"; };
+          rust = mkEnv { name = "rust"; };
+          go = mkEnv { name = "go"; };
+          py = mkEnv { name = "py"; };
+          node = mkEnv { name = "node"; };
+          java = mkEnv { name = "java"; };
 
           # Combinations (compose toolchains, each includes base)
           fullstack = mkEnv { name = "default"; extraPackages = combinations.fullstack.packages; };
-          ml        = mkEnv { name = "default"; extraPackages = combinations.ml.packages; };
-          infra     = mkEnv { name = "default"; extraPackages = combinations.infra.packages; };
-          research  = mkEnv { name = "default"; extraPackages = combinations.research.packages; };
+          ml = mkEnv { name = "default"; extraPackages = combinations.ml.packages; };
+          infra = mkEnv { name = "default"; extraPackages = combinations.infra.packages; };
+          research = mkEnv { name = "default"; extraPackages = combinations.research.packages; };
 
           # Custom example
           custom = mkEnv { name = "default"; extraPackages = with pkgs; [ docker kubectl ]; extraShellHook = "echo 'Custom environment loaded'"; };
@@ -153,7 +155,7 @@
           username = let su = builtins.getEnv "SUDO_USER"; u = builtins.getEnv "USER"; in if su != "" then su else u;
         };
         "aarch64" = darwinLib.mkDarwin { system = "aarch64-darwin"; username = "leedaegon"; };
-        "x86_64"  = darwinLib.mkDarwin { system = "x86_64-darwin";  username = "leedaegon"; };
+        "x86_64" = darwinLib.mkDarwin { system = "x86_64-darwin"; username = "leedaegon"; };
       };
     };
 }

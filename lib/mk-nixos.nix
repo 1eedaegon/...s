@@ -25,15 +25,17 @@
               nixpkgs.config.cudaSupport = false;
 
               users.users = builtins.listToAttrs (
-                map (username: {
-                  name = username;
-                  value = {
-                    isNormalUser = true;
-                    description = username;
-                    home = identity.getHomeDirectory config.system username;
-                    extraGroups = [ "networkmanager" "wheel" "docker" ];
-                  };
-                }) config.users
+                map
+                  (username: {
+                    name = username;
+                    value = {
+                      isNormalUser = true;
+                      description = username;
+                      home = identity.getHomeDirectory config.system username;
+                      extraGroups = [ "networkmanager" "wheel" "docker" ];
+                    };
+                  })
+                  config.users
               );
 
               programs.zsh.enable = true;
@@ -52,7 +54,8 @@
                 let
                   u = builtins.elemAt config.users 0;
                   ident = identity.lookupUser u;
-                in {
+                in
+                {
                   systemUsername = u;
                   username = ident.serviceUsername;
                   email = ident.email;
@@ -64,10 +67,12 @@
               ];
 
               home-manager.users = builtins.listToAttrs (
-                map (username: {
-                  name = username;
-                  value = import ../home/home.nix;
-                }) config.users
+                map
+                  (username: {
+                    name = username;
+                    value = import ../home/home.nix;
+                  })
+                  config.users
               );
             }
           ] ++ config.modules;
