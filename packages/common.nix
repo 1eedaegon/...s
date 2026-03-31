@@ -109,10 +109,7 @@
     # Python package manager
     uv
 
-    # Python (lightweight — ML packages are in toolchains/py.nix)
-    (python313.withPackages (ps: with ps; [
-      huggingface-hub
-    ]))
+    # Python (ML packages are in combinations/ml.nix)
 
     # Docker CLI
     docker

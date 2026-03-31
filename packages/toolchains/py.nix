@@ -1,13 +1,11 @@
 # packages/toolchains/py.nix
+# Lightweight Python toolchain — ML packages (wandb, marimo) are in combinations/ml.nix
 { pkgs }:
 
 {
   packages = with pkgs; [
     uv
-    (python312.withPackages (ps: with ps; [
-      marimo
-      wandb
-    ]))
+    python312
     ruff
     black
     mypy
