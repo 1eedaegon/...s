@@ -10,6 +10,7 @@
     mypy
     poetry
     marimo
+    wandb
     gh
     kaggle
     openmpi

@@ -109,10 +109,8 @@
     # Python package manager
     uv
 
-    # ML tools
+    # Python (lightweight — ML packages are in toolchains/py.nix)
     (python313.withPackages (ps: with ps; [
-      marimo
-      wandb
       huggingface-hub
     ]))
 
