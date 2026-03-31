@@ -4,13 +4,14 @@
 {
   packages = with pkgs; [
     uv
-    python312
+    (python312.withPackages (ps: with ps; [
+      marimo
+      wandb
+    ]))
     ruff
     black
     mypy
     poetry
-    marimo
-    wandb
     gh
     kaggle
     openmpi
