@@ -7,9 +7,10 @@ in
 {
   packages = with pkgs; [
     (if rust-bin != null then
-      rust-bin.stable.latest.default.override {
-        extensions = [ "rust-src" "rust-analyzer" "clippy" "rustfmt" ];
-      }
+      rust-bin.stable.latest.default.override
+        {
+          extensions = [ "rust-src" "rust-analyzer" "clippy" "rustfmt" ];
+        }
     else rustc)
 
     rustup
