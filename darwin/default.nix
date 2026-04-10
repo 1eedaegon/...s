@@ -49,9 +49,11 @@
       echo "trusted-users = root ${systemUsername}" >> "$CONF"
     fi
     if ! grep -q "auto-optimise-store" "$CONF" 2>/dev/null; then
-      echo "auto-optimise-store = true" >> "$CONF"
-      echo "min-free = 1073741824" >> "$CONF"
-      echo "max-free = 3221225472" >> "$CONF"
+      {
+        echo "auto-optimise-store = true"
+        echo "min-free = 1073741824"
+        echo "max-free = 3221225472"
+      } >> "$CONF"
     fi
     launchctl kickstart -k system/systems.determinate.nix-daemon 2>/dev/null || true
   '';

@@ -29,6 +29,7 @@ in
     # Git configuration
     git = {
       enable = true;
+      signing.format = null;
       settings = {
         user = {
           name = username;
