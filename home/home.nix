@@ -23,10 +23,9 @@ let
     inherit config lib pkgs everything-claude-code;
   };
 
-  # Doom Emacs: user-editable config directory
+  # Doom Emacs
   homeDirectory = config.home.homeDirectory;
   userDoomDir = "${homeDirectory}/.doom.d";
-  userDoomDirExists = builtins.pathExists (builtins.toPath userDoomDir);
 
   # Default doom config (from repo) with user identity injected
   defaultDoomDir = pkgs.symlinkJoin {
@@ -118,13 +117,11 @@ in
 
   programs = lib.recursiveUpdate homeInstalls.programs {
     # Doom Emacs (via nix-doom-emacs-unstraightened)
-    # Uses ~/.doom.d/ if it exists (user-editable), otherwise repo defaults
+    # doomDir must be a Nix store path. User-editable config is copied to
+    # ~/.doom.d/ by activation script (see doomActivationScript above).
     doom-emacs = {
       enable = true;
-      doomDir =
-        if userDoomDirExists
-        then builtins.toPath userDoomDir
-        else defaultDoomDir;
+      doomDir = defaultDoomDir;
     };
 
     # Git
