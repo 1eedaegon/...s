@@ -26,6 +26,13 @@ let
   # Doom Emacs
   homeDirectory = config.home.homeDirectory;
   userDoomDir = "${homeDirectory}/.doom.d";
+  userDoomDirExists = builtins.pathExists (builtins.toPath userDoomDir);
+
+  # If ~/.doom.d/ exists, copy it into Nix store so user edits are picked up
+  userDoomDirStore =
+    if userDoomDirExists
+    then builtins.path { path = builtins.toPath userDoomDir; name = "doom.d-user"; }
+    else null;
 
   # Default doom config (from repo) with user identity injected
   defaultDoomDir = pkgs.symlinkJoin {
@@ -117,11 +124,11 @@ in
 
   programs = lib.recursiveUpdate homeInstalls.programs {
     # Doom Emacs (via nix-doom-emacs-unstraightened)
-    # doomDir must be a Nix store path. User-editable config is copied to
-    # ~/.doom.d/ by activation script (see doomActivationScript above).
+    # If ~/.doom.d/ exists → use it (copied into Nix store via builtins.path)
+    # Otherwise → use repo defaults with user identity injected
     doom-emacs = {
       enable = true;
-      doomDir = defaultDoomDir;
+      doomDir = if userDoomDirStore != null then userDoomDirStore else defaultDoomDir;
     };
 
     # Git
