@@ -77,8 +77,7 @@
     mise
     devcontainer
 
-    # VPN
-    tailscale
+    # VPN: macOS uses homebrew cask (darwin/default.nix), linux uses nixpkgs (platform/*.nix)
 
     # Common C Modules
     ccache

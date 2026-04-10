@@ -8,6 +8,7 @@
     nmap
     libgcc
     valgrind
+    tailscale
     zed-editor
     code-cursor
   ];
