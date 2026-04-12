@@ -1,5 +1,5 @@
 # home/home.nix
-{ config, lib, pkgs, username, systemUsername, email, system, everything-claude-code, ... }:
+{ config, lib, pkgs, username, systemUsername, email, system, everything-claude-code, gstack, ... }:
 let
   isDarwin = pkgs.stdenv.isDarwin;
 
@@ -20,7 +20,7 @@ let
 
   # Claude Code configuration
   claudeCode = import ./claude-code.nix {
-    inherit config lib pkgs everything-claude-code;
+    inherit config lib pkgs everything-claude-code gstack;
   };
 
   # Doom Emacs

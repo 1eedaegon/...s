@@ -1,6 +1,6 @@
 # lib/mk-darwin.nix
 # Builds darwinConfigurations
-{ nixpkgs, nix-darwin, nix-homebrew, home-manager, nix-doom-emacs-unstraightened, everything-claude-code, identity, overlaysLib }:
+{ nixpkgs, nix-darwin, nix-homebrew, home-manager, nix-doom-emacs-unstraightened, everything-claude-code, gstack, identity, overlaysLib }:
 
 {
   mkDarwin = { system, username }:
@@ -38,7 +38,7 @@
           home-manager.extraSpecialArgs = {
             systemUsername = username;
             username = serviceUsername;
-            inherit email system everything-claude-code;
+            inherit email system everything-claude-code gstack;
           };
           home-manager.sharedModules = [
             nix-doom-emacs-unstraightened.homeModule

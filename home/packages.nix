@@ -29,7 +29,7 @@ in
     # Git configuration
     git = {
       enable = true;
-      signing.format = null;
+      signing.format = "openpgp";
       settings = {
         user = {
           name = username;

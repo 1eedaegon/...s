@@ -26,6 +26,10 @@
       url = "github:affaan-m/everything-claude-code";
       flake = false;
     };
+    gstack = {
+      url = "github:garrytan/gstack";
+      flake = false;
+    };
     cursor-arm = {
       url = "github:coder/cursor-arm";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -36,7 +40,7 @@
     };
   };
 
-  outputs = { self, nixpkgs, flake-utils, home-manager, nix-darwin, nix-homebrew, rust-overlay, jetpack, everything-claude-code, cursor-arm, nix-doom-emacs-unstraightened, ... }:
+  outputs = { self, nixpkgs, flake-utils, home-manager, nix-darwin, nix-homebrew, rust-overlay, jetpack, everything-claude-code, gstack, cursor-arm, nix-doom-emacs-unstraightened, ... }:
     let
       lib = nixpkgs.lib;
 
@@ -51,13 +55,13 @@
       overlaysLib = import ./lib/overlays.nix { inherit rust-overlay jetpack cursor-arm; };
 
       homeLib = import ./lib/mk-home.nix {
-        inherit nixpkgs home-manager nix-doom-emacs-unstraightened everything-claude-code identity overlaysLib;
+        inherit nixpkgs home-manager nix-doom-emacs-unstraightened everything-claude-code gstack identity overlaysLib;
       };
       darwinLib = import ./lib/mk-darwin.nix {
-        inherit nixpkgs nix-darwin nix-homebrew home-manager nix-doom-emacs-unstraightened everything-claude-code identity overlaysLib;
+        inherit nixpkgs nix-darwin nix-homebrew home-manager nix-doom-emacs-unstraightened everything-claude-code gstack identity overlaysLib;
       };
       nixosLib = import ./lib/mk-nixos.nix {
-        inherit nixpkgs home-manager nix-doom-emacs-unstraightened everything-claude-code identity overlaysLib;
+        inherit nixpkgs home-manager nix-doom-emacs-unstraightened everything-claude-code gstack identity overlaysLib;
       };
 
       # ── NixOS profiles (data only) ──

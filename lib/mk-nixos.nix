@@ -1,6 +1,6 @@
 # lib/mk-nixos.nix
 # Builds nixosConfigurations from profile table
-{ nixpkgs, home-manager, nix-doom-emacs-unstraightened, everything-claude-code, identity, overlaysLib }:
+{ nixpkgs, home-manager, nix-doom-emacs-unstraightened, everything-claude-code, gstack, identity, overlaysLib }:
 
 {
   mkNixOS = nixosSystemConfigs:
@@ -60,7 +60,7 @@
                   username = ident.serviceUsername;
                   email = ident.email;
                   system = config.system;
-                  inherit everything-claude-code;
+                  inherit everything-claude-code gstack;
                 };
               home-manager.sharedModules = [
                 nix-doom-emacs-unstraightened.homeModule

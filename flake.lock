@@ -135,6 +135,22 @@
         "type": "github"
       }
     },
+    "gstack": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1775877195,
+        "narHash": "sha256-uLzxSM0ZRAsaXmaUlvZy595jDdlE97dVkTPgBiRWc54=",
+        "owner": "garrytan",
+        "repo": "gstack",
+        "rev": "c6e6a21d1a9a58e771403260ff6a134898f2dd02",
+        "type": "github"
+      },
+      "original": {
+        "owner": "garrytan",
+        "repo": "gstack",
+        "type": "github"
+      }
+    },
     "home-manager": {
       "inputs": {
         "nixpkgs": [
@@ -258,6 +274,7 @@
         "cursor-arm": "cursor-arm",
         "everything-claude-code": "everything-claude-code",
         "flake-utils": "flake-utils",
+        "gstack": "gstack",
         "home-manager": "home-manager",
         "jetpack": "jetpack",
         "nix-darwin": "nix-darwin",

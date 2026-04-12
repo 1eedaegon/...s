@@ -1,6 +1,6 @@
 # home/claude-code.nix
 # Claude Code installation and everything-claude-code configuration
-{ config, lib, pkgs, everything-claude-code, ... }:
+{ config, lib, pkgs, everything-claude-code, gstack, ... }:
 
 let
   # Claude Code native installer script
@@ -19,6 +19,7 @@ let
   setupClaudeConfigs = pkgs.writeShellScript "setup-claude-configs" ''
     CLAUDE_DIR="$HOME/.claude"
     REPO_DIR="${everything-claude-code}"
+    GSTACK_DIR="${gstack}"
 
     mkdir -p "$CLAUDE_DIR"
 
@@ -47,7 +48,44 @@ let
     link_dir "mcp-configs"
     link_dir "plugins"
     link_dir "rules"
-    link_dir "skills"
+
+    # skills/: merge ECC skills + gstack skills (prefixed "gstack-") into a real dir.
+    # gstack top-level skill dirs with SKILL.md collide with ECC entries
+    # (checkpoint, learn, benchmark), so we prefix all gstack entries.
+    SKILLS_TARGET="$CLAUDE_DIR/skills"
+    if [ -L "$SKILLS_TARGET" ]; then
+      rm "$SKILLS_TARGET"
+    fi
+    mkdir -p "$SKILLS_TARGET"
+
+    # ECC skills: per-entry symlink (idempotent, allows coexistence)
+    if [ -d "$REPO_DIR/skills" ]; then
+      for src in "$REPO_DIR/skills"/*; do
+        [ -e "$src" ] || continue
+        name="$(basename "$src")"
+        dst="$SKILLS_TARGET/$name"
+        if [ -L "$dst" ] || [ ! -e "$dst" ]; then
+          ln -sfn "$src" "$dst"
+        fi
+      done
+    fi
+
+    # gstack skills: only subdirs containing SKILL.md, prefixed "gstack-"
+    if [ -d "$GSTACK_DIR" ]; then
+      for src in "$GSTACK_DIR"/*/; do
+        src="''${src%/}"
+        [ -f "$src/SKILL.md" ] || continue
+        name="gstack-$(basename "$src")"
+        dst="$SKILLS_TARGET/$name"
+        if [ -L "$dst" ] || [ ! -e "$dst" ]; then
+          ln -sfn "$src" "$dst"
+        fi
+      done
+      # Also expose gstack root for reference (ETHOS.md, README, etc.)
+      if [ -L "$SKILLS_TARGET/gstack" ] || [ ! -e "$SKILLS_TARGET/gstack" ]; then
+        ln -sfn "$GSTACK_DIR" "$SKILLS_TARGET/gstack"
+      fi
+    fi
 
     echo "Claude Code configs setup complete"
   '';
