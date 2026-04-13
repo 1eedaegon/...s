@@ -118,10 +118,10 @@
           java = mkEnv { name = "java"; };
 
           # Combinations (compose toolchains, each includes base)
-          fullstack = mkEnv { name = "default"; extraPackages = combinations.fullstack.packages; };
-          ml = mkEnv { name = "default"; extraPackages = combinations.ml.packages; };
-          infra = mkEnv { name = "default"; extraPackages = combinations.infra.packages; };
-          research = mkEnv { name = "default"; extraPackages = combinations.research.packages; };
+          fullstack = mkEnv { name = "fullstack"; extraPackages = combinations.fullstack.packages; };
+          ml = mkEnv { name = "ml"; extraPackages = combinations.ml.packages; };
+          infra = mkEnv { name = "infra"; extraPackages = combinations.infra.packages; };
+          research = mkEnv { name = "research"; extraPackages = combinations.research.packages; };
 
           # Custom example
           custom = mkEnv { name = "default"; extraPackages = with pkgs; [ docker kubectl ]; extraShellHook = "echo 'Custom environment loaded'"; };
