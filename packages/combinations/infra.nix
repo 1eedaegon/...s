@@ -28,7 +28,18 @@ in
     kubectx
     kustomize
 
-    # Messaging
+    # Messaging / Queue CLIs
     natscli
+    kcat # kafka producer/consumer CLI (formerly kafkacat)
+
+    # Database CLIs
+    postgresql # psql
+    pgcli # psql with autocomplete
+    mariadb # mysql client (mysql-client replaced by mariadb.client upstream)
+    mycli # mysql with autocomplete
+    sqlite
+    litecli # sqlite with autocomplete
+    redis # redis-cli
+    mongosh # mongodb shell
   ]);
 }
