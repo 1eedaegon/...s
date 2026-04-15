@@ -19,7 +19,15 @@ in
 
     # Kubernetes
     kubectl
-    kubernetes-helm
+    (wrapHelm kubernetes-helm {
+      plugins = with kubernetes-helmPlugins; [
+        helm-diff # required by helmfile
+        helm-secrets # sops-encrypted values
+        helm-git # git:// chart sources
+        helm-s3 # s3 chart repos
+        helm-unittest # chart unit tests
+      ];
+    })
     helmfile
     k9s
     kind

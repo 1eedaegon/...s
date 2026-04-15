@@ -115,8 +115,10 @@
     docker-compose
 
     # Kubernetes CLI
+    # Note: kubernetes-helm intentionally NOT here — infra combination
+    # provides wrapHelm with plugins (helm-diff etc). Adding raw helm here
+    # would shadow the wrapped one on PATH and break helmfile.
     kubectl
-    kubernetes-helm
     k9s
     kubectx
     stern
