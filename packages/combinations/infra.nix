@@ -17,8 +17,8 @@ in
     packer
     pulumi
 
-    # Kubernetes
-    kubectl
+    # Kubernetes (kubectl/k9s/kubectx/stern/kustomize come from common.nix;
+    # kind comes from go toolchain)
     (wrapHelm kubernetes-helm {
       plugins = with kubernetes-helmPlugins; [
         helm-diff # required by helmfile
@@ -29,12 +29,7 @@ in
       ];
     })
     helmfile
-    k9s
-    kind
     minikube
-    stern
-    kubectx
-    kustomize
 
     # Messaging / Queue CLIs
     natscli
