@@ -20,6 +20,12 @@
           doCheck = false;
           doInstallCheck = false;
         });
+        # ginkgo 2.28.1 self-test flake (testingtproxy interface assertion)
+        # fails during nixpkgs build on darwin/aarch64. Skip its check.
+        ginkgo = prev.ginkgo.overrideAttrs (old: {
+          doCheck = false;
+          doInstallCheck = false;
+        });
       } // (if includeCursorArm && system != null then {
         cursor-arm = cursor-arm.packages.${system}.default or null;
       } else { }))
