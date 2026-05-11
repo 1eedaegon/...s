@@ -5,9 +5,10 @@
 let
   go = import ../toolchains/go.nix { inherit pkgs; };
   node = import ../toolchains/node.nix { inherit pkgs; };
+  security = import ./security.nix { inherit pkgs; };
 in
 {
-  packages = go.packages ++ node.packages ++ (with pkgs; [
+  packages = go.packages ++ node.packages ++ security.packages ++ (with pkgs; [
     # IaC (terraform + opentofu side-by-side)
     terraform
     opentofu
