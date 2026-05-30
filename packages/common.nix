@@ -83,7 +83,7 @@
     ccache
     gnumake
     cmake
-    extra-cmake-modules
+    kdePackages.extra-cmake-modules # top-level alias removed (KDE5 EOL); Qt6 version
 
     # Zip and Compression
     p7zip
@@ -98,7 +98,7 @@
 
     # Cloudflare
     cloudflared
-    wrangler
+    # wrangler  # temp off: upstream tsup/node EBADF on darwin source build, no cache hit
     flarectl
 
     # Infrastructure as Code

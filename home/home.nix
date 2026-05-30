@@ -23,6 +23,11 @@ let
     inherit config lib pkgs everything-claude-code gstack;
   };
 
+  # Codex CLI configuration (shares ECC + gstack skills via the Agent Skills standard)
+  codex = import ./codex.nix {
+    inherit config lib pkgs everything-claude-code gstack;
+  };
+
   # Doom Emacs
   homeDirectory = config.home.homeDirectory;
   userDoomDir = "${homeDirectory}/.doom.d";
@@ -115,10 +120,10 @@ in
   manual.html.enable = false;
   manual.json.enable = false;
 
-  home.packages = homeInstalls.packages ++ claudeCode.packages;
+  home.packages = homeInstalls.packages ++ claudeCode.packages ++ codex.packages;
 
-  # Activation scripts: Claude Code + Doom Emacs default config
-  home.activation = claudeCode.activation // {
+  # Activation scripts: Claude Code + Codex + Doom Emacs default config
+  home.activation = claudeCode.activation // codex.activation // {
     initDoomConfig = doomActivationScript;
   };
 
@@ -126,8 +131,11 @@ in
     # Doom Emacs (via nix-doom-emacs-unstraightened)
     # If ~/.doom.d/ exists → use it (copied into Nix store via builtins.path)
     # Otherwise → use repo defaults with user identity injected
+    # Temporarily disabled: AV false-positive on emacs-overlay web-mode test
+    # fixture (issues/0895.html) blocks the FOD fetch. Re-enable after the AV
+    # exclusion for /nix is added, or after web-mode snapshot is regenerated.
     doom-emacs = {
-      enable = true;
+      enable = false;
       doomDir = if userDoomDirStore != null then userDoomDirStore else defaultDoomDir;
     };
 
@@ -139,7 +147,7 @@ in
 
     # Zsh
     zsh = homeInstalls.programs.zsh // homeConfig.zsh // {
-      shellAliases = homeExec.aliases // claudeCode.aliases // {
+      shellAliases = homeExec.aliases // claudeCode.aliases // codex.aliases // {
         # Noglob settings for nix commands (prevents "no matches found" errors with .#flake syntax)
         nix = "noglob nix";
       };
@@ -148,7 +156,7 @@ in
 
     # Bash
     bash = homeInstalls.programs.bash // {
-      shellAliases = homeExec.aliases // claudeCode.aliases;
+      shellAliases = homeExec.aliases // claudeCode.aliases // codex.aliases;
       initExtra = homeExec.bashConfig.initExtra;
     };
 
@@ -158,5 +166,5 @@ in
   };
 
   # Set session variables from configuration module
-  home.sessionVariables = homeConfig.environment;
+  home.sessionVariables = homeConfig.environment // claudeCode.sessionVariables;
 }
