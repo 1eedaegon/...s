@@ -135,7 +135,7 @@ in
     # fixture (issues/0895.html) blocks the FOD fetch. Re-enable after the AV
     # exclusion for /nix is added, or after web-mode snapshot is regenerated.
     doom-emacs = {
-      enable = false;
+      enable = true;
       doomDir = if userDoomDirStore != null then userDoomDirStore else defaultDoomDir;
     };
 

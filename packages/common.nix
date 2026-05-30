@@ -98,7 +98,6 @@
 
     # Cloudflare
     cloudflared
-    # wrangler  # temp off: upstream tsup/node EBADF on darwin source build, no cache hit
     flarectl
 
     # Infrastructure as Code
