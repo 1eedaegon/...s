@@ -21,10 +21,17 @@ let
   rustExact = [ "1.75.0" ];        # via rust-overlay (reproducible)
 
   # ---- helpers ------------------------------------------------------------
-  okPkg = p: let r = builtins.tryEval (builtins.seq (p.outPath or p.version) true);
+  # Matrix-aware: a candidate is kept only if it evaluates AND is actually
+  # available on this system's platform (respects meta.platforms / badPlatforms
+  # / broken). Without the availability check a shell could appear on a platform
+  # where its toolchain doesn't build.
+  availOn = p:
+    let r = builtins.tryEval (lib.meta.availableOn pkgs.stdenv.hostPlatform p);
+    in r.success && r.value;
+  evals = p: let r = builtins.tryEval (builtins.seq (p.outPath or p.version) true);
              in r.success && r.value;
-  okAttr = n: builtins.hasAttr n pkgs
-    && (let r = builtins.tryEval (builtins.seq pkgs.${n}.version true); in r.success && r.value);
+  okPkg = p: (let r = builtins.tryEval (evals p && availOn p); in r.success && r.value);
+  okAttr = n: builtins.hasAttr n pkgs && okPkg pkgs.${n};
 
   mkShell' = { label, packages, gotoolchain ? null }:
     pkgs.mkShell {
