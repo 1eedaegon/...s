@@ -99,6 +99,8 @@
           };
         };
         mkEnv = envLib.mkEnv;
+        # Version-postfixed shells (#go1_25, #py3_13, #node22, #java21, #rust1_75_0)
+        versionShells = import ./lib/version-shells.nix { inherit pkgs lib; };
         # Combination packages
         combinations = {
           fullstack = import ./packages/combinations/fullstack.nix { inherit pkgs; };
@@ -127,7 +129,7 @@
 
           # Custom example
           custom = mkEnv { name = "default"; extraPackages = with pkgs; [ docker kubectl ]; extraShellHook = "echo 'Custom environment loaded'"; };
-        };
+        } // versionShells;
 
         apps.default = {
           type = "app";
