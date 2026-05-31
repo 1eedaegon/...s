@@ -122,6 +122,11 @@ in
 
   home.packages = homeInstalls.packages ++ claudeCode.packages ++ codex.packages;
 
+  # Neovim: disable mouse so terminal-native drag-select/copy works over SSH.
+  home.file.".config/nvim/init.lua".text = ''
+    vim.opt.mouse = ""
+  '';
+
   # Activation scripts: Claude Code + Codex + Doom Emacs default config
   home.activation = claudeCode.activation // codex.activation // {
     initDoomConfig = doomActivationScript;
