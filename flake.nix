@@ -146,6 +146,19 @@
           ''}";
         };
 
+        # Dynamic Go version shell: `nix run .#go -- 1.25.6` enters a shell on
+        # any patch (fetched via GOTOOLCHAIN — no flake enumeration needed).
+        # Omit the arg for the nixpkgs default. Needs network on first use.
+        apps.go = {
+          type = "app";
+          program = "${pkgs.writeShellScript "go-version-shell" ''
+            export PATH="${pkgs.go}/bin:${pkgs.gopls}/bin:${pkgs.gotools}/bin:$PATH"
+            if [ -n "''${1:-}" ]; then export GOTOOLCHAIN="go$1"; fi
+            echo "[go ''${1:-default}] $(go version 2>/dev/null || echo 'fetching on first run')"
+            exec "''${SHELL:-${pkgs.bash}/bin/bash}"
+          ''}";
+        };
+
         inherit modules;
       }
     )) // {

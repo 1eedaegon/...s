@@ -146,6 +146,13 @@ nix develop github:1eedaegon/...s#rust1_75_0  # Rust 1.75.0 exactly (rust-overla
 - Exact pins are curated in `lib/version-shells.nix` (`goExact`, `rustExact`). Go fetches any patch via `GOTOOLCHAIN`; Rust pins reproducibly via rust-overlay.
 - Use `_`, not `.` — the `#` fragment splits on dots. Run `nix flake show` to list every generated shell.
 
+Flake fragments are static keys (looked up, not parsed), so `#go1_25_6` only
+exists if enumerated. For **any** Go patch on demand without editing the flake:
+
+```bash
+nix run github:1eedaegon/...s#go -- 1.25.6   # GOTOOLCHAIN fetches it, drops you in a shell
+```
+
 Or in a project directory with direnv:
 
 ```bash
