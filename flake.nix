@@ -51,6 +51,13 @@
         "1eedaegon" = { serviceUsername = "1eedaegon"; email = "d8726243@gmail.com"; };
       };
 
+      # Exact toolchain pins -> #go1_25_6 #py3_13_5 #rust1_75_0 (assembly in lib/version-shells.nix)
+      toolchainVersions = {
+        go = [ "1.23.5" "1.25.6" ];
+        rust = [ "1.75.0" ];
+        python = [ "3.11.5" "3.13.5" ];
+      };
+
       # ── Lib ──
       identity = import ./lib/identity.nix { inherit lib userRegistry; };
       overlaysLib = import ./lib/overlays.nix { inherit rust-overlay jetpack cursor-arm; };
@@ -104,6 +111,7 @@
         versionShells = import ./lib/version-shells.nix {
           inherit pkgs lib;
           pythonPkgs = nixpkgs-python.packages.${system};
+          versions = toolchainVersions;
         };
         # Combination packages
         combinations = {

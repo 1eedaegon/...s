@@ -1,22 +1,13 @@
 # lib/version-shells.nix
-# Version-postfixed devShells. Each shell inherits `base`; language tooling
-# layers on top.
+# Assembly only — exact version pins live in flake.nix (`toolchainVersions`).
+# Each shell inherits `base`; language tooling layers on top.
 #
-# Applicable versions:
-#   go      any patch          e.g. #go1_25_6   (GOTOOLCHAIN)
-#   rust    rust-overlay patch e.g. #rust1_75_0 (reproducible)
-#   python  nixpkgs-python     e.g. #py3_13_5   (reproducible)
-#   node    nixpkgs minor      e.g. #node22     (auto)
-#   java    nixpkgs minor      e.g. #java21     (auto)
-{ pkgs, lib, pythonPkgs }:
+#   go     #go1_25_6   GOTOOLCHAIN        rust   #rust1_75_0  rust-overlay
+#   python #py3_13_5   nixpkgs-python     node   #node22      nixpkgs minor
+#   java   #java21     nixpkgs minor
+{ pkgs, lib, pythonPkgs, versions }:
 
 let
-  versions = {
-    go = [ "1.23.5" "1.25.6" ];
-    rust = [ "1.75.0" ];
-    python = [ "3.11.5" "3.13.5" ];
-  };
-
   # Shared deps inherited by every version shell.
   base = with pkgs; [ git ripgrep ];
 
@@ -28,22 +19,25 @@ let
 
   dropDots = v: builtins.concatStringsSep "_" (lib.splitString "." v);
 
-  mk = { label, packages, gotoolchain ? null }:
+  # name drives the starship `#<env>` badge (env_var.NIX_DEV_ENV) + derivation name.
+  mk = { name, packages, gotoolchain ? null }:
     pkgs.mkShell {
+      inherit name;
+      NIX_DEV_ENV = name;
       packages = base ++ packages;
       shellHook = lib.optionalString (gotoolchain != null) "export GOTOOLCHAIN=${gotoolchain}\n"
-        + ''echo "[${label}] ready"'';
+        + ''echo "[${name}] ready"'';
     };
 
   fromAttrs = { regex, nameFn, toolingFor }:
     builtins.listToAttrs (map
-      (a: { name = nameFn a; value = mk { label = nameFn a; packages = toolingFor a; }; })
+      (a: let nm = nameFn a; in { name = nm; value = mk { name = nm; packages = toolingFor a; }; })
       (builtins.filter (n: builtins.match regex n != null && okAttr n) (builtins.attrNames pkgs)));
 
-  fromList = { list, pkgFor, nameFor, labelFor, toolingFor }:
+  fromList = { list, pkgFor, nameFor, toolingFor, gotoolchainFor ? (_: null) }:
     builtins.listToAttrs (lib.filter (x: x != null) (map
-      (v: let p = pkgFor v; in if p != null && okPkg p
-        then { name = nameFor v; value = mk { label = labelFor v; packages = toolingFor p; }; }
+      (v: let p = pkgFor v; nm = nameFor v; in if p != null && okPkg p
+        then { name = nm; value = mk { name = nm; packages = toolingFor p; gotoolchain = gotoolchainFor v; }; }
         else null)
       list));
 
@@ -54,9 +48,13 @@ let
     nameFn = a: "go" + lib.removePrefix "go_" a;
     toolingFor = a: goTooling pkgs.${a};
   };
-  goExact = builtins.listToAttrs (map
-    (v: { name = "go${dropDots v}"; value = mk { label = "go${v}"; packages = goTooling pkgs.go; gotoolchain = "go${v}"; }; })
-    versions.go);
+  goExact = fromList {
+    list = versions.go;
+    pkgFor = _: pkgs.go;
+    nameFor = v: "go${dropDots v}";
+    toolingFor = _: goTooling pkgs.go;
+    gotoolchainFor = v: "go${v}";
+  };
 
   pyMinor = fromAttrs {
     regex = "python3[0-9]+";
@@ -67,7 +65,6 @@ let
     list = versions.python;
     pkgFor = v: pythonPkgs.${v} or null;
     nameFor = v: "py${dropDots v}";
-    labelFor = v: "py${v}";
     toolingFor = p: [ p pkgs.uv ];
   };
 
@@ -88,7 +85,6 @@ let
       list = versions.rust;
       pkgFor = v: pkgs.rust-bin.stable.${v}.default or null;
       nameFor = v: "rust${dropDots v}";
-      labelFor = v: "rust${v}";
       toolingFor = t: [ t pkgs.rust-analyzer ];
     } else { };
 in

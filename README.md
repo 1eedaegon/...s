@@ -156,13 +156,13 @@ Use `_`, not `.` — the `#` fragment splits on dots. `nix flake show` lists the
 
 #### Pinning an exact patch (declarative, one line)
 
-Exact shells exist only if declared — add one string to a list in
-[`lib/version-shells.nix`](lib/version-shells.nix), commit, done:
+Exact shells exist only if declared — add one string to `toolchainVersions` in
+[`flake.nix`](flake.nix), commit, done (assembly lives in `lib/version-shells.nix`):
 
 ```nix
-versions = {
-  go = [ "1.23.5" "1.25.6" ];   # -> #go1_25_6
-  rust = [ "1.75.0" ];          # -> #rust1_75_0
+toolchainVersions = {
+  go = [ "1.23.5" "1.25.6" ];     # -> #go1_25_6
+  rust = [ "1.75.0" ];            # -> #rust1_75_0
   python = [ "3.11.5" "3.13.5" ]; # -> #py3_13_5
 };
 ```
