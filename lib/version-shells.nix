@@ -19,14 +19,19 @@ let
 
   dropDots = v: builtins.concatStringsSep "_" (lib.splitString "." v);
 
-  # name drives the starship `#<env>` badge (env_var.NIX_DEV_ENV) + derivation name.
+  # name = lang+version (e.g. go1_25_6). Drives the starship `#<env>` badge
+  # (env_var.NIX_DEV_ENV) and is re-exported to strip the `-env` suffix that
+  # `nix develop` adds to $name.
   mk = { name, packages, gotoolchain ? null }:
     pkgs.mkShell {
       inherit name;
       NIX_DEV_ENV = name;
       packages = base ++ packages;
       shellHook = lib.optionalString (gotoolchain != null) "export GOTOOLCHAIN=${gotoolchain}\n"
-        + ''echo "[${name}] ready"'';
+        + ''
+          export name=${name}
+          echo "[${name}] ready"
+        '';
     };
 
   fromAttrs = { regex, nameFn, toolingFor }:
