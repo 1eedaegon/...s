@@ -12,51 +12,46 @@
 { pkgs, everything-claude-code, gstack }:
 
 let
+  # Lossless line-based normalizer: only rewrites single-line `description:`
+  # values (quote colons, truncate >1024); every other byte is preserved.
+  # Lossless line-based normalizer: only rewrites single-line `description:`
+  # values (quote colons, truncate over the limit); every other byte preserved.
+  maxDescLen = 1024; # Codex's hard frontmatter description limit
   patcher = pkgs.writeText "patch-skill.py" ''
     import sys, re
 
-    src = sys.argv[1]
-    with open(src, 'r', encoding='utf-8') as f:
-        content = f.read()
+    MAX_DESC = ${toString maxDescLen}
+    TARGET = MAX_DESC - 4         # truncate values longer than this (quote headroom)
+    ELLIPSIS = '...'
+    FENCE = '---'
+    BLOCK_MARKERS = ('>', '>-', '|', '|-', '>+', '|+')
 
-    parts = content.split('---', 2)
-    if len(parts) < 3:
-        sys.stdout.write(content)
-        sys.exit(0)
-    pre, fm, body = parts[0], parts[1], parts[2]
+    content = open(sys.argv[1], encoding='utf-8').read()
+    lines = content.split('\n')
+    if not lines or lines[0].strip() != FENCE:
+        sys.stdout.write(content); sys.exit(0)
+    close = next((i for i in range(1, len(lines)) if lines[i].strip() == FENCE), None)
+    if close is None:
+        sys.stdout.write(content); sys.exit(0)
 
-    out_lines = []
-    for line in fm.splitlines():
-        m = re.match(r'^(description:\s*)(.*)$', line)
+    for i in range(1, close):
+        m = re.match(r'^(description:[ \t]*)(.*)$', lines[i])
         if not m:
-            out_lines.append(line)
             continue
-        prefix, val = m.group(1), m.group(2)
-        v = val.strip()
-
-        # Multi-line markers — don't touch.
-        if v in ('>', '>-', '|', '|-', '>+', '|+', ""):
-            out_lines.append(line)
+        prefix, v = m.group(1), m.group(2).strip()
+        if not v or v in BLOCK_MARKERS:
             continue
-
-        is_quoted = (
-            (v.startswith('"') and v.endswith('"'))
-            or (v.startswith("'") and v.endswith("'"))
-        )
-        if is_quoted:
-            inner = v[1:-1]
-            if len(line) <= 1024:
-                out_lines.append(line)
+        if i + 1 < close and re.match(r'^[ \t]+\S', lines[i + 1]):
+            continue  # multi-line plain scalar — already valid
+        if (v.startswith('"') and v.endswith('"')) or (v.startswith("'") and v.endswith("'")):
+            if len(v) <= TARGET + 2:
                 continue
-            v = inner
+            v = v[1:-1]
+        if len(v) > TARGET:
+            v = v[:TARGET - len(ELLIPSIS)] + ELLIPSIS
+        lines[i] = prefix + '"' + v.replace('\\', '\\\\').replace('"', '\\"') + '"'
 
-        if len(v) > 1020:
-            v = v[:1017] + '...'
-
-        escaped = v.replace('\\', '\\\\').replace('"', '\\"')
-        out_lines.append(f'{prefix}"{escaped}"')
-
-    sys.stdout.write(pre + '---' + '\n'.join(out_lines) + '---' + body)
+    sys.stdout.write('\n'.join(lines))
   '';
 
   # Mirror a skills root: for every subdir that contains SKILL.md, rebuild the
