@@ -16,9 +16,9 @@
 { pkgs, lib }:
 
 let
-  # ---- curated exact pins -------------------------------------------------
-  goExact = [ "1.23.5" ];          # via GOTOOLCHAIN (any patch, fetched by go)
-  rustExact = [ "1.75.0" ];        # via rust-overlay (reproducible)
+  # ---- curated exact pins (declarative: add one line to expose a shell) ---
+  goExact = [ "1.23.5" "1.25.6" ];   # -> #go1_23_5 #go1_25_6 (GOTOOLCHAIN fetches the patch)
+  rustExact = [ "1.75.0" ];          # -> #rust1_75_0 (rust-overlay, reproducible)
 
   # ---- helpers ------------------------------------------------------------
   # Matrix-aware: a candidate is kept only if it evaluates AND is actually
