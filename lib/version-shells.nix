@@ -1,100 +1,95 @@
 # lib/version-shells.nix
-# Generates version-postfixed devShells: `nix develop <flake>#go1_25`,
-# `#py3_13`, `#node22`, `#java21`, `#rust1_75_0`.
+# Version-postfixed devShells. Each shell inherits `base`; language tooling
+# layers on top.
 #
-# Granularity per language:
-#   go     minor pins from nixpkgs `go_1_*`  -> go1_25, go1_26
-#          exact pins via Go's GOTOOLCHAIN   -> go1_23_5  (fetched on demand)
-#   python from nixpkgs `python3*`           -> py3_13, py3_14
-#   node   from nixpkgs `nodejs_*`           -> node22, node24
-#   java   from nixpkgs `jdk*`               -> java21, java23
-#   rust   exact pins from rust-overlay      -> rust1_75_0  (reproducible)
-#
-# Flake fragments must be static; exact lists (`goExact`, `rustExact`) are the
-# curated versions to expose. EOL/removed attrs are throwing tombstones in
-# nixpkgs, so every candidate is guarded with tryEval and silently skipped.
-{ pkgs, lib }:
+# Applicable versions:
+#   go      any patch          e.g. #go1_25_6   (GOTOOLCHAIN)
+#   rust    rust-overlay patch e.g. #rust1_75_0 (reproducible)
+#   python  nixpkgs-python     e.g. #py3_13_5   (reproducible)
+#   node    nixpkgs minor      e.g. #node22     (auto)
+#   java    nixpkgs minor      e.g. #java21     (auto)
+{ pkgs, lib, pythonPkgs }:
 
 let
-  # ---- curated exact pins (declarative: add one line to expose a shell) ---
-  goExact = [ "1.23.5" "1.25.6" ];   # -> #go1_23_5 #go1_25_6 (GOTOOLCHAIN fetches the patch)
-  rustExact = [ "1.75.0" ];          # -> #rust1_75_0 (rust-overlay, reproducible)
+  versions = {
+    go = [ "1.23.5" "1.25.6" ];
+    rust = [ "1.75.0" ];
+    python = [ "3.11.5" "3.13.5" ];
+  };
 
-  # ---- helpers ------------------------------------------------------------
-  # Matrix-aware: a candidate is kept only if it evaluates AND is actually
-  # available on this system's platform (respects meta.platforms / badPlatforms
-  # / broken). Without the availability check a shell could appear on a platform
-  # where its toolchain doesn't build.
-  availOn = p:
-    let r = builtins.tryEval (lib.meta.availableOn pkgs.stdenv.hostPlatform p);
+  # Shared deps inherited by every version shell.
+  base = with pkgs; [ git ripgrep ];
+
+  okPkg = p:
+    let r = builtins.tryEval
+      (lib.meta.availableOn pkgs.stdenv.hostPlatform p && builtins.seq (p.outPath or p.version) true);
     in r.success && r.value;
-  evals = p: let r = builtins.tryEval (builtins.seq (p.outPath or p.version) true);
-             in r.success && r.value;
-  okPkg = p: (let r = builtins.tryEval (evals p && availOn p); in r.success && r.value);
   okAttr = n: builtins.hasAttr n pkgs && okPkg pkgs.${n};
 
-  mkShell' = { label, packages, gotoolchain ? null }:
+  dropDots = v: builtins.concatStringsSep "_" (lib.splitString "." v);
+
+  mk = { label, packages, gotoolchain ? null }:
     pkgs.mkShell {
-      inherit packages;
-      shellHook = lib.optionalString (gotoolchain != null) ''
-        export GOTOOLCHAIN=${gotoolchain}
-      '' + ''
-        echo "[${label}] ready"
-      '';
+      packages = base ++ packages;
+      shellHook = lib.optionalString (gotoolchain != null) "export GOTOOLCHAIN=${gotoolchain}\n"
+        + ''echo "[${label}] ready"'';
     };
 
-  # Generate { name -> shell } from nixpkgs attrs matching `regex`.
-  fromNixpkgs = { regex, nameFn, toolingFor }:
+  fromAttrs = { regex, nameFn, toolingFor }:
     builtins.listToAttrs (map
-      (attr: { name = nameFn attr; value = mkShell' { label = nameFn attr; packages = toolingFor attr; }; })
+      (a: { name = nameFn a; value = mk { label = nameFn a; packages = toolingFor a; }; })
       (builtins.filter (n: builtins.match regex n != null && okAttr n) (builtins.attrNames pkgs)));
 
-  # ---- go -----------------------------------------------------------------
-  goTooling = goPkg: [ goPkg ] ++ (with pkgs; [ gopls gotools delve golangci-lint gofumpt gotestsum ]);
-  goMinor = fromNixpkgs {
+  fromList = { list, pkgFor, nameFor, labelFor, toolingFor }:
+    builtins.listToAttrs (lib.filter (x: x != null) (map
+      (v: let p = pkgFor v; in if p != null && okPkg p
+        then { name = nameFor v; value = mk { label = labelFor v; packages = toolingFor p; }; }
+        else null)
+      list));
+
+  goTooling = g: [ g ] ++ (with pkgs; [ gopls gotools delve golangci-lint gofumpt gotestsum ]);
+
+  goMinor = fromAttrs {
     regex = "go_1_[0-9]+";
-    nameFn = attr: "go" + lib.removePrefix "go_" attr;          # go_1_25 -> go1_25
-    toolingFor = attr: goTooling pkgs.${attr};
+    nameFn = a: "go" + lib.removePrefix "go_" a;
+    toolingFor = a: goTooling pkgs.${a};
   };
-  goExactShells = builtins.listToAttrs (map
-    (v: {
-      name = "go" + builtins.concatStringsSep "_" (lib.splitString "." v);  # 1.23.5 -> go1_23_5
-      value = mkShell' { label = "go${v}"; packages = goTooling pkgs.go; gotoolchain = "go${v}"; };
-    })
-    goExact);
+  goExact = builtins.listToAttrs (map
+    (v: { name = "go${dropDots v}"; value = mk { label = "go${v}"; packages = goTooling pkgs.go; gotoolchain = "go${v}"; }; })
+    versions.go);
 
-  # ---- python -------------------------------------------------------------
-  pyMinor = fromNixpkgs {
+  pyMinor = fromAttrs {
     regex = "python3[0-9]+";
-    nameFn = attr: "py3_" + (builtins.head (builtins.match "python3([0-9]+)" attr));  # python313 -> py3_13
-    toolingFor = attr: [ pkgs.${attr} pkgs.uv ];
+    nameFn = a: "py3_" + builtins.head (builtins.match "python3([0-9]+)" a);
+    toolingFor = a: [ pkgs.${a} pkgs.uv ];
+  };
+  pyExact = fromList {
+    list = versions.python;
+    pkgFor = v: pythonPkgs.${v} or null;
+    nameFor = v: "py${dropDots v}";
+    labelFor = v: "py${v}";
+    toolingFor = p: [ p pkgs.uv ];
   };
 
-  # ---- node ---------------------------------------------------------------
-  nodeMinor = fromNixpkgs {
+  nodeMinor = fromAttrs {
     regex = "nodejs_[0-9]+";
-    nameFn = attr: "node" + lib.removePrefix "nodejs_" attr;     # nodejs_22 -> node22
-    toolingFor = attr: [ pkgs.${attr} ];
+    nameFn = a: "node" + lib.removePrefix "nodejs_" a;
+    toolingFor = a: [ pkgs.${a} ];
   };
 
-  # ---- java ---------------------------------------------------------------
-  javaMinor = fromNixpkgs {
+  javaMinor = fromAttrs {
     regex = "jdk[0-9]+";
-    nameFn = attr: "java" + lib.removePrefix "jdk" attr;         # jdk21 -> java21
-    toolingFor = attr: [ pkgs.${attr} pkgs.maven pkgs.gradle ];
+    nameFn = a: "java" + lib.removePrefix "jdk" a;
+    toolingFor = a: [ pkgs.${a} pkgs.maven pkgs.gradle ];
   };
 
-  # ---- rust (rust-overlay gives exact patches) ----------------------------
-  rustShells =
-    if pkgs ? rust-bin then
-      builtins.listToAttrs (lib.filter (x: x != null) (map
-        (v:
-          let toolchain = pkgs.rust-bin.stable.${v}.default or null;
-          in if toolchain != null && okPkg toolchain then {
-            name = "rust" + builtins.concatStringsSep "_" (lib.splitString "." v);  # 1.75.0 -> rust1_75_0
-            value = mkShell' { label = "rust${v}"; packages = [ toolchain pkgs.rust-analyzer ]; };
-          } else null)
-        rustExact))
-    else { };
+  rustExact =
+    if pkgs ? rust-bin then fromList {
+      list = versions.rust;
+      pkgFor = v: pkgs.rust-bin.stable.${v}.default or null;
+      nameFor = v: "rust${dropDots v}";
+      labelFor = v: "rust${v}";
+      toolingFor = t: [ t pkgs.rust-analyzer ];
+    } else { };
 in
-goMinor // goExactShells // pyMinor // nodeMinor // javaMinor // rustShells
+goMinor // goExact // pyMinor // pyExact // nodeMinor // javaMinor // rustExact

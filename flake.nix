@@ -38,9 +38,10 @@
       url = "github:marienz/nix-doom-emacs-unstraightened";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    nixpkgs-python.url = "github:cachix/nixpkgs-python";
   };
 
-  outputs = { self, nixpkgs, flake-utils, home-manager, nix-darwin, nix-homebrew, rust-overlay, jetpack, everything-claude-code, gstack, cursor-arm, nix-doom-emacs-unstraightened, ... }:
+  outputs = { self, nixpkgs, flake-utils, home-manager, nix-darwin, nix-homebrew, rust-overlay, jetpack, everything-claude-code, gstack, cursor-arm, nix-doom-emacs-unstraightened, nixpkgs-python, ... }:
     let
       lib = nixpkgs.lib;
 
@@ -99,8 +100,11 @@
           };
         };
         mkEnv = envLib.mkEnv;
-        # Version-postfixed shells (#go1_25, #py3_13, #node22, #java21, #rust1_75_0)
-        versionShells = import ./lib/version-shells.nix { inherit pkgs lib; };
+        # Version-postfixed shells (#go1_25_6, #py3_13_5, #node22, #java21, #rust1_75_0)
+        versionShells = import ./lib/version-shells.nix {
+          inherit pkgs lib;
+          pythonPkgs = nixpkgs-python.packages.${system};
+        };
         # Combination packages
         combinations = {
           fullstack = import ./packages/combinations/fullstack.nix { inherit pkgs; };

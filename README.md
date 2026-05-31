@@ -134,32 +134,38 @@ nix develop github:1eedaegon/...s#java     # jdk + maven + gradle + mvnd
 Append a `[lang][version]` postfix to pin an exact toolchain:
 
 ```bash
-nix develop github:1eedaegon/...s#go1_25      # Go 1.25 (latest patch in nixpkgs)
-nix develop github:1eedaegon/...s#go1_23_5    # Go 1.23.5 exactly (via GOTOOLCHAIN)
-nix develop github:1eedaegon/...s#py3_13      # Python 3.13
-nix develop github:1eedaegon/...s#node22      # Node.js 22
-nix develop github:1eedaegon/...s#java21      # JDK 21
-nix develop github:1eedaegon/...s#rust1_75_0  # Rust 1.75.0 exactly (rust-overlay)
+nix develop github:1eedaegon/...s#go1_25      # Go 1.25 latest (auto)
+nix develop github:1eedaegon/...s#go1_25_6    # Go 1.25.6 exact
+nix develop github:1eedaegon/...s#py3_13      # Python 3.13 latest (auto)
+nix develop github:1eedaegon/...s#py3_13_5    # Python 3.13.5 exact
+nix develop github:1eedaegon/...s#node22      # Node.js 22 (auto)
+nix develop github:1eedaegon/...s#java21      # JDK 21 (auto)
+nix develop github:1eedaegon/...s#rust1_75_0  # Rust 1.75.0 exact
 ```
 
-- Minor pins (`go1_25`, `py3_13`, `node22`, `java21`) are generated automatically
-  from whatever nixpkgs ships — no list to maintain.
-- Use `_`, not `.` — the `#` fragment splits on dots. Run `nix flake show` to list every generated shell.
+Every shell inherits a shared base (`git`, `ripgrep`); language tooling layers on top.
+Use `_`, not `.` — the `#` fragment splits on dots. `nix flake show` lists them all.
+
+| Lang | Auto (minor) | Exact (one line) | Source |
+|------|--------------|------------------|--------|
+| go | `#go1_25` | `#go1_25_6` | GOTOOLCHAIN |
+| python | `#py3_13` | `#py3_13_5` | nixpkgs-python |
+| rust | — | `#rust1_75_0` | rust-overlay |
+| node | `#node22` | minor only | nixpkgs |
+| java | `#java21` | minor only | nixpkgs |
 
 #### Pinning an exact patch (declarative, one line)
 
-Flake fragments are static keys (looked up, not parsed), so an exact patch shell
-exists only if declared. Add one string to the relevant list in
-[`lib/version-shells.nix`](lib/version-shells.nix):
+Exact shells exist only if declared — add one string to a list in
+[`lib/version-shells.nix`](lib/version-shells.nix), commit, done:
 
 ```nix
-goExact   = [ "1.23.5" "1.25.6" ];  # -> #go1_25_6   (Go fetches the patch via GOTOOLCHAIN)
-rustExact = [ "1.75.0" "1.79.0" ];  # -> #rust1_79_0 (rust-overlay, fully reproducible)
+versions = {
+  go = [ "1.23.5" "1.25.6" ];   # -> #go1_25_6
+  rust = [ "1.75.0" ];          # -> #rust1_75_0
+  python = [ "3.11.5" "3.13.5" ]; # -> #py3_13_5
+};
 ```
-
-Commit, then `nix develop github:1eedaegon/...s#go1_25_6`. Exact pins apply to Go
-(GOTOOLCHAIN) and Rust (rust-overlay); Python/Node/Java are minor-grained by
-nixpkgs, so use their auto-generated `#py3_13` / `#node22` / `#java21` shells.
 
 Or in a project directory with direnv:
 
