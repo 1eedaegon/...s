@@ -127,6 +127,20 @@ in
     vim.opt.mouse = ""
   '';
 
+  # gpg-agent: use a pinentry that can persist the passphrase (macOS Keychain
+  # via pinentry-mac) and cache it for the day, so commit signing stops
+  # prompting every time. After switch run once: gpgconf --kill gpg-agent
+  home.file.".gnupg/gpg-agent.conf".text =
+    let
+      pinentry =
+        if isDarwin then "${pkgs.pinentry_mac}/bin/pinentry-mac"
+        else "${pkgs.pinentry-curses}/bin/pinentry-curses";
+    in ''
+      pinentry-program ${pinentry}
+      default-cache-ttl 28800
+      max-cache-ttl 86400
+    '';
+
   # Activation scripts: Claude Code + Codex + Doom Emacs default config
   home.activation = claudeCode.activation // codex.activation // {
     initDoomConfig = doomActivationScript;

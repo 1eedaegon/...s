@@ -83,6 +83,11 @@
     # for bash and zsh (via enableBashIntegration/enableZshIntegration/enableFzfIntegration)
     # This script is mainly for additional display and custom settings
 
+    # GPG: let gpg-agent prompt on the right tty so commit signing caches the
+    # passphrase instead of asking every time.
+    export GPG_TTY="$(tty)"
+    gpgconf --launch gpg-agent >/dev/null 2>&1 || true
+
     # Display system info (skip in nix develop to avoid library conflicts)
     if [ -z "$IN_NIX_SHELL" ] && command -v fastfetch >/dev/null 2>&1; then
       fastfetch --logo-color-1 magenta --logo-color-2 cyan
