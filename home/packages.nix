@@ -22,8 +22,7 @@ in
   # Merge common packages with home-manager specific packages
   packages = common.packages ++ (with pkgs; [
     eza
-  ]) ++ lib.optionals isDarwin [ pkgs.pinentry_mac ]
-    ++ lib.optionals (!isDarwin) [ pkgs.pinentry-curses ];
+  ]);
 
   # Programs configuration for home-manager
   programs = lib.recursiveUpdate common.programs {
