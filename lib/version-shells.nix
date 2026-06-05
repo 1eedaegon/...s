@@ -12,9 +12,11 @@ let
   base = with pkgs; [ git ripgrep ];
 
   okPkg = p:
-    let r = builtins.tryEval
-      (lib.meta.availableOn pkgs.stdenv.hostPlatform p && builtins.seq (p.outPath or p.version) true);
-    in r.success && r.value;
+    let
+      r = builtins.tryEval
+        (lib.meta.availableOn pkgs.stdenv.hostPlatform p && builtins.seq (p.outPath or p.version) true);
+    in
+    r.success && r.value;
   okAttr = n: builtins.hasAttr n pkgs && okPkg pkgs.${n};
 
   dropDots = v: builtins.concatStringsSep "_" (lib.splitString "." v);
@@ -29,9 +31,9 @@ let
       packages = base ++ packages;
       shellHook = lib.optionalString (gotoolchain != null) "export GOTOOLCHAIN=${gotoolchain}\n"
         + ''
-          export name=${name}
-          echo "[${name}] ready"
-        '';
+        export name=${name}
+        echo "[${name}] ready"
+      '';
     };
 
   fromAttrs = { regex, nameFn, toolingFor }:
@@ -41,7 +43,8 @@ let
 
   fromList = { list, pkgFor, nameFor, toolingFor, gotoolchainFor ? (_: null) }:
     builtins.listToAttrs (lib.filter (x: x != null) (map
-      (v: let p = pkgFor v; nm = nameFor v; in if p != null && okPkg p
+      (v:
+        let p = pkgFor v; nm = nameFor v; in if p != null && okPkg p
         then { name = nm; value = mk { name = nm; packages = toolingFor p; gotoolchain = gotoolchainFor v; }; }
         else null)
       list));
@@ -86,11 +89,13 @@ let
   };
 
   rustExact =
-    if pkgs ? rust-bin then fromList {
-      list = versions.rust;
-      pkgFor = v: pkgs.rust-bin.stable.${v}.default or null;
-      nameFor = v: "rust${dropDots v}";
-      toolingFor = t: [ t pkgs.rust-analyzer ];
-    } else { };
+    if pkgs ? rust-bin then
+      fromList
+        {
+          list = versions.rust;
+          pkgFor = v: pkgs.rust-bin.stable.${v}.default or null;
+          nameFor = v: "rust${dropDots v}";
+          toolingFor = t: [ t pkgs.rust-analyzer ];
+        } else { };
 in
 goMinor // goExact // pyMinor // pyExact // nodeMinor // javaMinor // rustExact
