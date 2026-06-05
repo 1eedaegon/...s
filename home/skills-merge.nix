@@ -82,12 +82,70 @@ let
 
   patchedECC = mkPatchedMirror "ecc-skills" "${everything-claude-code}/skills";
   patchedGstack = mkPatchedMirror "gstack-skills" "${gstack}";
+
+  # Codex has no subagents, only skills. Convert each Claude agent (.md with
+  # name/description/tools/model frontmatter) into a SKILL.md so AGENTS.md
+  # references like "rust-reviewer" resolve and Codex can load the rubric inline.
+  # Keep name + description (normalized like the patcher); drop tools/model.
+  agentToSkill = pkgs.writeText "agent-to-skill.py" ''
+    import sys, re
+
+    MAX_DESC = ${toString maxDescLen}
+    TARGET = MAX_DESC - 4
+    ELLIPSIS = '...'
+    FENCE = '---'
+
+    content = open(sys.argv[1], encoding='utf-8').read()
+    lines = content.split('\n')
+    if not lines or lines[0].strip() != FENCE:
+        sys.stdout.write(content); sys.exit(0)
+    close = next((i for i in range(1, len(lines)) if lines[i].strip() == FENCE), None)
+    if close is None:
+        sys.stdout.write(content); sys.exit(0)
+
+    name = desc = None
+    for i in range(1, close):
+        m = re.match(r'^name:[ \t]*(.*)$', lines[i])
+        if m:
+            name = m.group(1).strip().strip('"').strip("'"); continue
+        m = re.match(r'^description:[ \t]*(.*)$', lines[i])
+        if m:
+            desc = m.group(1).strip()
+            if (desc[:1], desc[-1:]) in (('"', '"'), ("'", "'")):
+                desc = desc[1:-1]
+
+    if name is None:
+        sys.stdout.write(content); sys.exit(0)
+    desc = desc or ""
+    if len(desc) > TARGET:
+        desc = desc[:TARGET - len(ELLIPSIS)] + ELLIPSIS
+    desc_q = '"' + desc.replace('\\', '\\\\').replace('"', '\\"') + '"'
+    body = '\n'.join(lines[close + 1:])
+
+    sys.stdout.write('\n'.join([
+        FENCE, 'name: ' + name, 'description: ' + desc_q, 'origin: ECC-agent', FENCE, body,
+    ]))
+  '';
+
+  mkAgentSkills = name: agentsRoot: pkgs.runCommand "agent-skills-${name}" { } ''
+    mkdir -p $out
+    for f in ${agentsRoot}/*.md; do
+      [ -e "$f" ] || continue
+      bn=$(basename "$f" .md)
+      mkdir -p "$out/$bn"
+      ${pkgs.python3}/bin/python3 ${agentToSkill} "$f" > "$out/$bn/SKILL.md"
+    done
+  '';
+
+  eccAgentSkills = mkAgentSkills "ecc" "${everything-claude-code}/agents";
 in
 pkgs.writeShellScript "merge-skills" ''
   PATCHED_ECC="${patchedECC}"
   PATCHED_GSTACK="${patchedGstack}"
+  ECC_AGENT_SKILLS="${eccAgentSkills}"
   # GSTACK="${gstack}"
   SKILLS_TARGET="$1"
+  INCLUDE_AGENTS="$2"   # "agents" -> also expose Claude agents as skills (Codex only)
 
   if [ -z "$SKILLS_TARGET" ]; then
     echo "merge-skills: missing target dir argument" >&2
@@ -131,6 +189,19 @@ pkgs.writeShellScript "merge-skills" ''
     if [ -L "$SKILLS_TARGET/gstack" ] || [ ! -e "$SKILLS_TARGET/gstack" ]; then
       ln -sfn "$PATCHED_GSTACK" "$SKILLS_TARGET/gstack"
     fi
+  fi
+
+  # Agents-as-skills: only when requested (Codex). Claude already has the real
+  # agents at ~/.claude/agents, so we skip this for the Claude skills target.
+  if [ "$INCLUDE_AGENTS" = "agents" ] && [ -d "$ECC_AGENT_SKILLS" ]; then
+    for src in "$ECC_AGENT_SKILLS"/*; do
+      [ -f "$src/SKILL.md" ] || continue
+      name="$(basename "$src")"
+      dst="$SKILLS_TARGET/$name"
+      if [ -L "$dst" ] || [ ! -e "$dst" ]; then
+        ln -sfn "$src" "$dst"
+      fi
+    done
   fi
 
   echo "Skills merged into $SKILLS_TARGET"
