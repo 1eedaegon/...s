@@ -104,8 +104,17 @@
     opentofu
     cf-terraforming
 
-    # Python package manager
+    # Python package manager (ad-hoc / per-project venvs)
     uv
+
+    # Declarative global Python env (reproducible, like an always-on devshell).
+    # EDIT THIS LIST to add globally-available libraries; ad-hoc installs go via uv.
+    (python312.withPackages (ps: with ps; [
+      pip
+      setuptools
+      wheel
+      ipython
+    ]))
 
     # Python (ML packages are in combinations/ml.nix)
 
