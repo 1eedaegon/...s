@@ -5,7 +5,7 @@
 {
   packages = with pkgs; [
     uv
-    python312
+    python3 # nixpkgs default (latest stable); pin a version via #py3_13 / #py3_13_5
     ruff
     black
     mypy
