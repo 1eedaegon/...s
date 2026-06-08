@@ -242,6 +242,18 @@ in
   # Zsh specific configuration
   zsh = {
     enableCompletion = true;
+    # Self-healing compinit: one dump, rebuilt only when the zsh build hash
+    # changes (same 5.9, different store path). No linear pileup, never loads a
+    # stale compiled .zwc (the double-free crash source).
+    completionInit = ''
+      _zdir="$HOME/.cache/zsh"; _zdump="$_zdir/zcompdump"; _zstamp="$_zdump.build"
+      _zcur="''${''${:-$(readlink -f =zsh)}:h:h:t}"
+      if [[ "$(cat $_zstamp 2>/dev/null)" != "$_zcur" ]]; then
+        mkdir -p "$_zdir"; rm -f "$_zdump" "$_zdump.zwc"
+        print -r -- "$_zcur" > "$_zstamp"
+      fi
+      autoload -U compinit && compinit -d "$_zdump"
+    '';
     autosuggestion.enable = true;
     syntaxHighlighting.enable = true;
 
