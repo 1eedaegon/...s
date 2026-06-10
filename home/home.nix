@@ -136,11 +136,11 @@ in
     # Doom Emacs (via nix-doom-emacs-unstraightened)
     # If ~/.doom.d/ exists → use it (copied into Nix store via builtins.path)
     # Otherwise → use repo defaults with user identity injected
-    # Temporarily disabled: AV false-positive on emacs-overlay web-mode test
-    # fixture (issues/0895.html) blocks the FOD fetch. Re-enable after the AV
-    # exclusion for /nix is added, or after web-mode snapshot is regenerated.
+    # emacs: pin to the macport (Mac GUI) build — cached on cache.nixos.org, so
+    # nixpkgs bumps don't force a local ns build (which breaks on new clang/SDK).
     doom-emacs = {
       enable = true;
+      emacs = pkgs.emacs30-macport;
       doomDir = if userDoomDirStore != null then userDoomDirStore else defaultDoomDir;
     };
 
