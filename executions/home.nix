@@ -80,6 +80,16 @@ in
       ${common.initScript}
       ${common.functions}
 
+      # Authenticate nix's GitHub fetches so bare `nix develop github:...` /
+      # `nix build github:...` don't hit the 60/h unauthenticated IP rate limit
+      # (HTTP 403). Token is read fresh from gh and exported via NIX_CONFIG —
+      # never written to a file or placed on a command line (ps-safe).
+      if command -v gh >/dev/null 2>&1; then
+        __gh_tok="$(gh auth token 2>/dev/null)"
+        [ -n "$__gh_tok" ] && export NIX_CONFIG="access-tokens = github.com=$__gh_tok"
+        unset __gh_tok
+      fi
+
       # Set up history
       HISTFILE=~/.zsh_history
       HISTSIZE=10000
