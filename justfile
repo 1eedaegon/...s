@@ -12,9 +12,19 @@ format-check:
 # Token is read fresh from gh each run — never stored in the repo.
 _gh := 'github.com=$(gh auth token 2>/dev/null)'
 
-# Build the system; on failure revert flake.lock so a broken bump never half-applies
+# Build the system; on failure revert flake.lock so a broken bump never half-applies.
+# Target matches what `nix run .#default` (apps.default) applies on this host:
+#   macOS → darwinConfigurations.default.system
+#   Linux → homeConfigurations.default.activationPackage  (e.g. aarch64 Jetson)
 _build-or-revert:
-    nix build .#darwinConfigurations.default.system --impure --option access-tokens "{{_gh}}" \
+    #!/usr/bin/env bash
+    set -euo pipefail
+    if [[ "$(uname)" == "Darwin" ]]; then
+      target='.#darwinConfigurations.default.system'
+    else
+      target='.#homeConfigurations.default.activationPackage'
+    fi
+    nix build "$target" --impure --option access-tokens "{{_gh}}" \
       || { echo "build failed → reverting flake.lock"; git checkout flake.lock; exit 1; }
 
 # Update all flake inputs (codex, claude-code via nixpkgs, ECC, gstack, ...) and apply

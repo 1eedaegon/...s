@@ -136,11 +136,13 @@ in
     # Doom Emacs (via nix-doom-emacs-unstraightened)
     # If ~/.doom.d/ exists → use it (copied into Nix store via builtins.path)
     # Otherwise → use repo defaults with user identity injected
-    # emacs: pin to the macport (Mac GUI) build — cached on cache.nixos.org, so
-    # nixpkgs bumps don't force a local ns build (which breaks on new clang/SDK).
+    # emacs: select per-platform. macOS uses the macport (Mac GUI) build; Linux
+    # (e.g. aarch64 Jetson) uses the pure-GTK/Wayland build. Both are cached on
+    # cache.nixos.org, so nixpkgs bumps don't force a local build. pgtk works as a
+    # GUI when a display exists and headless over SSH via `emacs -nw`.
     doom-emacs = {
       enable = true;
-      emacs = pkgs.emacs30-macport;
+      emacs = if isDarwin then pkgs.emacs30-macport else pkgs.emacs30-pgtk;
       doomDir = if userDoomDirStore != null then userDoomDirStore else defaultDoomDir;
     };
 
