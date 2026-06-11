@@ -120,11 +120,11 @@
     "everything-claude-code": {
       "flake": false,
       "locked": {
-        "lastModified": 1781152293,
-        "narHash": "sha256-2XpmCQSCCEhRg6++ZQmrE9011L/4Vk3U3HhYd0v6IZw=",
+        "lastModified": 1781154088,
+        "narHash": "sha256-3eyKAfIN80ZPeQH100wNCTqADkysEJ3j0OKwuB56GJ4=",
         "owner": "affaan-m",
         "repo": "everything-claude-code",
-        "rev": "6319c7d309df998a81a671902e1e90d15b884b00",
+        "rev": "e4a0062d9b5806a7053a70c35116c9f371f4b5ce",
         "type": "github"
       },
       "original": {
