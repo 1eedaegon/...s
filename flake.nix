@@ -91,7 +91,9 @@
     in
     (flake-utils.lib.eachDefaultSystem (system:
       let
-        overlays = overlaysLib.mkOverlays { includeJetpack = true; includeCursorArm = true; inherit system; };
+        # jetpack overlay only on aarch64-linux (Jetson). No devShell package
+        # needs CUDA/TensorRT, so applying it elsewhere is dead weight + a footgun.
+        overlays = overlaysLib.mkOverlays { includeJetpack = system == "aarch64-linux"; includeCursorArm = true; inherit system; };
         pkgs = overlaysLib.mkPkgs { inherit nixpkgs system overlays; cudaSupport = false; };
 
         moduleLoader = import ./lib/module-loader.nix { inherit pkgs system; };

@@ -1,6 +1,6 @@
 # packages/combinations/security.nix
 # Security scanning + network tooling
-#   - Cloud / IaC / container / SBOM scanners (prowler, trivy, grype, syft, checkov, tfsec, terrascan, kics)
+#   - Cloud / IaC / container / SBOM scanners (prowler, trivy, grype, syft, tfsec, terrascan, kics)
 #   - Kubernetes hardening (kube-bench, kubeaudit, kubescape, kubesec)
 #   - Secret scanning & supply chain (gitleaks, trufflehog, cosign, sops, age)
 #   - SAST / DAST (semgrep, nuclei)
@@ -24,7 +24,8 @@ in
     cosign # sigstore container signing / verification
 
     # ── IaC scanners ──
-    checkov # terraform / cfn / k8s / docker policy
+    # checkov removed: pulls python ecdsa 0.19.2 (CVE-2024-23342, marked
+    # insecure in nixpkgs). Coverage retained via tfsec/terrascan/kics.
     tfsec # terraform static analysis
     terrascan # IaC compliance scanning
     kics # checkmarx IaC scanner
