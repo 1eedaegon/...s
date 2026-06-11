@@ -8,7 +8,9 @@ let
   security = import ./security.nix { inherit pkgs; };
 in
 {
-  packages = go.packages ++ node.packages ++ security.packages ++ (with pkgs; [
+  # security.iacSubset: IaC/cloud-relevant scanners only (Go/Rust, aarch64-clean).
+  # The full security suite (incl. python SAST/pentest) lives in the `security` shell.
+  packages = go.packages ++ node.packages ++ security.iacSubset ++ (with pkgs; [
     # IaC (terraform + opentofu side-by-side)
     terraform
     opentofu
