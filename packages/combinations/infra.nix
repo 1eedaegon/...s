@@ -15,7 +15,7 @@ in
     terraform
     opentofu
     terragrunt
-    vault
+    vault-bin # prebuilt binary; source `vault` is uncached on darwin → multi-GB Go build
     ansible
     packer
     pulumi
