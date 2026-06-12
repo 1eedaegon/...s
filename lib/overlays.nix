@@ -37,5 +37,8 @@
       inherit system overlays;
       config.allowUnfree = true;
       config.cudaSupport = cudaSupport;
+      # ecdsa: pulled transitively by IaC python tooling (ansible/azure); permit
+      # the Minerva-timing CVE in dev shells rather than dropping the toolchain.
+      config.permittedInsecurePackages = [ "python3.13-ecdsa-0.19.2" ];
     };
 }
