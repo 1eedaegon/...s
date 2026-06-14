@@ -28,6 +28,10 @@ let
     inherit config lib pkgs everything-claude-code gstack;
   };
 
+  # Register a GitHub access token in user nix.conf so `nix develop github:...`
+  # needs no NIX_CONFIG prefix (avoids api.github.com rate-limit 403).
+  nixAccessToken = import ./nix-access-token.nix { inherit lib pkgs; };
+
   # Doom Emacs
   homeDirectory = config.home.homeDirectory;
   userDoomDir = "${homeDirectory}/.doom.d";
@@ -127,8 +131,8 @@ in
     vim.opt.mouse = ""
   '';
 
-  # Activation scripts: Claude Code + Codex + Doom Emacs default config
-  home.activation = claudeCode.activation // codex.activation // {
+  # Activation scripts: Claude Code + Codex + nix access token + Doom Emacs
+  home.activation = claudeCode.activation // codex.activation // nixAccessToken.activation // {
     initDoomConfig = doomActivationScript;
   };
 
