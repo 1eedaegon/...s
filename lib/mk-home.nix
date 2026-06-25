@@ -12,7 +12,6 @@
       system = currentSystem;
 
       overlays = overlaysLib.mkOverlays {
-        includeCursorArm = true;
         inherit system;
       };
       pkgs = overlaysLib.mkPkgs { inherit nixpkgs system overlays; };

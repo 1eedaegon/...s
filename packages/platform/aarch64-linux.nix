@@ -11,6 +11,5 @@
     tailscale
     devenv
     zed-editor
-    pkgs.cursor-arm
   ];
 }

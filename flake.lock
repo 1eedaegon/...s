@@ -42,26 +42,6 @@
         "type": "github"
       }
     },
-    "cursor-arm": {
-      "inputs": {
-        "nixpkgs": [
-          "nixpkgs"
-        ]
-      },
-      "locked": {
-        "lastModified": 1735561606,
-        "narHash": "sha256-aYCw0i7ravhhFcwKBglqI6XDc7z8CNjP2Q+TaYgdQN0=",
-        "owner": "coder",
-        "repo": "cursor-arm",
-        "rev": "b0b63f46d252a6cb5e6e3b0b1c73e777e26f58ee",
-        "type": "github"
-      },
-      "original": {
-        "owner": "coder",
-        "repo": "cursor-arm",
-        "type": "github"
-      }
-    },
     "doomemacs": {
       "flake": false,
       "locked": {
@@ -339,7 +319,6 @@
     },
     "root": {
       "inputs": {
-        "cursor-arm": "cursor-arm",
         "everything-claude-code": "everything-claude-code",
         "flake-utils": "flake-utils",
         "gstack": "gstack",

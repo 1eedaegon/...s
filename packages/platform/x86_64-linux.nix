@@ -10,6 +10,5 @@
     valgrind
     tailscale
     zed-editor
-    code-cursor
   ];
 }

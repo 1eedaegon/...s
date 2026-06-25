@@ -30,10 +30,6 @@
       url = "github:garrytan/gstack";
       flake = false;
     };
-    cursor-arm = {
-      url = "github:coder/cursor-arm";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
     nix-doom-emacs-unstraightened = {
       url = "github:marienz/nix-doom-emacs-unstraightened";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -41,7 +37,7 @@
     nixpkgs-python.url = "github:cachix/nixpkgs-python";
   };
 
-  outputs = { self, nixpkgs, flake-utils, home-manager, nix-darwin, nix-homebrew, rust-overlay, jetpack, everything-claude-code, gstack, cursor-arm, nix-doom-emacs-unstraightened, nixpkgs-python, ... }:
+  outputs = { self, nixpkgs, flake-utils, home-manager, nix-darwin, nix-homebrew, rust-overlay, jetpack, everything-claude-code, gstack, nix-doom-emacs-unstraightened, nixpkgs-python, ... }:
     let
       lib = nixpkgs.lib;
 
@@ -60,7 +56,7 @@
 
       # ── Lib ──
       identity = import ./lib/identity.nix { inherit lib userRegistry; };
-      overlaysLib = import ./lib/overlays.nix { inherit rust-overlay jetpack cursor-arm; };
+      overlaysLib = import ./lib/overlays.nix { inherit rust-overlay jetpack; };
 
       homeLib = import ./lib/mk-home.nix {
         inherit nixpkgs home-manager nix-doom-emacs-unstraightened everything-claude-code gstack identity overlaysLib;
@@ -93,7 +89,7 @@
       let
         # jetpack overlay only on aarch64-linux (Jetson). No devShell package
         # needs CUDA/TensorRT, so applying it elsewhere is dead weight + a footgun.
-        overlays = overlaysLib.mkOverlays { includeJetpack = system == "aarch64-linux"; includeCursorArm = true; inherit system; };
+        overlays = overlaysLib.mkOverlays { includeJetpack = system == "aarch64-linux"; inherit system; };
         pkgs = overlaysLib.mkPkgs { inherit nixpkgs system overlays; cudaSupport = false; };
 
         moduleLoader = import ./lib/module-loader.nix { inherit pkgs system; };

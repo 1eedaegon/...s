@@ -1,13 +1,12 @@
 # lib/overlays.nix
 # Overlay factory — eliminates 3x duplication across devShell/home/darwin
-{ rust-overlay, jetpack, cursor-arm }:
+{ rust-overlay, jetpack }:
 
 {
   # Build overlay list based on context
-  # devShells:  includeJetpack=true,  includeCursorArm=true
-  # home:       includeJetpack=false, includeCursorArm=true
-  # darwin:     includeJetpack=false, includeCursorArm=false
-  mkOverlays = { includeJetpack ? false, includeCursorArm ? false, system ? null }:
+  # devShells/home: includeJetpack=false (true only on aarch64-linux Jetson)
+  # darwin:         includeJetpack=false
+  mkOverlays = { includeJetpack ? false, system ? null }:
     [ (import rust-overlay) ]
     ++ (if includeJetpack then [ jetpack.overlays.default ] else [ ])
     ++ [
@@ -26,9 +25,7 @@
           doCheck = false;
           doInstallCheck = false;
         });
-      } // (if includeCursorArm && system != null then {
-        cursor-arm = cursor-arm.packages.${system}.default or null;
-      } else { }))
+      })
     ];
 
   # Instantiate nixpkgs with overlays
