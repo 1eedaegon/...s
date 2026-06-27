@@ -3,9 +3,15 @@
 { pkgs }:
 
 let
+  inherit (pkgs) lib stdenv;
   go = import ../toolchains/go.nix { inherit pkgs; };
   node = import ../toolchains/node.nix { inherit pkgs; };
   security = import ./security.nix { inherit pkgs; };
+
+  # mycli pulls sqlglot → duckdb → pyarrow → arrow-cpp, which nixpkgs marks
+  # broken on x86_64-darwin only (isDarwin && isx86_64). Drop the autocomplete
+  # wrapper there; the plain `mariadb` mysql client below still ships.
+  isBrokenArrowPlatform = stdenv.hostPlatform.isDarwin && stdenv.hostPlatform.isx86_64;
 in
 {
   # security.iacSubset: IaC/cloud-relevant scanners only (Go/Rust, aarch64-clean).
@@ -42,10 +48,11 @@ in
     postgresql # psql
     pgcli # psql with autocomplete
     mariadb # mysql client (mysql-client replaced by mariadb.client upstream)
-    mycli # mysql with autocomplete
     sqlite
     litecli # sqlite with autocomplete
     redis # redis-cli
     mongosh # mongodb shell
+  ]) ++ lib.optionals (!isBrokenArrowPlatform) (with pkgs; [
+    mycli # mysql with autocomplete (skipped on x86_64-darwin; see above)
   ]);
 }
