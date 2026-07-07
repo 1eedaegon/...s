@@ -174,6 +174,26 @@ echo 'use flake github:1eedaegon/...s#rust' > .envrc
 direnv allow
 ```
 
+### Local-first shells (zero network)
+
+`github:` refs re-check the remote HEAD hourly (`tarball-ttl`). Register a
+local clone once and shells resolve offline — committing is the refresh:
+
+```bash
+nix registry add dots "git+file://$PWD"   # from the clone root; uses last commit, dirty files ignored
+nix develop dots#infra
+```
+
+Or pin the remote and refresh explicitly (re-run the same command):
+
+```bash
+nix registry pin dots github:1eedaegon/...s
+```
+
+Registry names must start with a letter (`3dots` is invalid), and the short
+form `nix registry pin dots` fails for user-registry-only names — always pass
+the target ref.
+
 ## What's included
 
 ### Common packages (all platforms)
