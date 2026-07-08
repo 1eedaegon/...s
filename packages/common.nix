@@ -109,7 +109,8 @@
 
     # Declarative global Python env (reproducible, like an always-on devshell).
     # EDIT THIS LIST to add globally-available libraries; ad-hoc installs go via uv.
-    (python312.withPackages (ps: with ps; [
+    # Default python set (cache.nixos.org coverage; pinned sets build from source)
+    (python3.withPackages (ps: with ps; [
       pip
       setuptools
       wheel

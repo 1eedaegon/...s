@@ -7,7 +7,9 @@ let
   rust = import ../toolchains/rust.nix { inherit pkgs; };
 
   mlPackages = [
-    (pkgs.python312.withPackages (ps: with ps; [
+    # Default python set — non-default sets (python312.*) are not built by
+    # Hydra, so pinning one forces the whole closure to build from source.
+    (pkgs.python3.withPackages (ps: with ps; [
       marimo
       wandb
       huggingface-hub
