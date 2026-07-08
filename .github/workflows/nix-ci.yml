@@ -40,7 +40,7 @@ jobs:
       - name: Check devShells
         run: |
           SYS=$(nix eval --raw --impure --expr builtins.currentSystem)
-          for shell in default rust go py node java; do
+          for shell in default rust go py node java fullstack ml infra research security; do
             nix eval ".#devShells.${SYS}.${shell}.name" > /dev/null
             echo "✓ devShell ${shell}"
           done
@@ -51,7 +51,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, macos-latest]
-        shell: [default, rust, go, py, node, java]
+        shell: [default, rust, go, py, node, java, fullstack, ml, infra, research, security]
     runs-on: ${{ matrix.os }}
     timeout-minutes: 45
     steps:
