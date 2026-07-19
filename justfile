@@ -22,7 +22,12 @@ format-check:
 _build-or-revert:
     #!/usr/bin/env bash
     set -euo pipefail
-    export NIX_CONFIG="access-tokens = github.com=$(gh auth token 2>/dev/null)"
+    token="$(gh auth token 2>/dev/null || true)"
+    if [[ -n "$token" ]]; then
+      export NIX_CONFIG="access-tokens = github.com=$token"
+    else
+      unset NIX_CONFIG
+    fi
     if [[ "$(uname)" == "Darwin" ]]; then
       target='.#darwinConfigurations.default.system'
     else
@@ -31,24 +36,43 @@ _build-or-revert:
     nix build "$target" --impure \
       || { echo "build failed → reverting flake.lock"; git checkout flake.lock; exit 1; }
 
-# Update all flake inputs (codex, claude-code via nixpkgs, ECC, gstack, ...) and apply
+# Update all flake inputs (nixpkgs, shared skills, toolchains, ...) and apply
 update:
     #!/usr/bin/env bash
     set -euo pipefail
-    export NIX_CONFIG="access-tokens = github.com=$(gh auth token 2>/dev/null)"
+    token="$(gh auth token 2>/dev/null || true)"
+    if [[ -n "$token" ]]; then
+      export NIX_CONFIG="access-tokens = github.com=$token"
+    else
+      unset NIX_CONFIG
+    fi
     echo "Updating flake inputs..."
     nix flake update
     just _build-or-revert
     echo "Build OK — applying configuration..."
     nix run .#default
 
-# Update only the agent toolchain inputs (codex/claude-code source + shared skills) and apply
+# Update agent-related inputs and apply
 update-agents:
     #!/usr/bin/env bash
     set -euo pipefail
-    export NIX_CONFIG="access-tokens = github.com=$(gh auth token 2>/dev/null)"
-    echo "Updating nixpkgs (codex, claude-code) + ECC + gstack..."
-    nix flake update nixpkgs everything-claude-code gstack
+    # Codex is pinned separately in lib/overlays.nix so it can move
+    # independently of nixpkgs on x86_64-darwin.
+    token="$(gh auth token 2>/dev/null || true)"
+    if [[ -n "$token" ]]; then
+      export NIX_CONFIG="access-tokens = github.com=$token"
+    else
+      unset NIX_CONFIG
+    fi
+    inputs=(everything-claude-code gstack)
+    if [[ "$(uname)" == "Darwin" && "$(uname -m)" == "x86_64" ]]; then
+      echo "Skipping nixpkgs update: current nixos-unstable has dropped x86_64-darwin support."
+      echo "Updating ECC + gstack..."
+    else
+      inputs=(nixpkgs "${inputs[@]}")
+      echo "Updating nixpkgs (claude-code) + ECC + gstack..."
+    fi
+    nix flake update "${inputs[@]}"
     just _build-or-revert
     echo "Build OK — applying configuration..."
     nix run .#default

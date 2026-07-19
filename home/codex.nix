@@ -61,10 +61,10 @@ let
   '';
 in
 {
-  # Codex CLI from nixpkgs (reproducible; bump via flake.lock update)
-  packages = with pkgs; [
-    codex
-  ];
+  # Agent CLIs from pkgs. lib/overlays.nix pins Codex to OpenAI's prebuilt
+  # platform tarball. grok-build is installed when available: x86_64-darwin
+  # gets the forked nixpkgs input, other platforms come directly from NixOS/nixpkgs.
+  packages = with pkgs; [ codex ] ++ lib.optionals (pkgs ? grok-build) [ grok-build ];
 
   activation = {
     setupCodex = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
@@ -74,5 +74,7 @@ in
 
   aliases = {
     cx = "codex";
+  } // lib.optionalAttrs (pkgs ? grok-build) {
+    gb = "grok";
   };
 }

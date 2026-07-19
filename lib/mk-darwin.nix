@@ -10,7 +10,6 @@
       email = ident.email;
 
       overlays = overlaysLib.mkOverlays { inherit system; };
-      pkgs = overlaysLib.mkPkgs { inherit nixpkgs system overlays; };
     in
     nix-darwin.lib.darwinSystem {
       inherit system;
@@ -20,6 +19,9 @@
         username = serviceUsername;
       };
       modules = [
+        {
+          nixpkgs.overlays = overlays;
+        }
         ../darwin/default.nix
         nix-homebrew.darwinModules.nix-homebrew
         {

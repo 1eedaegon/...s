@@ -35,9 +35,10 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     nixpkgs-python.url = "github:cachix/nixpkgs-python";
+    nixpkgs-grok-build.url = "github:1eedaegon/nixpkgs/grok-build-intel-mac-release-26.05";
   };
 
-  outputs = { self, nixpkgs, flake-utils, home-manager, nix-darwin, nix-homebrew, rust-overlay, jetpack, everything-claude-code, gstack, nix-doom-emacs-unstraightened, nixpkgs-python, ... }:
+  outputs = { self, nixpkgs, flake-utils, home-manager, nix-darwin, nix-homebrew, rust-overlay, jetpack, everything-claude-code, gstack, nix-doom-emacs-unstraightened, nixpkgs-python, nixpkgs-grok-build, ... }:
     let
       lib = nixpkgs.lib;
 
@@ -56,7 +57,7 @@
 
       # ── Lib ──
       identity = import ./lib/identity.nix { inherit lib userRegistry; };
-      overlaysLib = import ./lib/overlays.nix { inherit rust-overlay jetpack; };
+      overlaysLib = import ./lib/overlays.nix { inherit rust-overlay jetpack nixpkgs-grok-build; };
 
       homeLib = import ./lib/mk-home.nix {
         inherit nixpkgs home-manager nix-doom-emacs-unstraightened everything-claude-code gstack identity overlaysLib;
