@@ -284,11 +284,11 @@
     },
     "nixpkgs-grok-build": {
       "locked": {
-        "lastModified": 1784490604,
-        "narHash": "sha256-rbjlzeXE8E5BimiM+gM90OZIpTGx19B4+zH55HyqM6k=",
+        "lastModified": 1784577386,
+        "narHash": "sha256-ZAeGZ+LN5NA7SIuwTMOqAaudwPz4RRV9ibDJyOEa2fU=",
         "owner": "1eedaegon",
         "repo": "nixpkgs",
-        "rev": "4173d468ad4274e2b38f700f0915bad969f13168",
+        "rev": "057b5b3a8f5ecbce8352537875d4249277e7cb4f",
         "type": "github"
       },
       "original": {
