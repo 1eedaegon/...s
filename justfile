@@ -64,7 +64,7 @@ update-agents:
     else
       unset NIX_CONFIG
     fi
-    inputs=(everything-claude-code gstack)
+    inputs=(everything-claude-code gstack nixpkgs-grok-build)
     if [[ "$(uname)" == "Darwin" && "$(uname -m)" == "x86_64" ]]; then
       echo "Skipping nixpkgs update: current nixos-unstable has dropped x86_64-darwin support."
       echo "Updating ECC + gstack..."

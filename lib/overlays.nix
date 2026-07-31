@@ -94,7 +94,10 @@
           doCheck = false;
           doInstallCheck = false;
         });
-      } // (if system == "x86_64-darwin" && nixpkgs-grok-build != null then {
+      } // (if nixpkgs-grok-build != null && system != null then {
+        # grok CLI from the pinned fork on every platform (its package.nix
+        # ships hashes for all four systems). Upstream nixpkgs lags x.ai
+        # stable and release-26.05 only carries 0.2.93.
         grok-build =
           (import nixpkgs-grok-build {
             inherit system;

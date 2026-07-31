@@ -62,8 +62,8 @@ let
 in
 {
   # Agent CLIs from pkgs. lib/overlays.nix pins Codex to OpenAI's prebuilt
-  # platform tarball. grok-build is installed when available: x86_64-darwin
-  # gets the forked nixpkgs input, other platforms come directly from NixOS/nixpkgs.
+  # platform tarball and grok-build to the pinned fork input on every
+  # platform (upstream nixpkgs lags x.ai stable).
   packages = with pkgs; [ codex ] ++ lib.optionals (pkgs ? grok-build) [ grok-build ];
 
   activation = {
