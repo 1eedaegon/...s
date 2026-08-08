@@ -2,7 +2,7 @@
 # Assembly only — exact version pins live in flake.nix (`toolchainVersions`).
 # Each shell inherits `base`; language tooling layers on top.
 #
-#   go     #go1_25_6   GOTOOLCHAIN        rust   #rust1_75_0  rust-overlay
+#   go     #go1_25_6   GOTOOLCHAIN        rust   #rust1_96_0  rust-overlay
 #   python #py3_13_5   nixpkgs-python     node   #node22      nixpkgs minor
 #   java   #java21     nixpkgs minor
 { pkgs, lib, pythonPkgs, versions }:

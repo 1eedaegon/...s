@@ -48,10 +48,10 @@
         "1eedaegon" = { serviceUsername = "1eedaegon"; email = "d8726243@gmail.com"; };
       };
 
-      # Exact toolchain pins -> #go1_25_6 #py3_13_5 #rust1_75_0 (assembly in lib/version-shells.nix)
+      # Exact toolchain pins -> #go1_25_6 #py3_13_5 #rust1_96_0 (assembly in lib/version-shells.nix)
       toolchainVersions = {
         go = [ "1.23.5" "1.25.6" ];
-        rust = [ "1.75.0" ];
+        rust = [ "1.96.0" ];
         python = [ "3.11.5" "3.13.5" ];
       };
 
@@ -106,7 +106,7 @@
           };
         };
         mkEnv = envLib.mkEnv;
-        # Version-postfixed shells (#go1_25_6, #py3_13_5, #node22, #java21, #rust1_75_0)
+        # Version-postfixed shells (#go1_25_6, #py3_13_5, #node22, #java21, #rust1_96_0)
         versionShells = import ./lib/version-shells.nix {
           inherit pkgs lib;
           pythonPkgs = nixpkgs-python.packages.${system};

@@ -140,7 +140,7 @@ nix develop github:1eedaegon/...s#py3_13      # Python 3.13 latest (auto)
 nix develop github:1eedaegon/...s#py3_13_5    # Python 3.13.5 exact
 nix develop github:1eedaegon/...s#node22      # Node.js 22 (auto)
 nix develop github:1eedaegon/...s#java21      # JDK 21 (auto)
-nix develop github:1eedaegon/...s#rust1_75_0  # Rust 1.75.0 exact
+nix develop github:1eedaegon/...s#rust1_96_0  # Rust 1.96.0 exact
 ```
 
 Every shell inherits a shared base (`git`, `ripgrep`); language tooling layers on top.
@@ -150,7 +150,7 @@ Use `_`, not `.` — the `#` fragment splits on dots. `nix flake show` lists the
 |------|--------------|------------------|--------|
 | go | `#go1_25` | `#go1_25_6` | GOTOOLCHAIN |
 | python | `#py3_13` | `#py3_13_5` | nixpkgs-python |
-| rust | — | `#rust1_75_0` | rust-overlay |
+| rust | — | `#rust1_96_0` | rust-overlay |
 | node | `#node22` | minor only | nixpkgs |
 | java | `#java21` | minor only | nixpkgs |
 
@@ -162,7 +162,7 @@ Exact shells exist only if declared — add one string to `toolchainVersions` in
 ```nix
 toolchainVersions = {
   go = [ "1.23.5" "1.25.6" ];     # -> #go1_25_6
-  rust = [ "1.75.0" ];            # -> #rust1_75_0
+  rust = [ "1.96.0" ];            # -> #rust1_96_0
   python = [ "3.11.5" "3.13.5" ]; # -> #py3_13_5
 };
 ```
