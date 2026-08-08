@@ -99,6 +99,7 @@
     # Cloudflare
     cloudflared
     flarectl
+    wrangler # workers/pages CLI (x86_64-darwin cached on cache.nixos.org)
 
     # Infrastructure as Code
     opentofu
