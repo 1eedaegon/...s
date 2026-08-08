@@ -36,9 +36,23 @@
     };
     nixpkgs-python.url = "github:cachix/nixpkgs-python";
     nixpkgs-grok-build.url = "github:1eedaegon/nixpkgs/grok-build-intel-mac-release-26.05";
+
+    # x86_64-darwin lifeline: nixpkgs unstable (26.11-pre) hard-dropped intel
+    # macs. 26.05 is the last supporting release (security fixes until end of
+    # 2026), so that system gets a matched 26.05 channel set; everything else
+    # keeps tracking unstable. Selection happens in `channelsFor` below.
+    nixpkgs-2605-darwin.url = "github:NixOS/nixpkgs/nixpkgs-26.05-darwin";
+    home-manager-2605 = {
+      url = "github:nix-community/home-manager/release-26.05";
+      inputs.nixpkgs.follows = "nixpkgs-2605-darwin";
+    };
+    nix-darwin-2605 = {
+      url = "github:LnL7/nix-darwin/nix-darwin-26.05";
+      inputs.nixpkgs.follows = "nixpkgs-2605-darwin";
+    };
   };
 
-  outputs = { self, nixpkgs, flake-utils, home-manager, nix-darwin, nix-homebrew, rust-overlay, jetpack, everything-claude-code, gstack, nix-doom-emacs-unstraightened, nixpkgs-python, nixpkgs-grok-build, ... }:
+  outputs = { self, nixpkgs, flake-utils, home-manager, nix-darwin, nix-homebrew, rust-overlay, jetpack, everything-claude-code, gstack, nix-doom-emacs-unstraightened, nixpkgs-python, nixpkgs-grok-build, nixpkgs-2605-darwin, home-manager-2605, nix-darwin-2605, ... }:
     let
       lib = nixpkgs.lib;
 
@@ -55,15 +69,35 @@
         python = [ "3.11.5" "3.13.5" ];
       };
 
+      # ── Channel selection ──
+      # x86_64-darwin rides the 26.05 channel set (unstable dropped intel mac);
+      # every other system tracks unstable. home-manager/nix-darwin must match
+      # their nixpkgs, so the whole trio is swapped together.
+      channelsFor = system:
+        if system == "x86_64-darwin" then {
+          nixpkgs = nixpkgs-2605-darwin;
+          home-manager = home-manager-2605;
+          nix-darwin = nix-darwin-2605;
+        } else {
+          inherit nixpkgs home-manager nix-darwin;
+        };
+      # For impure host-targeting outputs (darwinConfigurations, homeConfigurations)
+      currentChannels = channelsFor (builtins.currentSystem or "x86_64-linux");
+
       # ── Lib ──
       identity = import ./lib/identity.nix { inherit lib userRegistry; };
       overlaysLib = import ./lib/overlays.nix { inherit rust-overlay jetpack nixpkgs-grok-build; };
 
       homeLib = import ./lib/mk-home.nix {
-        inherit nixpkgs home-manager nix-doom-emacs-unstraightened everything-claude-code gstack identity overlaysLib;
+        nixpkgs = currentChannels.nixpkgs;
+        home-manager = currentChannels.home-manager;
+        inherit nix-doom-emacs-unstraightened everything-claude-code gstack identity overlaysLib;
       };
       darwinLib = import ./lib/mk-darwin.nix {
-        inherit nixpkgs nix-darwin nix-homebrew home-manager nix-doom-emacs-unstraightened everything-claude-code gstack identity overlaysLib;
+        nixpkgs = currentChannels.nixpkgs;
+        nix-darwin = currentChannels.nix-darwin;
+        home-manager = currentChannels.home-manager;
+        inherit nix-homebrew nix-doom-emacs-unstraightened everything-claude-code gstack identity overlaysLib;
       };
       nixosLib = import ./lib/mk-nixos.nix {
         inherit nixpkgs home-manager nix-doom-emacs-unstraightened everything-claude-code gstack identity overlaysLib;
@@ -91,7 +125,7 @@
         # jetpack overlay only on aarch64-linux (Jetson). No devShell package
         # needs CUDA/TensorRT, so applying it elsewhere is dead weight + a footgun.
         overlays = overlaysLib.mkOverlays { includeJetpack = system == "aarch64-linux"; inherit system; };
-        pkgs = overlaysLib.mkPkgs { inherit nixpkgs system overlays; cudaSupport = false; };
+        pkgs = overlaysLib.mkPkgs { nixpkgs = (channelsFor system).nixpkgs; inherit system overlays; cudaSupport = false; };
 
         moduleLoader = import ./lib/module-loader.nix { inherit pkgs system; };
         modules = moduleLoader.loadModules;
@@ -152,7 +186,7 @@
                 sudo -H nix run nix-darwin -- switch --flake ${self}#default --impure "$@"
               fi
             else
-              ${home-manager.packages.${system}.home-manager}/bin/home-manager switch --flake ${self}#default --impure -b backup "$@"
+              ${(channelsFor system).home-manager.packages.${system}.home-manager}/bin/home-manager switch --flake ${self}#default --impure -b backup "$@"
             fi
           ''}";
         };

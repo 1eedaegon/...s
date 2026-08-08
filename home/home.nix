@@ -148,6 +148,14 @@ in
       enable = true;
       emacs = if isDarwin then pkgs.emacs30-macport else pkgs.emacs30-pgtk;
       doomDir = if userDoomDirStore != null then userDoomDirStore else defaultDoomDir;
+      # org-pdftools probes pdf-info features at byte-compile time, which spawns
+      # epdfinfo; inside the nix-daemon build context on x86_64-darwin (26.05)
+      # that spawn aborts (trap 6) even though the same binary works at runtime.
+      # Tolerate the compile error only — same approach unstraightened itself
+      # uses for sly-stepper.
+      emacsPackageOverrides = eself: esuper: {
+        org-pdftools = esuper.org-pdftools.overrideAttrs { ignoreCompilationError = true; };
+      };
     };
 
     # Git
