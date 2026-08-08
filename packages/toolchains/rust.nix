@@ -1,5 +1,7 @@
 # packages/toolchains/rust.nix
-{ pkgs }:
+# `targets`: extra cross-compilation std targets (rust-overlay), e.g.
+# combinations/hybridapp.nix passes android/ios/windows triples for tauri.
+{ pkgs, targets ? [ ] }:
 
 let
   rust-bin = pkgs.rust-bin or null;
@@ -10,6 +12,7 @@ in
       rust-bin.stable.latest.default.override
         {
           extensions = [ "rust-src" "rust-analyzer" "clippy" "rustfmt" ];
+          inherit targets;
         }
     else rustc)
 

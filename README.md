@@ -129,6 +129,14 @@ nix develop github:1eedaegon/...s#node     # node + pnpm + turbo
 nix develop github:1eedaegon/...s#java     # jdk + maven + gradle + mvnd
 ```
 
+Combination shells compose toolchains for a workload (`#fullstack`, `#ml`,
+`#infra`, `#research`, `#security`, `#hybridapp`):
+
+```bash
+nix develop github:1eedaegon/...s#hybridapp  # tauri v2: rust(+android/ios/win targets) + node + jdk/gradle/kotlin + cocoapods
+# cocoapods ships from nixpkgs — no `brew install cocoapods` needed for `cargo tauri ios`
+```
+
 ### Version-pinned toolchains
 
 Append a `[lang][version]` postfix to pin an exact toolchain:

@@ -153,6 +153,7 @@
           infra = import ./packages/combinations/infra.nix { inherit pkgs; };
           research = import ./packages/combinations/research.nix { inherit pkgs; };
           security = import ./packages/combinations/security.nix { inherit pkgs; };
+          hybridapp = import ./packages/combinations/hybridapp.nix { inherit pkgs; };
         };
       in
       {
@@ -171,6 +172,7 @@
           infra = mkEnv { name = "infra"; extraPackages = combinations.infra.packages; };
           research = mkEnv { name = "research"; extraPackages = combinations.research.packages; };
           security = mkEnv { name = "security"; extraPackages = combinations.security.packages; };
+          hybridapp = mkEnv { name = "hybridapp"; extraPackages = combinations.hybridapp.packages; extraShellHook = combinations.hybridapp.shellHook; };
 
           # Custom example
           custom = mkEnv { name = "default"; extraPackages = with pkgs; [ docker kubectl ]; extraShellHook = "echo 'Custom environment loaded'"; };

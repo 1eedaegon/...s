@@ -41,7 +41,7 @@
     gnumake
 
     # Development tools
-    nodejs_24
+    nodejs_26
     jdk
     just
     act
