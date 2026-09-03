@@ -60,6 +60,13 @@
         echo "max-free = 3221225472"
       } >> "$CONF"
     fi
+    if ! grep -q "lazy-trees" "$CONF" 2>/dev/null; then
+      # lazy-trees leaves drvs referencing virtual source trees; stale
+      # direnv/eval caches then fail with "don't know how to recreate
+      # store derivation". Materializing sources costs ~1s per local
+      # flake entry on a repo this size.
+      echo "lazy-trees = false" >> "$CONF"
+    fi
     launchctl kickstart -k system/systems.determinate.nix-daemon 2>/dev/null || true
   '';
 
