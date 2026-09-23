@@ -51,7 +51,29 @@ nix develop github:1eedaegon/...s#rust
 curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix | sh -s -- install
 ```
 
-### 2. Set your identity
+### 2. Apply — no fork, no GitHub login
+
+```bash
+nix run github:1eedaegon/...s --impure
+```
+
+That is the whole install. Identity is resolved at eval time with a fallback, so
+an unregistered user still gets a complete configuration:
+
+| Field | Source when you are not in `userRegistry` |
+|-------|-------------------------------------------|
+| username | `$USER` (macOS: `$SUDO_USER` when run under sudo) |
+| email | `$EMAIL` if set, else `test@localhost` |
+
+```bash
+# Linux / home-manager: pass your git email without forking anything
+EMAIL=you@example.com nix run github:1eedaegon/...s --impure
+```
+
+macOS (nix-darwin) reads the email from the registry only — set it via the fork
+below if you want git commits attributed correctly.
+
+### 3. (Optional) Make it yours — fork and set your identity
 
 Fork this repo, then edit `flake.nix` — replace the `userRegistry` with your own:
 
@@ -65,14 +87,10 @@ userRegistry = {
 This single table drives all configurations (home-manager, NixOS, nix-darwin).
 No other files need user-specific changes.
 
-### 3. Apply
+Then apply from your clone:
 
 ```bash
-# macOS (nix-darwin + home-manager)
-nix run . --impure
-
-# Linux (home-manager only)
-nix run . --impure
+nix run . --impure   # macOS: nix-darwin + home-manager / Linux: home-manager
 ```
 
 ## DevShells (no install required)
