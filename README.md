@@ -62,51 +62,10 @@ userRegistry = {
 };
 ```
 
-This single table drives all configurations (home-manager, NixOS, nix-darwin, Doom Emacs).
+This single table drives all configurations (home-manager, NixOS, nix-darwin).
 No other files need user-specific changes.
 
-### 3. (Optional) Customize Doom Emacs
-
-Doom Emacs is installed via `nix-doom-emacs-unstraightened`. After `nix run .`:
-
-- `~/.doom.d/` — Doom config (init.el, config.el, packages.el)
-- Knowledge base directory — auto-created with folder structure + `git init`
-
-**Set your knowledge base directory** — edit one line in `~/.doom.d/config.el`:
-
-```elisp
-(defvar knowledge-base (expand-file-name "~/your-knowledge-base"))
-```
-
-All paths (org-roam, citar, agenda, journal) are derived from this single variable. The directory is auto-created on first `nix run .` with this structure:
-
-```
-~/your-knowledge-base/       ← git initialized
-├── inbox/                   ← Quick capture
-├── papers/reading/          ← Paper notes (org-roam)
-├── concepts/                ← Concept notes (Zettelkasten)
-├── pe/topics/               ← Study topic notes
-├── pe/mock-answers/         ← Daily writing practice (org-journal)
-├── review/                  ← Paper review notes
-├── weekly/                  ← Weekly review logs
-├── shutdown.org             ← Daily checklist (org-agenda)
-├── references.bib           ← Zotero auto-export (citar)
-└── .gitignore               ← PDF/binary excluded
-```
-
-Key shortcuts:
-
-| Key | Action |
-|-----|--------|
-| `SPC n r f` | Find/create org-roam note |
-| `SPC n r c` | Capture with template (paper/concept/review) |
-| `SPC n r i` | Insert link to another note |
-| `SPC n j` | Open today's journal |
-| `SPC o a` | Open agenda (shutdown checklist) |
-| `SPC @` | Search Zotero bibliography |
-| `SPC g g` | Git (Magit) |
-
-### 4. Apply
+### 3. Apply
 
 ```bash
 # macOS (nix-darwin + home-manager)
@@ -211,7 +170,7 @@ the target ref.
 | Cloud CLI | awscli2, google-cloud-sdk, azure-cli |
 | Cloudflare | cloudflared, flarectl, cf-terraforming |
 | Kubernetes | kubectl, helm, k9s, kubectx, stern, kustomize |
-| Editor | neovim, Doom Emacs (nix-managed) |
+| Editor | neovim |
 | AI agents | Claude Code + Codex (nix-pinned, shared skills/rules) |
 | Build cache | ccache (C/C++) |
 | IaC | opentofu |

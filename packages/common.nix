@@ -59,7 +59,7 @@
     # Editor
     neovim
 
-    # Doom Emacs system dependencies
+    # Shared CLI/dev tooling
     fd
     sqlite
     graphviz

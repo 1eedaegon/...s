@@ -30,10 +30,6 @@
       url = "github:garrytan/gstack";
       flake = false;
     };
-    nix-doom-emacs-unstraightened = {
-      url = "github:marienz/nix-doom-emacs-unstraightened";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
     nixpkgs-python.url = "github:cachix/nixpkgs-python";
     nixpkgs-grok-build.url = "github:1eedaegon/nixpkgs/grok-build-intel-mac-release-26.05";
 
@@ -52,7 +48,7 @@
     };
   };
 
-  outputs = { self, nixpkgs, flake-utils, home-manager, nix-darwin, nix-homebrew, rust-overlay, jetpack, everything-claude-code, gstack, nix-doom-emacs-unstraightened, nixpkgs-python, nixpkgs-grok-build, nixpkgs-2605-darwin, home-manager-2605, nix-darwin-2605, ... }:
+  outputs = { self, nixpkgs, flake-utils, home-manager, nix-darwin, nix-homebrew, rust-overlay, jetpack, everything-claude-code, gstack, nixpkgs-python, nixpkgs-grok-build, nixpkgs-2605-darwin, home-manager-2605, nix-darwin-2605, ... }:
     let
       lib = nixpkgs.lib;
 
@@ -91,16 +87,16 @@
       homeLib = import ./lib/mk-home.nix {
         nixpkgs = currentChannels.nixpkgs;
         home-manager = currentChannels.home-manager;
-        inherit nix-doom-emacs-unstraightened everything-claude-code gstack identity overlaysLib;
+        inherit everything-claude-code gstack identity overlaysLib;
       };
       darwinLib = import ./lib/mk-darwin.nix {
         nixpkgs = currentChannels.nixpkgs;
         nix-darwin = currentChannels.nix-darwin;
         home-manager = currentChannels.home-manager;
-        inherit nix-homebrew nix-doom-emacs-unstraightened everything-claude-code gstack identity overlaysLib;
+        inherit nix-homebrew everything-claude-code gstack identity overlaysLib;
       };
       nixosLib = import ./lib/mk-nixos.nix {
-        inherit nixpkgs home-manager nix-doom-emacs-unstraightened everything-claude-code gstack identity overlaysLib;
+        inherit nixpkgs home-manager everything-claude-code gstack identity overlaysLib;
       };
 
       # ── NixOS profiles (data only) ──

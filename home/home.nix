@@ -1,8 +1,6 @@
 # home/home.nix
 { config, lib, pkgs, username, systemUsername, email, system, everything-claude-code, gstack, ... }:
 let
-  isDarwin = pkgs.stdenv.isDarwin;
-
   # Import new module structures
   homeInstalls = import ./packages.nix {
     inherit config lib pkgs email system;
@@ -31,88 +29,6 @@ let
   # Register a GitHub access token in user nix.conf so `nix develop github:...`
   # needs no NIX_CONFIG prefix (avoids api.github.com rate-limit 403).
   nixAccessToken = import ./nix-access-token.nix { inherit lib pkgs; };
-
-  # Doom Emacs
-  homeDirectory = config.home.homeDirectory;
-  userDoomDir = "${homeDirectory}/.doom.d";
-  userDoomDirExists = builtins.pathExists (builtins.toPath userDoomDir);
-
-  # If ~/.doom.d/ exists, copy it into Nix store so user edits are picked up
-  userDoomDirStore =
-    if userDoomDirExists
-    then builtins.path { path = builtins.toPath userDoomDir; name = "doom.d-user"; }
-    else null;
-
-  # Default doom config (from repo) with user identity injected
-  defaultDoomDir = pkgs.symlinkJoin {
-    name = "doom.d";
-    paths = [
-      (pkgs.writeTextDir "init.el" (builtins.readFile ../doom.d/init.el))
-      (pkgs.writeTextDir "packages.el" (builtins.readFile ../doom.d/packages.el))
-      (pkgs.writeTextDir "config.el" ''
-        ;;; config.el -*- lexical-binding: t; -*-
-        ;; User identity (injected from flake)
-        (setq user-full-name "${username}"
-              user-mail-address "${email}")
-
-        ${builtins.readFile ../doom.d/config.el}
-      '')
-    ];
-  };
-
-  # Knowledge base directory (read from doom.d/config.el default)
-  kbDir = "${homeDirectory}/research-git";
-
-  # Activation script: init doom config + knowledge base directory
-  doomActivationScript = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-    # Doom config
-    if [ ! -d "${userDoomDir}" ]; then
-      echo "Initializing Doom Emacs config at ${userDoomDir}..."
-      mkdir -p "${userDoomDir}"
-      cp "${defaultDoomDir}"/init.el "${userDoomDir}/init.el"
-      cp "${defaultDoomDir}"/packages.el "${userDoomDir}/packages.el"
-      cp "${defaultDoomDir}"/config.el "${userDoomDir}/config.el"
-      chmod -R u+w "${userDoomDir}"
-      echo "Done. Edit files in ${userDoomDir} to customize Doom Emacs."
-    fi
-
-    # Knowledge base directory structure + git init
-    if [ ! -d "${kbDir}" ]; then
-      echo "Initializing knowledge base at ${kbDir}..."
-      mkdir -p "${kbDir}"/{inbox,concepts,weekly,blog-drafts}
-      mkdir -p "${kbDir}"/papers/{reading,done}
-      mkdir -p "${kbDir}"/projects/{research,saas,work}
-      mkdir -p "${kbDir}"/pe/{topics,keywords,mock-answers,answer-templates}
-      mkdir -p "${kbDir}"/review/{protein,multimodal}
-
-      cat > "${kbDir}/shutdown.org" << 'SHUTDOWN'
-    #+title: Shutdown
-
-    * Daily checklist
-    - [ ] Anki cards created
-    - [ ] inbox cleared
-    - [ ] Tomorrow's paper ready
-    - [ ] Deep Block goal written
-
-    ** Tomorrow's goal
-
-    SHUTDOWN
-
-      cat > "${kbDir}/.gitignore" << 'GITIGNORE'
-    .DS_Store
-    *.elc
-    .org-id-locations
-    .org-roam.db
-    .#*
-    \#*\#
-    *.pdf
-    *.epub
-    GITIGNORE
-
-      cd "${kbDir}" && ${pkgs.git}/bin/git init
-      echo "Done. Knowledge base initialized at ${kbDir}"
-    fi
-  '';
 in
 {
   home.username = systemUsername;
@@ -131,33 +47,10 @@ in
     vim.opt.mouse = ""
   '';
 
-  # Activation scripts: Claude Code + Codex + nix access token + Doom Emacs
-  home.activation = claudeCode.activation // codex.activation // nixAccessToken.activation // {
-    initDoomConfig = doomActivationScript;
-  };
+  # Activation scripts: Claude Code + Codex + nix access token
+  home.activation = claudeCode.activation // codex.activation // nixAccessToken.activation;
 
   programs = lib.recursiveUpdate homeInstalls.programs {
-    # Doom Emacs (via nix-doom-emacs-unstraightened)
-    # If ~/.doom.d/ exists → use it (copied into Nix store via builtins.path)
-    # Otherwise → use repo defaults with user identity injected
-    # emacs: select per-platform. macOS uses the macport (Mac GUI) build; Linux
-    # (e.g. aarch64 Jetson) uses the pure-GTK/Wayland build. Both are cached on
-    # cache.nixos.org, so nixpkgs bumps don't force a local build. pgtk works as a
-    # GUI when a display exists and headless over SSH via `emacs -nw`.
-    doom-emacs = {
-      enable = true;
-      emacs = if isDarwin then pkgs.emacs30-macport else pkgs.emacs30-pgtk;
-      doomDir = if userDoomDirStore != null then userDoomDirStore else defaultDoomDir;
-      # org-pdftools probes pdf-info features at byte-compile time, which spawns
-      # epdfinfo; inside the nix-daemon build context on x86_64-darwin (26.05)
-      # that spawn aborts (trap 6) even though the same binary works at runtime.
-      # Tolerate the compile error only — same approach unstraightened itself
-      # uses for sly-stepper.
-      emacsPackageOverrides = eself: esuper: {
-        org-pdftools = esuper.org-pdftools.overrideAttrs { ignoreCompilationError = true; };
-      };
-    };
-
     # Git
     git = homeInstalls.programs.git // homeConfig.git;
 
