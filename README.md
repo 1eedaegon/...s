@@ -57,21 +57,28 @@ curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix 
 nix run github:1eedaegon/...s --impure
 ```
 
-That is the whole install. Identity is resolved at eval time with a fallback, so
-an unregistered user still gets a complete configuration:
+That is the whole install. Identity is resolved at eval time with a fallback
+chain, so an unregistered user still gets a complete configuration:
 
 | Field | Source when you are not in `userRegistry` |
 |-------|-------------------------------------------|
-| username | `$USER` (macOS: `$SUDO_USER` when run under sudo) |
-| email | `$EMAIL` if set, else `test@localhost` |
+| system account | `$USER` (macOS: `$SUDO_USER` under sudo) — decides the home directory |
+| git name | `$GIT_AUTHOR_NAME` → `$GIT_COMMITTER_NAME` → the system account |
+| git email | `$EMAIL` → `$GIT_AUTHOR_EMAIL` → `$GIT_COMMITTER_EMAIL` → `test@localhost` |
+
+So commits get attributed correctly without forking anything — just export the
+values you already use for git:
 
 ```bash
-# Linux / home-manager: pass your git email without forking anything
-EMAIL=you@example.com nix run github:1eedaegon/...s --impure
+EMAIL=you@example.com GIT_AUTHOR_NAME="Your Name" \
+  nix run github:1eedaegon/...s --impure
 ```
 
-macOS (nix-darwin) reads the email from the registry only — set it via the fork
-below if you want git commits attributed correctly.
+This works the same on macOS: `sudo` wipes the environment, so the switch app
+re-injects these two variables through `sudo env` before nix-darwin evaluates.
+
+Registry entries always win over the environment — once you are in
+`userRegistry` (step 3), these variables are ignored for your account.
 
 ### 3. (Optional) Make it yours — fork and set your identity
 

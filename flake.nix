@@ -178,10 +178,17 @@
           type = "app";
           program = "${pkgs.writeShellScript "nix-switch" ''
             if [[ "$(uname)" == "Darwin" ]]; then
+              # sudo resets the environment, which would drop the identity vars
+              # lib/identity.nix reads for unregistered users. Re-inject them as
+              # arguments to env(1) — `sudo -E` needs a SETENV sudoers tag that
+              # the macOS default does not grant, `sudo env VAR=…` never does.
+              identity_env=()
+              [[ -n "''${EMAIL:-}" ]] && identity_env+=("EMAIL=''${EMAIL}")
+              [[ -n "''${GIT_AUTHOR_NAME:-}" ]] && identity_env+=("GIT_AUTHOR_NAME=''${GIT_AUTHOR_NAME}")
               if command -v darwin-rebuild &> /dev/null; then
-                sudo -H darwin-rebuild switch --flake ${self}#default --impure "$@"
+                sudo -H env "''${identity_env[@]}" darwin-rebuild switch --flake ${self}#default --impure "$@"
               else
-                sudo -H nix run nix-darwin -- switch --flake ${self}#default --impure "$@"
+                sudo -H env "''${identity_env[@]}" nix run nix-darwin -- switch --flake ${self}#default --impure "$@"
               fi
             else
               ${(channelsFor system).home-manager.packages.${system}.home-manager}/bin/home-manager switch --flake ${self}#default --impure -b backup "$@"
