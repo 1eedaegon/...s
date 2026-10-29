@@ -185,11 +185,18 @@
               identity_env=()
               [[ -n "''${EMAIL:-}" ]] && identity_env+=("EMAIL=''${EMAIL}")
               [[ -n "''${GIT_AUTHOR_NAME:-}" ]] && identity_env+=("GIT_AUTHOR_NAME=''${GIT_AUTHOR_NAME}")
-              if command -v darwin-rebuild &> /dev/null; then
-                sudo -H env "''${identity_env[@]}" darwin-rebuild switch --flake ${self}#default --impure "$@"
-              else
-                sudo -H env "''${identity_env[@]}" nix run nix-darwin -- switch --flake ${self}#default --impure "$@"
-              fi
+              # Always use the pinned nix-darwin, never the bare `nix run
+              # nix-darwin --` fallback this used to have for first-time
+              # bootstrap (when darwin-rebuild wasn't on PATH yet). That
+              # fallback resolves "nix-darwin" through the global flake
+              # registry, pulling in ITS default nixpkgs input — unstable on
+              # x86_64-darwin — which now hard-errors: "Nixpkgs 26.11 has
+              # dropped support for x86_64-darwin." channelsFor already gives
+              # the correctly-pinned binary either way, so there's no need to
+              # special-case first boot via `command -v` at all.
+              sudo -H env "''${identity_env[@]}" \
+                ${(channelsFor system).nix-darwin.packages.${system}.darwin-rebuild}/bin/darwin-rebuild \
+                switch --flake ${self}#default --impure "$@"
             else
               ${(channelsFor system).home-manager.packages.${system}.home-manager}/bin/home-manager switch --flake ${self}#default --impure -b backup "$@"
             fi
