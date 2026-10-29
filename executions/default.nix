@@ -78,43 +78,43 @@
 
   # Common shell initialization script
   initScript = ''
-    # Set up shell prompt and tools
-    # Note: starship, zoxide, and fzf initialization are handled by home-manager's automatic integration
-    # for bash and zsh (via enableBashIntegration/enableZshIntegration/enableFzfIntegration)
-    # This script is mainly for additional display and custom settings
+        # Set up shell prompt and tools
+        # Note: starship, zoxide, and fzf initialization are handled by home-manager's automatic integration
+        # for bash and zsh (via enableBashIntegration/enableZshIntegration/enableFzfIntegration)
+        # This script is mainly for additional display and custom settings
 
-    # Display system info (skip in nix develop to avoid library conflicts)
-    # Lean module set: de/wm/wmtheme/poweradapter add ~150ms of macOS API calls
-    # for no useful output. The packages count comes from our own cache below:
-    # fastfetch's built-in cache validates by running `nix-store --query --hash`
-    # per profile (~550ms even on a hit), whereas comparing profile symlink
-    # targets via readlink detects generation changes in ~1ms. Only the first
-    # shell after a system switch pays the full recount.
-    if [ -z "$IN_NIX_SHELL" ] && command -v fastfetch >/dev/null 2>&1; then
-      __ff_cache="''${XDG_CACHE_HOME:-$HOME/.cache}/fastfetch-packages-line"
-      __ff_key="$(readlink -f /run/current-system 2>/dev/null):$(readlink -f /nix/var/nix/profiles/default 2>/dev/null):$(readlink -f "$HOME/.nix-profile" 2>/dev/null):$(ls /usr/local/Caskroom 2>/dev/null | wc -l | tr -d ' ')"
-      if [ -f "$__ff_cache" ] && [ "$(head -n 1 "$__ff_cache" 2>/dev/null)" = "$__ff_key" ]; then
-        __ff_pkgs="$(tail -n +2 "$__ff_cache")"
-      else
-        __ff_pkgs="$(fastfetch --logo none --pipe --structure packages | sed 's/^Packages: //')"
-        mkdir -p "$(dirname "$__ff_cache")"
-        printf '%s\n%s\n' "$__ff_key" "$__ff_pkgs" > "$__ff_cache"
-      fi
-      fastfetch --config - <<FFEOF
-{
-  "logo": { "color": { "1": "magenta", "2": "cyan" } },
-  "modules": [
-    "title", "separator", "os", "host", "kernel", "uptime",
-    { "type": "custom", "key": "Packages", "format": "$__ff_pkgs" },
-    "shell", "display", "terminal", "cpu", "gpu", "memory", "swap", "disk", "localip", "battery", "locale", "break", "colors"
-  ]
-}
-FFEOF
-      unset __ff_cache __ff_key __ff_pkgs
-    fi
+        # Display system info (skip in nix develop to avoid library conflicts)
+        # Lean module set: de/wm/wmtheme/poweradapter add ~150ms of macOS API calls
+        # for no useful output. The packages count comes from our own cache below:
+        # fastfetch's built-in cache validates by running `nix-store --query --hash`
+        # per profile (~550ms even on a hit), whereas comparing profile symlink
+        # targets via readlink detects generation changes in ~1ms. Only the first
+        # shell after a system switch pays the full recount.
+        if [ -z "$IN_NIX_SHELL" ] && command -v fastfetch >/dev/null 2>&1; then
+          __ff_cache="''${XDG_CACHE_HOME:-$HOME/.cache}/fastfetch-packages-line"
+          __ff_key="$(readlink -f /run/current-system 2>/dev/null):$(readlink -f /nix/var/nix/profiles/default 2>/dev/null):$(readlink -f "$HOME/.nix-profile" 2>/dev/null):$(ls /usr/local/Caskroom 2>/dev/null | wc -l | tr -d ' ')"
+          if [ -f "$__ff_cache" ] && [ "$(head -n 1 "$__ff_cache" 2>/dev/null)" = "$__ff_key" ]; then
+            __ff_pkgs="$(tail -n +2 "$__ff_cache")"
+          else
+            __ff_pkgs="$(fastfetch --logo none --pipe --structure packages | sed 's/^Packages: //')"
+            mkdir -p "$(dirname "$__ff_cache")"
+            printf '%s\n%s\n' "$__ff_key" "$__ff_pkgs" > "$__ff_cache"
+          fi
+          fastfetch --config - <<FFEOF
+    {
+      "logo": { "color": { "1": "magenta", "2": "cyan" } },
+      "modules": [
+        "title", "separator", "os", "host", "kernel", "uptime",
+        { "type": "custom", "key": "Packages", "format": "$__ff_pkgs" },
+        "shell", "display", "terminal", "cpu", "gpu", "memory", "swap", "disk", "localip", "battery", "locale", "break", "colors"
+      ]
+    }
+    FFEOF
+          unset __ff_cache __ff_key __ff_pkgs
+        fi
 
-    # Display font test
-    echo -e "font check(branch): \uf126 \ue0a0 \uf121"
+        # Display font test
+        echo -e "font check(branch): \uf126 \ue0a0 \uf121"
   '';
 
   # Common functions
