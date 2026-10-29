@@ -80,6 +80,87 @@
               };
             };
 
+        opencode =
+          let
+            version = "1.19.5";
+            system = prev.stdenvNoCC.hostPlatform.system;
+            # Prebuilt, notarized/signed per-platform binaries from upstream
+            # GitHub releases. nixpkgs-26.05-darwin (what x86_64-darwin is
+            # pinned to, see flake.nix channelsFor) carries 1.15.10; unstable
+            # carries 1.18.13 but no longer evaluates for x86_64-darwin at
+            # all. Pinning here keeps every platform on the same current
+            # release regardless of which nixpkgs channel it rides.
+            sources = {
+              x86_64-linux = {
+                url = "https://github.com/anomalyco/opencode/releases/download/v${version}/opencode-linux-x64-musl.tar.gz";
+                hash = "sha256-6NW+I7+PP2m8MgbzMRIVwEkynNavp8BtczmHzC0ztWg=";
+              };
+              aarch64-linux = {
+                url = "https://github.com/anomalyco/opencode/releases/download/v${version}/opencode-linux-arm64-musl.tar.gz";
+                hash = "sha256-NSLsyv0w2EotdwtypW1Id8V2uQcrNqWp6g+jDtgriW4=";
+              };
+              x86_64-darwin = {
+                url = "https://github.com/anomalyco/opencode/releases/download/v${version}/opencode-darwin-x64.zip";
+                hash = "sha256-sCEu+m2zRxhyJaF/o6McayYb9MnxWJopCwypAtcg0lA=";
+              };
+              aarch64-darwin = {
+                url = "https://github.com/anomalyco/opencode/releases/download/v${version}/opencode-darwin-arm64.zip";
+                hash = "sha256-wcnmJSEZIZLvTD7RNVraIUQFW922FoIhfpl7A8VSA8E=";
+              };
+            };
+            source = sources.${system} or null;
+          in
+          if source == null then
+            prev.opencode
+          else
+            final.stdenvNoCC.mkDerivation {
+              pname = "opencode";
+              inherit version;
+
+              src = final.fetchurl { inherit (source) url hash; };
+
+              nativeBuildInputs = [ final.unzip ];
+
+              # Both archives are flat (just the `opencode` binary, no top-level
+              # directory), which trips up stdenv's default unpackPhase — it
+              # auto-cds into "the one directory the unpacker produced" and
+              # aborts with "unpacker appears to have produced no directories"
+              # when there isn't one. Unpack into $PWD directly instead.
+              unpackPhase = ''
+                runHook preUnpack
+                case "$src" in
+                  *.zip) unzip -q "$src" ;;
+                  *.tar.gz | *.tgz) tar xzf "$src" ;;
+                esac
+                runHook postUnpack
+              '';
+
+              installPhase = ''
+                runHook preInstall
+                install -Dm755 opencode "$out/bin/opencode"
+                runHook postInstall
+              '';
+
+              doInstallCheck = true;
+              installCheckPhase = ''
+                runHook preInstallCheck
+                # The binary (Bun-compiled) creates its own config/cache dir
+                # on startup, resolved from $TMPDIR (not $HOME — the sandbox's
+                # default $TMPDIR is $PWD, where we just extracted the
+                # `opencode` binary, so "mkdir $TMPDIR/opencode" collides with
+                # that file). Point both at a fresh, unrelated directory.
+                export HOME="$(mktemp -d)" TMPDIR="$(mktemp -d)"
+                "$out/bin/opencode" --version | grep -F "${version}"
+                runHook postInstallCheck
+              '';
+
+              meta = (prev.opencode.meta or { }) // {
+                description = "AI coding agent built for the terminal";
+                homepage = "https://github.com/anomalyco/opencode";
+                sourceProvenance = with final.lib.sourceTypes; [ binaryNativeCode ];
+              };
+            };
+
         nix = prev.nix.overrideAttrs (old: {
           doCheck = false;
           doInstallCheck = false;

@@ -15,31 +15,9 @@ let
   # content Claude loads from rules/). Codex has no rules-dir loader; it reads a
   # single ~/.codex/AGENTS.md globally, so we assemble those rule files into one
   # generated AGENTS.md. Single source -> no drift between Claude and Codex.
-  # agents.md is a Claude-Code subagent registry; Codex has no subagents, only
-  # skills. Including it makes Codex hunt for nonexistent "rust-reviewer" etc.
-  excludeRules = [ "agents.md" ];
-
-  sharedAgentsMd = pkgs.runCommand "codex-agents-md" { } ''
-    {
-      echo "# Agent Instructions (shared rules)"
-      echo
-      echo "> Generated from everything-claude-code rules/common via Nix. Do not edit by hand."
-      echo
-      echo "> Platform note: named agents below (planner, code-reviewer, rust-reviewer,"
-      echo "> security-reviewer, …) are Claude Code subagents. Codex has no subagents —"
-      echo "> when a rule says \"use the X agent\", apply that role's criteria inline."
-      echo "> Do not look for an X skill or file."
-      for f in ${everything-claude-code}/rules/common/*.md; do
-        case " ${lib.concatStringsSep " " excludeRules} " in
-          *" $(basename "$f") "*) continue ;;
-        esac
-        echo
-        echo "<!-- source: rules/common/$(basename "$f") -->"
-        cat "$f"
-        echo
-      done
-    } > "$out"
-  '';
+  # (Shared with OpenCode, which reads the same AGENTS.md convention — see
+  # home/shared-agents-md.nix and home/opencode.nix.)
+  sharedAgentsMd = import ./shared-agents-md.nix { inherit pkgs everything-claude-code; };
 
   setupCodex = pkgs.writeShellScript "setup-codex" ''
     # ~/.agents/skills: cross-vendor canonical location (Codex primary user dir).
@@ -75,6 +53,9 @@ in
   aliases = {
     cx = "codex";
   } // lib.optionalAttrs (pkgs ? grok-build) {
-    gb = "grok";
+    # Not "gb" — executions/default.nix already binds that to `git branch`,
+    # and home.nix merges codex.aliases after it, so "gb" would silently
+    # shadow the git alias on any host with grok-build installed.
+    gk = "grok";
   };
 }

@@ -26,6 +26,11 @@ let
     inherit config lib pkgs everything-claude-code gstack;
   };
 
+  # OpenCode CLI configuration (shares ECC + gstack skills via the Agent Skills standard)
+  opencode = import ./opencode.nix {
+    inherit config lib pkgs everything-claude-code gstack;
+  };
+
   # Register a GitHub access token in user nix.conf so `nix develop github:...`
   # needs no NIX_CONFIG prefix (avoids api.github.com rate-limit 403).
   nixAccessToken = import ./nix-access-token.nix { inherit lib pkgs; };
@@ -40,16 +45,17 @@ in
   manual.html.enable = false;
   manual.json.enable = false;
 
-  home.packages = homeInstalls.packages ++ claudeCode.packages ++ codex.packages;
+  home.packages = homeInstalls.packages ++ claudeCode.packages ++ codex.packages ++ opencode.packages;
 
   # Neovim: disable mouse so terminal-native drag-select/copy works over SSH.
   home.file.".config/nvim/init.lua".text = ''
     vim.opt.mouse = ""
   '';
 
-  # Activation scripts: Claude Code + Codex + nix access token
-  home.activation = claudeCode.activation // codex.activation // nixAccessToken.activation;
-
+  # Activation scripts: Claude Code + Codex + OpenCode + nix access token + Doom Emacs
+  home.activation = claudeCode.activation // codex.activation // opencode.activation // nixAccessToken.activation // {
+    initDoomConfig = doomActivationScript;
+  };
   programs = lib.recursiveUpdate homeInstalls.programs {
     # Git
     git = homeInstalls.programs.git // homeConfig.git;
@@ -59,7 +65,7 @@ in
 
     # Zsh
     zsh = homeInstalls.programs.zsh // homeConfig.zsh // {
-      shellAliases = homeExec.aliases // claudeCode.aliases // codex.aliases // {
+      shellAliases = homeExec.aliases // claudeCode.aliases // codex.aliases // opencode.aliases // {
         # Noglob settings for nix commands (prevents "no matches found" errors with .#flake syntax)
         nix = "noglob nix";
       };
@@ -68,7 +74,7 @@ in
 
     # Bash
     bash = homeInstalls.programs.bash // {
-      shellAliases = homeExec.aliases // claudeCode.aliases // codex.aliases;
+      shellAliases = homeExec.aliases // claudeCode.aliases // codex.aliases // opencode.aliases;
       initExtra = homeExec.bashConfig.initExtra;
     };
 

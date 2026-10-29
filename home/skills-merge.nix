@@ -2,7 +2,7 @@
 # Shared skill-merge script for the open Agent Skills standard (SKILL.md).
 # Links ECC + gstack skills into a target directory via per-entry symlinks so
 # the same source feeds multiple agents (Claude Code: ~/.claude/skills,
-# Codex + cross-vendor: ~/.agents/skills).
+# Codex + cross-vendor: ~/.agents/skills, OpenCode: ~/.config/opencode/skills).
 #
 # Codex enforces stricter SKILL.md frontmatter than Claude (unquoted colons in
 # `description:` break its YAML parser; descriptions over 1024 chars are
@@ -145,7 +145,7 @@ pkgs.writeShellScript "merge-skills" ''
   ECC_AGENT_SKILLS="${eccAgentSkills}"
   # GSTACK="${gstack}"
   SKILLS_TARGET="$1"
-  INCLUDE_AGENTS="$2"   # "agents" -> also expose Claude agents as skills (Codex only)
+  INCLUDE_AGENTS="$2"   # "agents" -> also expose Claude agents as skills (tools with no subagents of their own, e.g. Codex, OpenCode)
 
   if [ -z "$SKILLS_TARGET" ]; then
     echo "merge-skills: missing target dir argument" >&2
@@ -191,8 +191,9 @@ pkgs.writeShellScript "merge-skills" ''
     fi
   fi
 
-  # Agents-as-skills: only when requested (Codex). Claude already has the real
-  # agents at ~/.claude/agents, so we skip this for the Claude skills target.
+  # Agents-as-skills: only when requested (Codex, OpenCode). Claude already
+  # has the real agents at ~/.claude/agents, so we skip this for the Claude
+  # skills target.
   if [ "$INCLUDE_AGENTS" = "agents" ] && [ -d "$ECC_AGENT_SKILLS" ]; then
     for src in "$ECC_AGENT_SKILLS"/*; do
       [ -f "$src/SKILL.md" ] || continue
