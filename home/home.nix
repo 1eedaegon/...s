@@ -52,10 +52,9 @@ in
     vim.opt.mouse = ""
   '';
 
-  # Activation scripts: Claude Code + Codex + OpenCode + nix access token + Doom Emacs
-  home.activation = claudeCode.activation // codex.activation // opencode.activation // nixAccessToken.activation // {
-    initDoomConfig = doomActivationScript;
-  };
+  # Activation scripts: Claude Code + Codex + OpenCode + nix access token
+  home.activation = claudeCode.activation // codex.activation // opencode.activation // nixAccessToken.activation;
+
   programs = lib.recursiveUpdate homeInstalls.programs {
     # Git
     git = homeInstalls.programs.git // homeConfig.git;
