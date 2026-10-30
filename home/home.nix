@@ -34,6 +34,10 @@ let
   # Register a GitHub access token in user nix.conf so `nix develop github:...`
   # needs no NIX_CONFIG prefix (avoids api.github.com rate-limit 403).
   nixAccessToken = import ./nix-access-token.nix { inherit lib pkgs; };
+
+  # Disable Determinate Nix's lazy-trees (see the module for why) on every
+  # platform, not just darwin.
+  nixLazyTrees = import ./nix-lazy-trees.nix { inherit lib pkgs; };
 in
 {
   home.username = systemUsername;
@@ -53,7 +57,7 @@ in
   '';
 
   # Activation scripts: Claude Code + Codex + OpenCode + nix access token
-  home.activation = claudeCode.activation // codex.activation // opencode.activation // nixAccessToken.activation;
+  home.activation = claudeCode.activation // codex.activation // opencode.activation // nixAccessToken.activation // nixLazyTrees.activation;
 
   programs = lib.recursiveUpdate homeInstalls.programs {
     # Git
