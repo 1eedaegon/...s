@@ -176,31 +176,41 @@
 
         apps.default = {
           type = "app";
-          program = "${pkgs.writeShellScript "nix-switch" ''
-            if [[ "$(uname)" == "Darwin" ]]; then
-              # sudo resets the environment, which would drop the identity vars
-              # lib/identity.nix reads for unregistered users. Re-inject them as
-              # arguments to env(1) — `sudo -E` needs a SETENV sudoers tag that
-              # the macOS default does not grant, `sudo env VAR=…` never does.
-              identity_env=()
-              [[ -n "''${EMAIL:-}" ]] && identity_env+=("EMAIL=''${EMAIL}")
-              [[ -n "''${GIT_AUTHOR_NAME:-}" ]] && identity_env+=("GIT_AUTHOR_NAME=''${GIT_AUTHOR_NAME}")
-              # Always use the pinned nix-darwin, never the bare `nix run
-              # nix-darwin --` fallback this used to have for first-time
-              # bootstrap (when darwin-rebuild wasn't on PATH yet). That
-              # fallback resolves "nix-darwin" through the global flake
-              # registry, pulling in ITS default nixpkgs input — unstable on
-              # x86_64-darwin — which now hard-errors: "Nixpkgs 26.11 has
-              # dropped support for x86_64-darwin." channelsFor already gives
-              # the correctly-pinned binary either way, so there's no need to
-              # special-case first boot via `command -v` at all.
-              sudo -H env "''${identity_env[@]}" \
-                ${(channelsFor system).nix-darwin.packages.${system}.darwin-rebuild}/bin/darwin-rebuild \
-                switch --flake ${self}#default --impure "$@"
+          # Split into two wholly separate script bodies selected by a Nix-level
+          # `if` on `system` (not a shell-level `uname` check): both branches of
+          # ONE string are forced unconditionally at eval time regardless of
+          # which one bash would take, so a single script referencing
+          # `nix-darwin.packages.${system}.darwin-rebuild` fails to even
+          # evaluate on non-darwin systems (that attribute doesn't exist there).
+          # Keeping them as separate strings means only the picked branch's
+          # interpolations are ever forced.
+          program =
+            if lib.hasSuffix "-darwin" system then
+              "${pkgs.writeShellScript "nix-switch" ''
+                # sudo resets the environment, which would drop the identity vars
+                # lib/identity.nix reads for unregistered users. Re-inject them as
+                # arguments to env(1) — `sudo -E` needs a SETENV sudoers tag that
+                # the macOS default does not grant, `sudo env VAR=…` never does.
+                identity_env=()
+                [[ -n "''${EMAIL:-}" ]] && identity_env+=("EMAIL=''${EMAIL}")
+                [[ -n "''${GIT_AUTHOR_NAME:-}" ]] && identity_env+=("GIT_AUTHOR_NAME=''${GIT_AUTHOR_NAME}")
+                # Always use the pinned nix-darwin, never the bare `nix run
+                # nix-darwin --` fallback this used to have for first-time
+                # bootstrap (when darwin-rebuild wasn't on PATH yet). That
+                # fallback resolves "nix-darwin" through the global flake
+                # registry, pulling in ITS default nixpkgs input — unstable on
+                # x86_64-darwin — which now hard-errors: "Nixpkgs 26.11 has
+                # dropped support for x86_64-darwin." channelsFor already gives
+                # the correctly-pinned binary either way, so there's no need to
+                # special-case first boot via `command -v` at all.
+                sudo -H env "''${identity_env[@]}" \
+                  ${(channelsFor system).nix-darwin.packages.${system}.darwin-rebuild}/bin/darwin-rebuild \
+                  switch --flake ${self}#default --impure "$@"
+              ''}"
             else
-              ${(channelsFor system).home-manager.packages.${system}.home-manager}/bin/home-manager switch --flake ${self}#default --impure -b backup "$@"
-            fi
-          ''}";
+              "${pkgs.writeShellScript "nix-switch" ''
+                ${(channelsFor system).home-manager.packages.${system}.home-manager}/bin/home-manager switch --flake ${self}#default --impure -b backup "$@"
+              ''}";
         };
 
         inherit modules;
