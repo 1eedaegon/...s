@@ -209,11 +209,17 @@
         # and accept the risk (same tradeoff as the ecdsa permit above) for
         # ansible's sake rather than drop the toolchain or pin a second
         # `invoke`; fabric itself isn't something we call directly.
+        #
+        # doInstallCheck, not doCheck: buildPythonPackage runs pytest in
+        # installCheckPhase and already passes doCheck = false down to
+        # mkDerivation, so an overrideAttrs { doCheck = false; } is a no-op
+        # that doesn't even change the drv hash — which is why the earlier
+        # attempt kept producing the identical failing derivation.
         pythonPackagesExtensions = prev.pythonPackagesExtensions ++ [
           (pyfinal: pyprev: {
             fabric = pyprev.fabric.overrideAttrs (old: {
               dontCheckRuntimeDeps = true;
-              doCheck = false;
+              doInstallCheck = false;
             });
           })
         ];
