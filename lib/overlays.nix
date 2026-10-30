@@ -196,5 +196,10 @@
       # ecdsa: pulled transitively by IaC python tooling (ansible/azure); permit
       # the Minerva-timing CVE in dev shells rather than dropping the toolchain.
       config.permittedInsecurePackages = [ "python3.13-ecdsa-0.19.2" ];
+      # fabric: another ansible transitive dep (see ecdsa above), marked
+      # `meta.broken` upstream on some python3 versions. "warn" keeps
+      # evaluation from refusing outright while still surfacing the notice,
+      # rather than disabling the ansible toolchain over one leaf dependency.
+      config.problems.handlers = { fabric.broken = "warn"; };
     };
 }
