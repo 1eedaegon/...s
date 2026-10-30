@@ -133,8 +133,25 @@
               # autoPatchelfHook rewrites the ELF interpreter + RPATH to
               # nixpkgs' own glibc automatically (it's not FHS-findable
               # otherwise) by scanning buildInputs for each NEEDED SONAME.
-              nativeBuildInputs = [ final.unzip ] ++ final.lib.optionals isLinux [ final.autoPatchelfHook ];
+              nativeBuildInputs = [ final.unzip final.makeBinaryWrapper ]
+              ++ final.lib.optionals isLinux [ final.autoPatchelfHook ];
               buildInputs = final.lib.optionals isLinux [ final.glibc ];
+
+              # The binary is a Bun-compiled standalone executable: Bun's JS
+              # bundle lives in a `.bun` ELF section and the runtime locates
+              # it through a linker symbol + dl_iterate_phdr. stdenv's default
+              # fixup runs `strip`, which rewrites the section table and
+              # drops that lookup on the floor — the binary still starts, but
+              # as a *plain `bun` runtime* that happily answers `--version`
+              # with Bun's own version (1.4.4) instead of opencode's. That was
+              # the "unexplained" linux installCheck failure (`1.4.4 | grep
+              # 1.19.5` → no output, exit 1) and the 1.4.4 seen on the Jetson
+              # after the check was skipped. Verified in a Debian container:
+              # the pristine binary prints 1.19.5, the same binary after
+              # `strip` prints 1.4.4; patchelf --set-interpreter / --set-rpath
+              # alone leave it intact. nixpkgs' claude-code (also a Bun
+              # binary) carries the identical `dontStrip` for the same reason.
+              dontStrip = true;
 
               # Both archives are flat (just the `opencode` binary, no top-level
               # directory), which trips up stdenv's default unpackPhase — it
@@ -153,18 +170,16 @@
               installPhase = ''
                 runHook preInstall
                 install -Dm755 opencode "$out/bin/opencode"
+                # A store-managed binary must not try to replace itself: the
+                # version is pinned here and bumped on purpose (same switch
+                # nixpkgs' opencode sets).
+                wrapProgram "$out/bin/opencode" --set OPENCODE_DISABLE_AUTOUPDATE true
                 runHook postInstall
               '';
 
-              # Verified working on darwin (dyld). On linux, `opencode
-              # --version` dies during installCheckPhase with zero output on
-              # either stream — not a missing-library issue (autoPatchelfHook
-              # reports every NEEDED symbol satisfied first) and not
-              # reproducible from here (no linux builder on this machine) —
-              # so skip the check there rather than block every switch on an
-              # unexplained crash. The binary itself still gets installed;
-              # only the extra verification step is disabled.
-              doInstallCheck = !isLinux;
+              # Run on every platform again — this check is exactly what
+              # caught the strip breakage above, so it must stay on.
+              doInstallCheck = true;
               installCheckPhase = ''
                 runHook preInstallCheck
                 # The binary (Bun-compiled) creates its own config/cache dir
