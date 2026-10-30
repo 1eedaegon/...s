@@ -13,28 +13,28 @@
       (final: prev: {
         codex =
           let
-            version = "0.144.6";
+            version = "0.166.0";
             system = prev.stdenvNoCC.hostPlatform.system;
             sources = {
               x86_64-linux = {
                 npmPlatform = "linux-x64";
                 vendorPlatform = "x86_64-unknown-linux-musl";
-                hash = "sha512-4E7EnzCg0OnBxCyYnwJ+qnZwWHYe0YScr5ucKWbngE9u4+0XrpWELqq2Kn9jl5GZK8MDjU7PrJwFIwusHOHjuw==";
+                hash = "sha512-CxDm3+D1cpbGJeHrdzINoG+3wn9BVncP4qpZaaNYkxe8iPtRJOYyCJnnPoVjWRIBvI9vPKbRoifsMSA5xDaUpw==";
               };
               aarch64-linux = {
                 npmPlatform = "linux-arm64";
                 vendorPlatform = "aarch64-unknown-linux-musl";
-                hash = "sha512-PGiLXMN+2IQRkf7tOLi64dMInjU1pRLbz0Rwfj/yt2Y97SZQqAjFQoi2wmswmqtqMDnfwCPTC1DRXVQkvU6T6Q==";
+                hash = "sha512-w0ScAsBr9aZKtIFrh6HN6KU2yjKKeSCzYfbb7DB0Ccj4BYPzeZtUeQprbycLCwuX3AFQdbdjapmLho2iot74jQ==";
               };
               x86_64-darwin = {
                 npmPlatform = "darwin-x64";
                 vendorPlatform = "x86_64-apple-darwin";
-                hash = "sha512-THRyPG0zSU6M8NQAge1LHEHsJDnoH4BpKsfJHB/qe3Fm+Wf6zqAmWJFlOKzBm27m0K2Hq3za4Ac2I5p5i4yp/A==";
+                hash = "sha512-Vj5wXJPizKmrzNtnRNQf9PP6FJkG3iJU/UO3NE4WvkENZGoQfmImdwf4MVRI5NgwjSuC6LT0HbBRHPVVnwGHuw==";
               };
               aarch64-darwin = {
                 npmPlatform = "darwin-arm64";
                 vendorPlatform = "aarch64-apple-darwin";
-                hash = "sha512-6zgvh70MzBNSeT17HEhSOrmmGGZGAKzSC7x6JAq+edkJkdPYA9P0I1tG7aJ49GlBkBxuC+MKBH1qm6+2Cghcww==";
+                hash = "sha512-5fWH6qqUInACcRADIewjlnRxDb4QLe0uriwehiZz0+viuAAB8I+WWefqw4xwHvyKaxeiGX4uK56+vrgfvFk3FQ==";
               };
             };
             source = sources.${system} or null;
