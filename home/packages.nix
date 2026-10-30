@@ -16,7 +16,7 @@ let
   };
   # Import common executions (aliases, functions, initScript)
   executions = import ../executions/default.nix { inherit pkgs system; };
-  isDarwin = pkgs.stdenv.isDarwin;
+  isDarwin = pkgs.stdenv.hostPlatform.isDarwin;
 in
 {
   # Merge common packages with home-manager specific packages

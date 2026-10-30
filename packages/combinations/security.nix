@@ -80,7 +80,7 @@ let
     ngrep # grep over network packets
     ipcalc # subnet calculator
     whois # whois client
-  ] ++ lib.optionals stdenv.isLinux [
+  ] ++ lib.optionals stdenv.hostPlatform.isLinux [
     nethogs # per-process net usage (linux only)
   ];
 in

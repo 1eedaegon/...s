@@ -5,7 +5,7 @@
 let
   # Import common configurations
   common = import ./default.nix { inherit pkgs system; };
-  isDarwin = pkgs.stdenv.isDarwin;
+  isDarwin = pkgs.stdenv.hostPlatform.isDarwin;
 in
 {
   # Merge common environment with home-manager specific

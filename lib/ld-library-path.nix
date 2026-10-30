@@ -4,8 +4,8 @@
 { pkgs, system }:
 
 let
-  isLinux = pkgs.stdenv.isLinux;
-  isDarwin = pkgs.stdenv.isDarwin;
+  isLinux = pkgs.stdenv.hostPlatform.isLinux;
+  isDarwin = pkgs.stdenv.hostPlatform.isDarwin;
   isAarch64 = system == "aarch64-linux" || system == "aarch64-darwin";
   isX86_64 = system == "x86_64-linux" || system == "x86_64-darwin";
 

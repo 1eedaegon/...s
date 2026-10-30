@@ -5,7 +5,7 @@
 let
   # Import common executions
   common = import ./default.nix { inherit pkgs system; };
-  isDarwin = pkgs.stdenv.isDarwin;
+  isDarwin = pkgs.stdenv.hostPlatform.isDarwin;
 
   # Import unified LD_LIBRARY_PATH configuration
   ldConfig = import ../lib/ld-library-path.nix { inherit pkgs system; };

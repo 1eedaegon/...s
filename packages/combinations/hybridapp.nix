@@ -18,7 +18,7 @@ let
     "i686-linux-android"
     "x86_64-linux-android"
   ];
-  iosTargets = lib.optionals stdenv.isDarwin [
+  iosTargets = lib.optionals stdenv.hostPlatform.isDarwin [
     "aarch64-apple-ios"
     "aarch64-apple-ios-sim"
     "x86_64-apple-ios"
@@ -40,10 +40,10 @@ let
   ];
 
   # Xcode itself cannot be nix-packaged; cocoapods is the nix-side iOS dep.
-  iosTooling = lib.optionals stdenv.isDarwin (with pkgs; [ cocoapods ]);
+  iosTooling = lib.optionals stdenv.hostPlatform.isDarwin (with pkgs; [ cocoapods ]);
 
   # Linux hosts run tauri dev against the GTK/WebKit system webview.
-  linuxWebview = lib.optionals stdenv.isLinux (with pkgs; [
+  linuxWebview = lib.optionals stdenv.hostPlatform.isLinux (with pkgs; [
     webkitgtk_4_1
     gtk3
     libsoup_3
