@@ -175,6 +175,18 @@
           doCheck = false;
           doInstallCheck = false;
         });
+        # fabric (ansible transitive dep, see mkPkgs' problems.handlers below)
+        # declares `invoke<3.0,>=2.0` in its wheel metadata, but this nixpkgs
+        # revision ships invoke 3.0.3 — pythonRuntimeDepsCheckHook fails the
+        # build over that mismatch even though invoke 3.x works fine with it
+        # in practice. Skip the check rather than pinning a second `invoke`.
+        pythonPackagesExtensions = prev.pythonPackagesExtensions ++ [
+          (pyfinal: pyprev: {
+            fabric = pyprev.fabric.overrideAttrs (old: {
+              dontCheckRuntimeDeps = true;
+            });
+          })
+        ];
       } // (if nixpkgs-grok-build != null && system != null then {
         # grok CLI from the pinned fork on every platform (its package.nix
         # ships hashes for all four systems). Upstream nixpkgs lags x.ai
