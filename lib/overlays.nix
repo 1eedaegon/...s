@@ -84,20 +84,31 @@
           let
             version = "1.19.5";
             system = prev.stdenvNoCC.hostPlatform.system;
+            isLinux = final.lib.hasSuffix "-linux" system;
             # Prebuilt, notarized/signed per-platform binaries from upstream
             # GitHub releases. nixpkgs-26.05-darwin (what x86_64-darwin is
             # pinned to, see flake.nix channelsFor) carries 1.15.10; unstable
             # carries 1.18.13 but no longer evaluates for x86_64-darwin at
             # all. Pinning here keeps every platform on the same current
             # release regardless of which nixpkgs channel it rides.
+            #
+            # Linux: the glibc tarballs, not the "-musl" ones. The musl build
+            # is dynamically linked against both musl's libc AND
+            # libstdc++.so.6 (some bundled native addon needs it) — there's
+            # no ready-made musl-targeted libstdc++ in nixpkgs, and gluing a
+            # glibc one on risks an ABI mismatch. The glibc build only needs
+            # libc/libm/libpthread/libdl plus the standard dynamic linker,
+            # which is exactly what autoPatchelfHook + glibc below resolve
+            # automatically (nixpkgs' best-trodden path for this, unlike
+            # hand-patching a musl interpreter).
             sources = {
               x86_64-linux = {
-                url = "https://github.com/anomalyco/opencode/releases/download/v${version}/opencode-linux-x64-musl.tar.gz";
-                hash = "sha256-6NW+I7+PP2m8MgbzMRIVwEkynNavp8BtczmHzC0ztWg=";
+                url = "https://github.com/anomalyco/opencode/releases/download/v${version}/opencode-linux-x64.tar.gz";
+                hash = "sha256-WIMQozb6O53zaz8CJbJvZ51FPvqtDPPWbDZR7z7BZHo=";
               };
               aarch64-linux = {
-                url = "https://github.com/anomalyco/opencode/releases/download/v${version}/opencode-linux-arm64-musl.tar.gz";
-                hash = "sha256-NSLsyv0w2EotdwtypW1Id8V2uQcrNqWp6g+jDtgriW4=";
+                url = "https://github.com/anomalyco/opencode/releases/download/v${version}/opencode-linux-arm64.tar.gz";
+                hash = "sha256-+uW+Ji1pO3xeVihWzEc+WedBdyk22wwGAKwNXtW9CIs=";
               };
               x86_64-darwin = {
                 url = "https://github.com/anomalyco/opencode/releases/download/v${version}/opencode-darwin-x64.zip";
@@ -119,8 +130,11 @@
 
               src = final.fetchurl { inherit (source) url hash; };
 
-              nativeBuildInputs = [ final.unzip ]
-              ++ final.lib.optionals (final.lib.hasSuffix "-linux" system) [ final.patchelf ];
+              # autoPatchelfHook rewrites the ELF interpreter + RPATH to
+              # nixpkgs' own glibc automatically (it's not FHS-findable
+              # otherwise) by scanning buildInputs for each NEEDED SONAME.
+              nativeBuildInputs = [ final.unzip ] ++ final.lib.optionals isLinux [ final.autoPatchelfHook ];
+              buildInputs = final.lib.optionals isLinux [ final.glibc ];
 
               # Both archives are flat (just the `opencode` binary, no top-level
               # directory), which trips up stdenv's default unpackPhase — it
@@ -140,18 +154,6 @@
                 runHook preInstall
                 install -Dm755 opencode "$out/bin/opencode"
                 runHook postInstall
-              '';
-
-              # The linux-*-musl releases are dynamically linked against musl
-              # but point their ELF interpreter at an FHS path
-              # (/lib/ld-musl-$arch.so.1) that doesn't exist in the Nix store,
-              # so the binary can't even exec ("required file not found").
-              # Repoint it at this nixpkgs' own musl loader. Not needed on
-              # darwin — those binaries use dyld, not an ELF interpreter.
-              postFixup = final.lib.optionalString (final.lib.hasSuffix "-linux" system) ''
-                patchelf --set-interpreter \
-                  "${final.musl}/lib/ld-musl-${if system == "aarch64-linux" then "aarch64" else "x86_64"}.so.1" \
-                  "$out/bin/opencode"
               '';
 
               doInstallCheck = true;
