@@ -119,7 +119,8 @@
 
               src = final.fetchurl { inherit (source) url hash; };
 
-              nativeBuildInputs = [ final.unzip ];
+              nativeBuildInputs = [ final.unzip ]
+              ++ final.lib.optionals (final.lib.hasSuffix "-linux" system) [ final.patchelf ];
 
               # Both archives are flat (just the `opencode` binary, no top-level
               # directory), which trips up stdenv's default unpackPhase — it
@@ -139,6 +140,18 @@
                 runHook preInstall
                 install -Dm755 opencode "$out/bin/opencode"
                 runHook postInstall
+              '';
+
+              # The linux-*-musl releases are dynamically linked against musl
+              # but point their ELF interpreter at an FHS path
+              # (/lib/ld-musl-$arch.so.1) that doesn't exist in the Nix store,
+              # so the binary can't even exec ("required file not found").
+              # Repoint it at this nixpkgs' own musl loader. Not needed on
+              # darwin — those binaries use dyld, not an ELF interpreter.
+              postFixup = final.lib.optionalString (final.lib.hasSuffix "-linux" system) ''
+                patchelf --set-interpreter \
+                  "${final.musl}/lib/ld-musl-${if system == "aarch64-linux" then "aarch64" else "x86_64"}.so.1" \
+                  "$out/bin/opencode"
               '';
 
               doInstallCheck = true;
