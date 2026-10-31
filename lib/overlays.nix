@@ -213,6 +213,18 @@
           doCheck = false;
           doInstallCheck = false;
         });
+        # ccache 4.14.2 added Linux-only elfutils (for eu-elfcmp) to
+        # nativeCheckInputs without a platform guard while keeping
+        # doCheck = true. doCheck splices nativeCheckInputs into
+        # nativeBuildInputs, so on darwin every shell that pulls ccache
+        # (packages/common.nix — i.e. all of them) refuses to even evaluate:
+        # "elfutils-0.195 ... not available on the requested hostPlatform".
+        # 4.13.6 had no elfutils at all. doCheck = false drops the check
+        # inputs and flips -DENABLE_TESTING=OFF via ccache's own cmakeFlags.
+        # Drop this once upstream guards the dep on isLinux.
+        ccache = prev.ccache.overrideAttrs (old: {
+          doCheck = false;
+        });
         # fabric (ansible transitive dep, see mkPkgs' problems.handlers below)
         # declares `invoke<3.0,>=2.0` in its wheel metadata, but this nixpkgs
         # revision ships invoke 3.0.3 — pythonRuntimeDepsCheckHook fails the
