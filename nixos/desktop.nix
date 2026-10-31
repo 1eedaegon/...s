@@ -49,8 +49,12 @@
   services.desktopManager.gnome.enable = true;
 
   # Exclude some GNOME applications
+  # (gnome-photos was dropped here when nixpkgs removed it on 2026-08-27 —
+  # archived upstream with image editing broken. GNOME can't ship a package
+  # that no longer exists, so there is nothing left to exclude; nixpkgs'
+  # `loupe`/`shotwell` suggestion is for people who want a photo app, which is
+  # the opposite of this list's purpose.)
   environment.gnome.excludePackages = (with pkgs; [
-    gnome-photos
     gnome-tour
     gnome-music
     gnome-connections

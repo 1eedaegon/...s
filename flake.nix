@@ -109,9 +109,14 @@
             else currentSystem;
         in
         {
+          # cudaSupport belongs here rather than in the profile's own module:
+          # nixpkgs.config is a single option that lib/mk-nixos.nix defines for
+          # every host, so a profile that sets `nixpkgs.config.cudaSupport`
+          # itself is a second definition that loses silently (jetson did, and
+          # spent who knows how long building without CUDA).
           "desktop" = { system = nixosSystem; hostname = "1eedaegon"; users = identity.registeredUsers; modules = [ ./nixos/desktop.nix ]; };
           "workstation" = { system = "x86_64-linux"; hostname = "workstation"; users = identity.registeredUsers; modules = [ ./nixos/workstation.nix ]; };
-          "jetson" = { system = "aarch64-linux"; hostname = "jetson"; users = identity.registeredUsers; modules = [ ./nixos/jetson.nix ]; };
+          "jetson" = { system = "aarch64-linux"; hostname = "jetson"; cudaSupport = true; users = identity.registeredUsers; modules = [ ./nixos/jetson.nix ]; };
           "sbc" = { system = "aarch64-linux"; hostname = "sbc"; users = identity.registeredUsers; modules = [ ./nixos/sbc.nix ]; };
         };
 

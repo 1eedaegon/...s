@@ -23,8 +23,12 @@
               };
               # Same as darwin: nixosSystem imports nixpkgs itself, so the
               # shared config has to be passed in rather than picked up from
-              # overlaysLib.mkPkgs.
-              nixpkgs.config = overlaysLib.nixpkgsConfig { cudaSupport = false; };
+              # overlaysLib.mkPkgs. This is the only definition of
+              # `nixpkgs.config` in the nixos tree — per-host knobs come
+              # through the profile table, not a competing definition.
+              nixpkgs.config = overlaysLib.nixpkgsConfig {
+                cudaSupport = config.cudaSupport or false;
+              };
 
               users.users = builtins.listToAttrs (
                 map
