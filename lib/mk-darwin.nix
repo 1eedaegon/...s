@@ -21,6 +21,9 @@
       modules = [
         {
           nixpkgs.overlays = overlays;
+          # nix-darwin imports nixpkgs itself, so this path never goes through
+          # overlaysLib.mkPkgs and has to be handed the shared config directly.
+          nixpkgs.config = overlaysLib.nixpkgsConfig { };
         }
         ../darwin/default.nix
         nix-homebrew.darwinModules.nix-homebrew

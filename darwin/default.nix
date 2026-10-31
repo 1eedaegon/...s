@@ -6,9 +6,11 @@
   # Disable nix-darwin's Nix management (using Determinate Nix)
   nix.enable = false;
 
-  # home-manager.useGlobalPkgs uses this system pkgs; allow unfree so nix-pinned
-  # claude-code (unfree Anthropic license) evaluates. Matches lib/overlays.nix mkPkgs.
-  nixpkgs.config.allowUnfree = true;
+  # nixpkgs.config (allowUnfree for claude-code's Anthropic licence, the
+  # insecure-package permit and the broken-package handlers) comes from
+  # overlaysLib.nixpkgsConfig, applied in lib/mk-darwin.nix. Defining it here
+  # too would reintroduce the drift that factory exists to prevent;
+  # home-manager.useGlobalPkgs means the user config inherits it either way.
 
   # System configuration
   system.stateVersion = 5;

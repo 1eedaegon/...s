@@ -21,8 +21,10 @@
                 includeJetpack = true;
                 system = config.system;
               };
-              nixpkgs.config.allowUnfree = true;
-              nixpkgs.config.cudaSupport = false;
+              # Same as darwin: nixosSystem imports nixpkgs itself, so the
+              # shared config has to be passed in rather than picked up from
+              # overlaysLib.mkPkgs.
+              nixpkgs.config = overlaysLib.nixpkgsConfig { cudaSupport = false; };
 
               users.users = builtins.listToAttrs (
                 map

@@ -1,8 +1,34 @@
 # lib/overlays.nix
-# Overlay factory — eliminates 3x duplication across devShell/home/darwin
+# Overlay + nixpkgs-config factory — eliminates 3x duplication across
+# devShell/home/darwin/nixos
 { rust-overlay, jetpack, nixpkgs-grok-build ? null }:
 
+let
+  # Single source of truth for nixpkgs' `config`.
+  #
+  # Two kinds of consumer have to agree on it: devShells and home-manager
+  # instantiate nixpkgs themselves via mkPkgs below, while darwin and nixos
+  # hand their module system a `nixpkgs.config` and let it do the import. Those
+  # used to be written out separately, and the copies drifted — the fabric and
+  # ecdsa entries existed only on the mkPkgs side, so every devShell evaluated
+  # happily while `nix run .#default` died on fabric's meta.broken. One attrset,
+  # four call sites: add an entry here and no path can miss it.
+  nixpkgsConfig = { cudaSupport ? false }: {
+    allowUnfree = true;
+    inherit cudaSupport;
+    # ecdsa: pulled transitively by IaC python tooling (ansible/azure); permit
+    # the Minerva-timing CVE rather than dropping the toolchain.
+    permittedInsecurePackages = [ "python3.13-ecdsa-0.19.2" ];
+    # fabric: another ansible transitive dep (see ecdsa above), marked
+    # `meta.broken` upstream on some python3 versions. "warn" keeps evaluation
+    # from refusing outright while still surfacing the notice, rather than
+    # disabling the ansible toolchain over one leaf dependency.
+    problems.handlers = { fabric.broken = "warn"; };
+  };
+in
 {
+  inherit nixpkgsConfig;
+
   # Build overlay list based on context
   # devShells/home: includeJetpack=false (true only on aarch64-linux Jetson)
   # darwin:         includeJetpack=false
@@ -266,15 +292,6 @@
   mkPkgs = { nixpkgs, system, overlays, cudaSupport ? false }:
     import nixpkgs {
       inherit system overlays;
-      config.allowUnfree = true;
-      config.cudaSupport = cudaSupport;
-      # ecdsa: pulled transitively by IaC python tooling (ansible/azure); permit
-      # the Minerva-timing CVE in dev shells rather than dropping the toolchain.
-      config.permittedInsecurePackages = [ "python3.13-ecdsa-0.19.2" ];
-      # fabric: another ansible transitive dep (see ecdsa above), marked
-      # `meta.broken` upstream on some python3 versions. "warn" keeps
-      # evaluation from refusing outright while still surfacing the notice,
-      # rather than disabling the ansible toolchain over one leaf dependency.
-      config.problems.handlers = { fabric.broken = "warn"; };
+      config = nixpkgsConfig { inherit cudaSupport; };
     };
 }
