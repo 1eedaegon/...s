@@ -38,7 +38,6 @@
     # GUI applications (brew install --cask)
     casks = [
       "zed" # Zed editor
-      "cursor" # Cursor AI editor
       "tailscale" # VPN (app + daemon, auto-update)
       # Claude Code: native installer로 설치 (자동 업데이트 지원)
     ];
